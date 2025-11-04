@@ -1,19 +1,23 @@
+// src/app/layout.tsx
 import type { Metadata } from "next";
 import "./globals.css";
-import HtmlFix from "./HtmlFix";
 
 export const metadata: Metadata = {
-  title: "Portfolio | Mathis",
-  description: "Mon portfolio animé en Next.js + Tailwind + Framer Motion",
+  title: "Mathis Truong — Portfolio",
+  description: "Développeur créatif : art, code et mouvement.",
+  icons: {
+    icon: [
+      { url: "/icon.png", type: "image/png" },      // si tu ajoutes app/icon.png
+      { url: "/favicon.ico", type: "image/x-icon" } // fallback
+    ],
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr" suppressHydrationWarning>
-      <body>
-        <HtmlFix />
-        {children}
-      </body>
+    // 👇 1) force a fixed class and 2) suppressHydrationWarning to ignore extension-induced diffs
+    <html lang="fr" className="theme-dark" suppressHydrationWarning>
+      <body className="antialiased">{children}</body>
     </html>
   );
 }

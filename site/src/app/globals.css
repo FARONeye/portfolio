@@ -1,5 +1,46 @@
 @import "tailwindcss";
 
-html, body { 
+:root {
+  --color-bg: #0a0a0b;
+  --color-bordeaux: #4b0d1a;
+  --color-rouge: #9b1c31;
+  --color-violet: #6c1e80;
+  --color-text: #ffffff;
+  --color-muted: #b3b3b3;
+  --color-accent: #e63946;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: "Inter", sans-serif;
   scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-bordeaux);
+  border-radius: 10px;
+}
+
+section {
+  position: relative;
+  overflow: hidden;
+}
+
+.glow {
+  filter: drop-shadow(0 0 25px var(--color-rouge));
+}
+
+.fade-in-up {
+  animation: fadeInUp 1s ease both;
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
 }
