@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState, useLayoutEffect } from "react";
 import * as THREE from "three";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Line, QuadraticBezierLine, Points, PointMaterial } from "@react-three/drei";
@@ -112,7 +112,7 @@ function LatLongGrid({
 }
 
 /* =========================================
-   Orbital particles (subtle motion)
+   Orbital particles — sobres, toujours visibles
 ========================================= */
 function OrbitalParticles({ count = 700, r = 1.36 }: { count?: number; r?: number }) {
   const positions = useMemo(() => {
@@ -129,70 +129,138 @@ function OrbitalParticles({ count = 700, r = 1.36 }: { count?: number; r?: numbe
     return arr;
   }, [count, r]);
 
-  const group = useRef<THREE.Group>(null);
-  useFrame((_, dt) => {
-    if (!group.current) return;
-    group.current.rotation.y += dt * 0.05;
-    group.current.rotation.x += dt * 0.015;
-  });
-
   return (
-    <group ref={group}>
-      <Points positions={positions} stride={3}>
-        <PointMaterial color="#BB69FF" size={0.01} sizeAttenuation depthWrite={false} transparent opacity={0.75} />
-      </Points>
-    </group>
+    <Points positions={positions} stride={3} frustumCulled={false} renderOrder={1}>
+      <PointMaterial
+        color="#BB69FF"
+        size={0.02}
+        sizeAttenuation={false}
+        depthWrite={false}
+        depthTest={false}
+        transparent
+        opacity={0.85}
+        blending={THREE.AdditiveBlending}
+        toneMapped={false}
+      />
+    </Points>
   );
 }
 
 /* =========================================
-   Dots sliding along arcs
+   Node ping (activité des nœuds)
 ========================================= */
-function FlowDots({
+function NodePing({ position }: { position: THREE.Vector3 }) {
+  const { camera } = useThree();
+  const ref = useRef<THREE.Mesh>(null);
+
+  useFrame(({ clock }) => {
+    const t = clock.getElapsedTime();
+    const a = (t % 1.6) / 1.6;
+    if (!ref.current) return;
+    ref.current.lookAt(camera.position);
+    ref.current.scale.setScalar(0.16 + 0.45 * a);
+    const mat = ref.current.material as THREE.MeshBasicMaterial;
+    mat.opacity = 0.9 * (1 - a);
+  });
+
+  return (
+    <mesh ref={ref} position={position.toArray()} renderOrder={3}>
+      <ringGeometry args={[0.014, 0.085, 32 ]} />
+      <meshBasicMaterial
+        color="#C084FC"
+        transparent
+        opacity={0.8}
+        depthWrite={false}
+        depthTest={false}
+        blending={THREE.AdditiveBlending}
+        toneMapped={false}
+      />
+    </mesh>
+  );
+}
+
+/* =========================================
+   ArcTraffic — MAJ via attribute ref (pas d’immutabilité hook)
+========================================= */
+function ArcTraffic({
   start,
   mid,
   end,
-  count = 2,
+  count = 18,
+  baseSpeed = 0.35,
+  size = 0.058,
+  color = "#F472B6",
+  progress = 0,
 }: {
   start: THREE.Vector3;
   mid: THREE.Vector3;
   end: THREE.Vector3;
   count?: number;
+  baseSpeed?: number;
+  size?: number;
+  color?: string;
+  progress?: number;
 }) {
-  const params = useMemo(
+  // buffer initial (une seule fois)
+  const initialPositions = useMemo(() => new Float32Array(count * 3), [count]);
+
+  // geometry & attribute refs
+  const geomRef = useRef<THREE.BufferGeometry>(null!);
+  const attrRef = useRef<THREE.BufferAttribute | null>(null);
+
+  // seeds deterministes
+  const seeds = useMemo(
     () =>
       Array.from({ length: count }, (_, i) => ({
-        offset: hash01(i * 3.1 + 0.1) + i * 0.35,
-        speed: 0.35 + 0.25 * hash01(i * 7.7 + 0.2),
-        scale: 0.02 + 0.02 * hash01(i * 11.3 + 0.3),
+        o: hash01(i * 2.13 + 0.17),
+        s: 0.6 + hash01(i * 7.7 + 0.29),
       })),
     [count]
   );
 
-  const meshes = useRef<THREE.Mesh[]>([]);
-  useFrame((state) => {
-    const t = state.clock.getElapsedTime();
-    params.forEach((d, i) => {
-      const u = (t * d.speed + d.offset) % 1;
+  // récupérer l’attribut 'position' une fois monté
+  useLayoutEffect(() => {
+    if (!geomRef.current) return;
+    attrRef.current = geomRef.current.getAttribute("position") as THREE.BufferAttribute;
+  }, []);
+
+  // animer en modifiant l’array de l’attribut (pas la valeur d’un hook)
+  useFrame(({ clock }) => {
+    const t = clock.getElapsedTime();
+    const speedBoost = 0.6 + 0.8 * progress;
+    const attr = attrRef.current;
+    if (!attr) return;
+
+    const arr = attr.array as Float32Array;
+    for (let i = 0; i < count; i++) {
+      const u = (seeds[i].o + t * baseSpeed * seeds[i].s * speedBoost) % 1;
       const p = quadPoint(start, mid, end, u);
-      const m = meshes.current[i];
-      if (m) {
-        m.position.copy(p);
-        const s = d.scale * (0.5 + 0.5 * Math.sin((u + t) * 6));
-        m.scale.setScalar(s);
-      }
-    });
+      arr[i * 3 + 0] = p.x;
+      arr[i * 3 + 1] = p.y;
+      arr[i * 3 + 2] = p.z;
+    }
+    attr.needsUpdate = true;
   });
 
+  // géométrie native (pas d’accès ref en render, pas de mutation de hook)
   return (
-    <group>
-      {params.map((_, i) => (
-        <mesh key={i} ref={(m) => m && (meshes.current[i] = m)}>
-          <sphereGeometry args={[1, 8, 8]} />
-          <meshBasicMaterial color="#FF477E" toneMapped={false} />
-        </mesh>
-      ))}
-    </group>
+    <points frustumCulled={false} renderOrder={4}>
+      <bufferGeometry ref={geomRef}>
+        {/* IMPORTANT: utiliser 'args' plutôt que 'array' pour éviter l’erreur TS */}
+        <bufferAttribute attach="attributes-position" args={[initialPositions, 3]} />
+      </bufferGeometry>
+      <PointMaterial
+        color={color}
+        size={size}
+        sizeAttenuation={false}
+        transparent
+        opacity={0.95}
+        depthWrite={false}
+        depthTest={false}
+        blending={THREE.AdditiveBlending}
+        toneMapped={false}
+      />
+    </points>
   );
 }
 
@@ -207,31 +275,22 @@ function BackgroundStars({
   const { camera } = useThree();
   const group = useRef<THREE.Group>(null);
 
-  // Deterministic, render-pure generation (no Math.random).
   const positions = useMemo(() => {
-    const seed = 1337; // change if you want a different sky
+    const seed = 1337;
     const arr = new Float32Array(count * 3);
-
     for (let i = 0; i < count; i++) {
-      // uniform sphere sampling with seeded hashes
       const u = hash01(i * 12.9898 + seed);
       const v = hash01(i * 78.233 + seed * 0.73);
       const theta = 2 * Math.PI * u;
       const phi = Math.acos(2 * v - 1);
-
-      // radius with deterministic jitter
-      const rad =
-        radius + (hash01(i * 91.7 + seed * 1.37) - 0.5) * jitter;
-
+      const rad = radius + (hash01(i * 91.7 + seed * 1.37) - 0.5) * jitter;
       arr[i * 3 + 0] = rad * Math.sin(phi) * Math.cos(theta);
       arr[i * 3 + 1] = rad * Math.cos(phi);
       arr[i * 3 + 2] = rad * Math.sin(phi) * Math.sin(theta);
     }
-
     return arr;
   }, [count, radius, jitter]);
 
-  // Keep the stars centered on the camera so they’re visible for the whole intro.
   useFrame(() => {
     if (group.current) group.current.position.copy(camera.position);
   });
@@ -252,7 +311,6 @@ function BackgroundStars({
     </group>
   );
 }
-
 
 /* =========================================
    Globe 3D scene (driven by progress 0..100)
@@ -295,7 +353,7 @@ function GlobeScene({ progress }: { progress: number }) {
     const t = performance.now() / 1000;
 
     if (root.current) {
-      // base spin + tiny parallax by mouse
+      // rotation pilotée par le scroll (spinT) + léger parallax
       const lerp = 1 - Math.pow(0.0005, dt);
       const targetRx = spinT * 0.35 + mouseTarget.current.y * 0.1;
       const targetRy = spinT * Math.PI * 2 + mouseTarget.current.x * 0.2;
@@ -306,13 +364,11 @@ function GlobeScene({ progress }: { progress: number }) {
       root.current.scale.setScalar(s);
     }
 
-    // slow down helper rotations near end
     const drift = 1 - zoomT;
     if (coarseGridRef.current) coarseGridRef.current.rotation.y += dt * 0.03 * drift;
     if (fineGridRef.current) fineGridRef.current.rotation.y -= dt * 0.05 * drift;
     if (ringsRef.current) ringsRef.current.rotation.z += dt * 0.04 * drift;
 
-    // camera travel
     const baseDist = 3.8;
     const closeDist = 1.8;
     const dist = THREE.MathUtils.lerp(baseDist, closeDist, zoomT);
@@ -324,18 +380,23 @@ function GlobeScene({ progress }: { progress: number }) {
 
   return (
     <group ref={root}>
-      {/* soft halo */}
+      {/* soft halo — n’écrit plus dans le depth buffer */}
       <mesh>
         <sphereGeometry args={[1.38, 64, 32]} />
-        <meshBasicMaterial color={"#6C1E80"} transparent opacity={0.06} />
+        <meshBasicMaterial
+          color={"#6C1E80"}
+          transparent
+          opacity={0.06}
+          depthWrite={false}
+        />
       </mesh>
 
       {/* grids */}
       <group ref={coarseGridRef}>
-        <LatLongGrid step={10} color="#9E8AFF" opacity={0.35} />
+        <LatLongGrid step={10} color="#9E8AFF" opacity={0.28} />
       </group>
       <group ref={fineGridRef}>
-        <LatLongGrid step={5} color="#6C1E80" opacity={0.18} />
+        <LatLongGrid step={5} color="#6C1E80" opacity={0.12} />
       </group>
 
       {/* rings */}
@@ -353,27 +414,60 @@ function GlobeScene({ progress }: { progress: number }) {
       {/* orbital particles */}
       <OrbitalParticles count={700} r={1.36} />
 
-      {/* arcs + flowing dots */}
+      {/* pulses sur les nœuds */}
+      {Object.values(cities).map((pos, i) => (
+        <NodePing key={i} position={pos} />
+      ))}
+
+      {/* arcs + trafic net */}
       {LINKS.map(([a, b], i) => {
         const start = cities[a];
         const end = cities[b];
-        const mid = start.clone().add(end).multiplyScalar(0.5).normalize().multiplyScalar(2.0);
+        const mid = start
+          .clone()
+          .add(end)
+          .multiplyScalar(0.5)
+          .normalize()
+          .multiplyScalar(2.0);
         return (
           <group key={i}>
             <QuadraticBezierLine
               start={start.toArray() as V3}
               end={end.toArray() as V3}
               mid={mid.toArray() as V3}
-              color={"#FF477E"}
-              lineWidth={1.3}
+              color="#C084FC"
+              lineWidth={1.4}
               dashed
               dashScale={1}
               dashSize={0.12}
               dashOffset={-(p * 8)}
               transparent
-              opacity={0.9}
+              opacity={0.55}
             />
-            <FlowDots start={start} mid={mid} end={end} count={2} />
+
+            {/* Aller */}
+            <ArcTraffic
+              start={start}
+              mid={mid}
+              end={end}
+              count={28}
+              baseSpeed={0.55}
+              size={0.10}
+              color="#F9A8D4"
+              progress={p}
+            />
+
+            {/* Retour (bidirectionnel) */}
+            <ArcTraffic
+              start={end}
+              mid={mid}
+              end={start}
+              count={18}
+              baseSpeed={0.4}
+              size={2}
+              color="#C084FC"
+              progress={p}
+            />
           </group>
         );
       })}
@@ -389,13 +483,10 @@ function StickyCanvas({ progress }: { progress: number }) {
     <div className="pointer-events-none absolute inset-0">
       <Canvas dpr={[1, 1.8]} gl={{ antialias: true, alpha: true }} camera={{ position: [0, 0, 3.8], fov: 45 }}>
         <Suspense fallback={null}>
-          {/* NEW: stars that follow the camera, always visible */}
           <BackgroundStars count={3800} radius={90} jitter={28} />
-
           <ambientLight intensity={0.9} />
           <pointLight color={"#9B1C31"} intensity={2} position={[2, 1, 2]} />
           <pointLight color={"#6C1E80"} intensity={1.8} position={[-2, -1, -2]} />
-
           <GlobeScene progress={progress} />
         </Suspense>
       </Canvas>
@@ -418,8 +509,6 @@ export default function GlobeIntro() {
 
   const SAFE_OFFSET = 220;
   const REENTRY_SNAP_ZONE = 180;
-  const EXIT_AT = 99;
-  const EXIT_FREEZE_MS = 0;
 
   const getSectionTop = () => {
     const el = sectionRef.current;
@@ -438,7 +527,7 @@ export default function GlobeIntro() {
     return () => window.removeEventListener("resize", computeAfterTop);
   }, []);
 
-  // re-entry when user scrolls back to the very top zone
+  // re-entry quand on revient tout en haut
   useEffect(() => {
     const onScroll = () => {
       if (locked || snappingRef.current) return;
@@ -455,7 +544,7 @@ export default function GlobeIntro() {
     return () => window.removeEventListener("scroll", onScroll);
   }, [locked]);
 
-  // lock inputs until intro ends
+  // lock inputs jusqu’à la fin de l’intro
   useEffect(() => {
     if (!locked) return;
 
@@ -463,10 +552,6 @@ export default function GlobeIntro() {
     const opts: AddEventListenerOptions = { passive: false };
     let touchStartY = 0;
 
-    const lockBody = () => {
-      document.documentElement.style.overflow = "hidden";
-      document.body.style.overflow = "hidden";
-    };
     const unlockBody = () => {
       document.documentElement.style.overflow = "";
       document.body.style.overflow = "";
@@ -478,30 +563,31 @@ export default function GlobeIntro() {
 
       const anchorTop = afterTopRef.current ?? getSectionTop();
 
-      // unlock immediately
+      // unlock immédiatement
       document.documentElement.style.overflow = "";
       document.body.style.overflow = "";
       setLocked(false);
 
       requestAnimationFrame(() => {
-        // jump directly under the anchor (no smooth to avoid resistance)
         const root = document.documentElement;
         const prev = root.style.scrollBehavior;
         root.style.scrollBehavior = "auto";
         window.scrollTo(0, anchorTop + SAFE_OFFSET);
         root.style.scrollBehavior = prev;
 
-        setTimeout(() => (exitingRef.current = false), EXIT_FREEZE_MS);
+        setTimeout(() => (exitingRef.current = false), 0);
       });
     };
 
-    lockBody();
+    // on lock maintenant
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
 
     const advance = (delta: number) => {
       if (exitingRef.current) return;
       setProgress((p) => {
         const next = clamp100(p + delta);
-        if (delta > 0 && next >= EXIT_AT) {
+        if (delta > 0 && next >= 99) {
           requestAnimationFrame(() => exitToContent());
           return 100;
         }
