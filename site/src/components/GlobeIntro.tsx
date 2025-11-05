@@ -5,14 +5,12 @@ import * as THREE from "three";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Line, QuadraticBezierLine, Points, PointMaterial } from "@react-three/drei";
 
-/* =========================
-   Utils & Types
-========================= */
-
+/* =========================================
+   Utils & types
+========================================= */
 type V3 = [number, number, number];
 const degToRad = (d: number) => (d * Math.PI) / 180;
 
-// bruit déterministe (pas de Math.random dans le render)
 function hash01(x: number) {
   const s = Math.sin(x) * 43758.5453123;
   return s - Math.floor(s);
@@ -33,10 +31,9 @@ function quadPoint(a: THREE.Vector3, b: THREE.Vector3, c: THREE.Vector3, t: numb
   return ab.lerp(bc, t);
 }
 
-/* =========================
-   Données villes & routes
-========================= */
-
+/* =========================================
+   Data
+========================================= */
 const CITIES = {
   paris: { lat: 48.8566, lon: 2.3522 },
   london: { lat: 51.5072, lon: -0.1276 },
@@ -56,10 +53,9 @@ const LINKS: Array<[CityKey, CityKey]> = [
   ["nyc", "tokyo"],
 ];
 
-/* =========================
-   Wireframe (parallèles + méridiens)
-========================= */
-
+/* =========================================
+   Graticule (wireframe latitude/longitude)
+========================================= */
 function buildLatitude(latDeg: number, seg = 128, r = 1.35) {
   const pts: THREE.Vector3[] = [];
   const lat = degToRad(latDeg);
@@ -115,10 +111,9 @@ function LatLongGrid({
   );
 }
 
-/* =========================
-   Particules en orbite
-========================= */
-
+/* =========================================
+   Orbital particles (subtle motion)
+========================================= */
 function OrbitalParticles({ count = 700, r = 1.36 }: { count?: number; r?: number }) {
   const positions = useMemo(() => {
     const arr = new Float32Array(count * 3);
@@ -150,10 +145,9 @@ function OrbitalParticles({ count = 700, r = 1.36 }: { count?: number; r?: numbe
   );
 }
 
-/* =========================
-   Dots qui glissent sur les arcs
-========================= */
-
+/* =========================================
+   Dots sliding along arcs
+========================================= */
 function FlowDots({
   start,
   mid,
@@ -202,12 +196,68 @@ function FlowDots({
   );
 }
 
-/* =========================
-   Scène 3D du globe (pilotée par progress 0..100)
-========================= */
+/* =========================================
+   Background starfield (camera-anchored)
+========================================= */
+function BackgroundStars({
+  count = 3800,
+  radius = 90,
+  jitter = 28,
+}: { count?: number; radius?: number; jitter?: number }) {
+  const { camera } = useThree();
+  const group = useRef<THREE.Group>(null);
 
+  // Deterministic, render-pure generation (no Math.random).
+  const positions = useMemo(() => {
+    const seed = 1337; // change if you want a different sky
+    const arr = new Float32Array(count * 3);
+
+    for (let i = 0; i < count; i++) {
+      // uniform sphere sampling with seeded hashes
+      const u = hash01(i * 12.9898 + seed);
+      const v = hash01(i * 78.233 + seed * 0.73);
+      const theta = 2 * Math.PI * u;
+      const phi = Math.acos(2 * v - 1);
+
+      // radius with deterministic jitter
+      const rad =
+        radius + (hash01(i * 91.7 + seed * 1.37) - 0.5) * jitter;
+
+      arr[i * 3 + 0] = rad * Math.sin(phi) * Math.cos(theta);
+      arr[i * 3 + 1] = rad * Math.cos(phi);
+      arr[i * 3 + 2] = rad * Math.sin(phi) * Math.sin(theta);
+    }
+
+    return arr;
+  }, [count, radius, jitter]);
+
+  // Keep the stars centered on the camera so they’re visible for the whole intro.
+  useFrame(() => {
+    if (group.current) group.current.position.copy(camera.position);
+  });
+
+  return (
+    <group ref={group} renderOrder={-1} frustumCulled={false}>
+      <Points positions={positions} stride={3}>
+        <PointMaterial
+          size={0.015}
+          sizeAttenuation
+          transparent
+          opacity={0.85}
+          depthWrite={false}
+          depthTest={false}
+          toneMapped={false}
+        />
+      </Points>
+    </group>
+  );
+}
+
+
+/* =========================================
+   Globe 3D scene (driven by progress 0..100)
+========================================= */
 function GlobeScene({ progress }: { progress: number }) {
-  // normalise en 0..1 pour les calculs internes
   const p = Math.max(0, Math.min(1, progress / 100));
 
   const root = useRef<THREE.Group>(null);
@@ -215,6 +265,19 @@ function GlobeScene({ progress }: { progress: number }) {
   const coarseGridRef = useRef<THREE.Group>(null);
   const ringsRef = useRef<THREE.Group>(null);
   const { camera } = useThree();
+
+  // Mouse parallax target
+  const mouseTarget = useRef({ x: 0, y: 0 });
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      const nx = (e.clientX / window.innerWidth) * 2 - 1;
+      const ny = (e.clientY / window.innerHeight) * 2 - 1;
+      mouseTarget.current.x = nx;
+      mouseTarget.current.y = ny;
+    };
+    window.addEventListener("mousemove", onMove, { passive: true });
+    return () => window.removeEventListener("mousemove", onMove);
+  }, []);
 
   const cities = useMemo(() => {
     const entries = Object.entries(CITIES) as [CityKey, { lat: number; lon: number }][];
@@ -232,19 +295,24 @@ function GlobeScene({ progress }: { progress: number }) {
     const t = performance.now() / 1000;
 
     if (root.current) {
-      root.current.rotation.y = spinT * Math.PI * 2;
-      root.current.rotation.x = spinT * 0.35;
-      const s = 1 + Math.sin(t * 0.9) * 0.015; // respiration
+      // base spin + tiny parallax by mouse
+      const lerp = 1 - Math.pow(0.0005, dt);
+      const targetRx = spinT * 0.35 + mouseTarget.current.y * 0.1;
+      const targetRy = spinT * Math.PI * 2 + mouseTarget.current.x * 0.2;
+      root.current.rotation.x = THREE.MathUtils.lerp(root.current.rotation.x, targetRx, lerp);
+      root.current.rotation.y = THREE.MathUtils.lerp(root.current.rotation.y, targetRy, lerp);
+
+      const s = 1 + Math.sin(t * 0.9) * 0.015; // breathing
       root.current.scale.setScalar(s);
     }
 
-    // amortit les drifts à l’approche de la fin
-    const drift = 1 - zoomT; // 1 au début → 0 à la fin
+    // slow down helper rotations near end
+    const drift = 1 - zoomT;
     if (coarseGridRef.current) coarseGridRef.current.rotation.y += dt * 0.03 * drift;
     if (fineGridRef.current) fineGridRef.current.rotation.y -= dt * 0.05 * drift;
     if (ringsRef.current) ringsRef.current.rotation.z += dt * 0.04 * drift;
 
-    // travel caméra
+    // camera travel
     const baseDist = 3.8;
     const closeDist = 1.8;
     const dist = THREE.MathUtils.lerp(baseDist, closeDist, zoomT);
@@ -256,13 +324,13 @@ function GlobeScene({ progress }: { progress: number }) {
 
   return (
     <group ref={root}>
-      {/* halo doux */}
+      {/* soft halo */}
       <mesh>
         <sphereGeometry args={[1.38, 64, 32]} />
         <meshBasicMaterial color={"#6C1E80"} transparent opacity={0.06} />
       </mesh>
 
-      {/* grilles */}
+      {/* grids */}
       <group ref={coarseGridRef}>
         <LatLongGrid step={10} color="#9E8AFF" opacity={0.35} />
       </group>
@@ -270,7 +338,7 @@ function GlobeScene({ progress }: { progress: number }) {
         <LatLongGrid step={5} color="#6C1E80" opacity={0.18} />
       </group>
 
-      {/* anneaux */}
+      {/* rings */}
       <group ref={ringsRef}>
         <mesh rotation={[Math.PI / 4, 0, 0]}>
           <torusGeometry args={[1.6, 0.0025, 8, 256]} />
@@ -282,10 +350,10 @@ function GlobeScene({ progress }: { progress: number }) {
         </mesh>
       </group>
 
-      {/* particules */}
+      {/* orbital particles */}
       <OrbitalParticles count={700} r={1.36} />
 
-      {/* arcs + flux */}
+      {/* arcs + flowing dots */}
       {LINKS.map(([a, b], i) => {
         const start = cities[a];
         const end = cities[b];
@@ -301,7 +369,7 @@ function GlobeScene({ progress }: { progress: number }) {
               dashed
               dashScale={1}
               dashSize={0.12}
-              dashOffset={-p * 8}
+              dashOffset={-(p * 8)}
               transparent
               opacity={0.9}
             />
@@ -313,18 +381,21 @@ function GlobeScene({ progress }: { progress: number }) {
   );
 }
 
-/* =========================
+/* =========================================
    Canvas sticky
-========================= */
-
+========================================= */
 function StickyCanvas({ progress }: { progress: number }) {
   return (
     <div className="pointer-events-none absolute inset-0">
       <Canvas dpr={[1, 1.8]} gl={{ antialias: true, alpha: true }} camera={{ position: [0, 0, 3.8], fov: 45 }}>
         <Suspense fallback={null}>
+          {/* NEW: stars that follow the camera, always visible */}
+          <BackgroundStars count={3800} radius={90} jitter={28} />
+
           <ambientLight intensity={0.9} />
           <pointLight color={"#9B1C31"} intensity={2} position={[2, 1, 2]} />
           <pointLight color={"#6C1E80"} intensity={1.8} position={[-2, -1, -2]} />
+
           <GlobeScene progress={progress} />
         </Suspense>
       </Canvas>
@@ -332,32 +403,23 @@ function StickyCanvas({ progress }: { progress: number }) {
   );
 }
 
-/* =========================
-   Intro : 0..100 + sortie ferme + snap de ré-entrée
-========================= */
-
+/* =========================================
+   Intro 0..100 + lock/unlock scroll + re-entry snap
+========================================= */
 export default function GlobeIntro() {
-const [progress, setProgress] = useState(0);  // 0 → 100
-const [locked, setLocked] = useState(true);
-const attachedRef = useRef(false);
+  const [progress, setProgress] = useState(0); // 0 → 100
+  const [locked, setLocked] = useState(true);
+  const attachedRef = useRef(false);
 
-const sectionRef = useRef<HTMLElement | null>(null);
-const afterTopRef = useRef<number | null>(null);
-const snappingRef = useRef(false);
-const exitingRef = useRef(false);
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const afterTopRef = useRef<number | null>(null);
+  const snappingRef = useRef(false);
+  const exitingRef = useRef(false);
 
-// NEW: mémorise la direction du dernier input
-const lastDirRef = useRef<'down' | 'up'>('down');
-
-// paramètres (légèrement augmentés)
-const SAFE_OFFSET = 220;        // marge sous l’ancre
-const REENTRY_SNAP_ZONE = 180;  // ré-entrée quand on revient près du haut
-const EXIT_AT = 99;
-const EXIT_FREEZE_MS = 0;
-
-// NEW: poussée supplémentaire pour bien rentrer dans le contenu
-const EXIT_EXTRA_PUSH_MIN = 0;    // px mini
-const EXIT_EXTRA_PUSH_VH  = 0.00;
+  const SAFE_OFFSET = 220;
+  const REENTRY_SNAP_ZONE = 180;
+  const EXIT_AT = 99;
+  const EXIT_FREEZE_MS = 0;
 
   const getSectionTop = () => {
     const el = sectionRef.current;
@@ -366,7 +428,6 @@ const EXIT_EXTRA_PUSH_VH  = 0.00;
     return r.top + window.scrollY;
   };
 
-  // calcule la position de l’ancre de contenu
   useEffect(() => {
     const computeAfterTop = () => {
       const el = document.getElementById("after-intro");
@@ -377,14 +438,13 @@ const EXIT_EXTRA_PUSH_VH  = 0.00;
     return () => window.removeEventListener("resize", computeAfterTop);
   }, []);
 
-  // Ré-entrée : on re-lock uniquement quand on est quasi en haut de la section
+  // re-entry when user scrolls back to the very top zone
   useEffect(() => {
     const onScroll = () => {
       if (locked || snappingRef.current) return;
       const sectionTop = getSectionTop();
       if (window.scrollY <= sectionTop + REENTRY_SNAP_ZONE) {
         snappingRef.current = true;
-        // snap en haut de la section puis reset anim
         window.scrollTo({ top: sectionTop, behavior: "auto" });
         setProgress(0);
         setLocked(true);
@@ -395,7 +455,7 @@ const EXIT_EXTRA_PUSH_VH  = 0.00;
     return () => window.removeEventListener("scroll", onScroll);
   }, [locked]);
 
-  // Verrouillage des entrées tant que l’intro n’est pas terminée
+  // lock inputs until intro ends
   useEffect(() => {
     if (!locked) return;
 
@@ -404,120 +464,104 @@ const EXIT_EXTRA_PUSH_VH  = 0.00;
     let touchStartY = 0;
 
     const lockBody = () => {
-        document.documentElement.style.overflow = "hidden";
-        document.body.style.overflow = "hidden";
+      document.documentElement.style.overflow = "hidden";
+      document.body.style.overflow = "hidden";
     };
     const unlockBody = () => {
-        document.documentElement.style.overflow = "";
-        document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+      document.body.style.overflow = "";
     };
 
     const exitToContent = () => {
-        if (exitingRef.current) return;
-        exitingRef.current = true;
+      if (exitingRef.current) return;
+      exitingRef.current = true;
 
-        // on calcule l’ancre la plus fraîche
-        const anchorTop = afterTopRef.current ?? getSectionTop();
-        const push = Math.max(window.innerHeight * EXIT_EXTRA_PUSH_VH, EXIT_EXTRA_PUSH_MIN);
+      const anchorTop = afterTopRef.current ?? getSectionTop();
 
-        // déverrouille immédiatement
-        document.documentElement.style.overflow = "";
-        document.body.style.overflow = "";
-        setLocked(false);
+      // unlock immediately
+      document.documentElement.style.overflow = "";
+      document.body.style.overflow = "";
+      setLocked(false);
 
-        requestAnimationFrame(() => {
-            // 1) saut *instantané* (pas smooth) juste sous l’ancre
-            const root = document.documentElement;
-            const prevBehavior = root.style.scrollBehavior;
-            root.style.scrollBehavior = "auto";
-            window.scrollTo(0, anchorTop + SAFE_OFFSET);
-            root.style.scrollBehavior = prevBehavior;
+      requestAnimationFrame(() => {
+        // jump directly under the anchor (no smooth to avoid resistance)
+        const root = document.documentElement;
+        const prev = root.style.scrollBehavior;
+        root.style.scrollBehavior = "auto";
+        window.scrollTo(0, anchorTop + SAFE_OFFSET);
+        root.style.scrollBehavior = prev;
 
-            // 2) petite frame plus tard: *grosse poussée* smooth pour être bien dans le contenu
-            requestAnimationFrame(() => {
-            window.scrollBy({ top: push, behavior: "smooth" });
-            });
-
-            // anti rebond
-            setTimeout(() => (exitingRef.current = false), EXIT_FREEZE_MS);
-        });
-        };
-
+        setTimeout(() => (exitingRef.current = false), EXIT_FREEZE_MS);
+      });
+    };
 
     lockBody();
 
     const advance = (delta: number) => {
-        if (exitingRef.current) return; // ignore pendant la sortie
-        setProgress((p) => {
+      if (exitingRef.current) return;
+      setProgress((p) => {
         const next = clamp100(p + delta);
         if (delta > 0 && next >= EXIT_AT) {
-            // fige à 100 et on sort
-            requestAnimationFrame(() => exitToContent());
-            return 100;
+          requestAnimationFrame(() => exitToContent());
+          return 100;
         }
         return next;
-        });
+      });
     };
 
     const onWheel = (e: WheelEvent) => {
-        e.preventDefault();
-        lastDirRef.current = e.deltaY > 0 ? "down" : "up";
-        advance(e.deltaY * 0.12);
+      e.preventDefault();
+      advance(e.deltaY * 0.12);
     };
-
     const onKeyDown = (e: KeyboardEvent) => {
-        if (["ArrowDown", "PageDown", " "].includes(e.key)) {
+      if (["ArrowDown", "PageDown", " "].includes(e.key)) {
         e.preventDefault();
-        lastDirRef.current = "down";
         advance(+6);
-        } else if (["ArrowUp", "PageUp"].includes(e.key)) {
+      } else if (["ArrowUp", "PageUp"].includes(e.key)) {
         e.preventDefault();
-        lastDirRef.current = "up";
         advance(-6);
-        }
+      }
     };
-
     const onTouchStart = (e: TouchEvent) => {
-        touchStartY = e.touches[0]?.clientY ?? 0;
+      touchStartY = e.touches[0]?.clientY ?? 0;
     };
     const onTouchMove = (e: TouchEvent) => {
-        e.preventDefault();
-        const y = e.touches[0]?.clientY ?? touchStartY;
-        const dy = touchStartY - y; // bas: + / haut: -
-        lastDirRef.current = dy > 0 ? "down" : "up";
-        advance(dy * 0.3);
-        touchStartY = y;
+      e.preventDefault();
+      const y = e.touches[0]?.clientY ?? touchStartY;
+      const dy = touchStartY - y;
+      advance(dy * 0.3);
+      touchStartY = y;
     };
 
     if (!attachedRef.current) {
-        attachedRef.current = true;
-        window.addEventListener("wheel", onWheel, opts);
-        window.addEventListener("keydown", onKeyDown, opts);
-        window.addEventListener("touchstart", onTouchStart, opts);
-        window.addEventListener("touchmove", onTouchMove, opts);
+      attachedRef.current = true;
+      window.addEventListener("wheel", onWheel, opts);
+      window.addEventListener("keydown", onKeyDown, opts);
+      window.addEventListener("touchstart", onTouchStart, opts);
+      window.addEventListener("touchmove", onTouchMove, opts);
     }
 
     return () => {
-        if (attachedRef.current) {
+      if (attachedRef.current) {
         attachedRef.current = false;
         window.removeEventListener("wheel", onWheel, opts);
         window.removeEventListener("keydown", onKeyDown, opts);
         window.removeEventListener("touchstart", onTouchStart, opts);
         window.removeEventListener("touchmove", onTouchMove, opts);
-        }
-        unlockBody();
+      }
+      unlockBody();
     };
-    }, [locked]);
+  }, [locked]);
 
   return (
-    <section ref={sectionRef} className="relative h-screen bg-[#0A0A0B]">
-      <div
-        className="absolute inset-0 z-0"
-        style={{
-          background:
-            "radial-gradient(1200px 600px at 50% 40%, rgba(108,30,128,.22), transparent 60%), radial-gradient(1000px 500px at 50% 80%, rgba(155,28,49,.18), transparent 60%), #0A0A0B",
-        }}
-      />
+    <section
+      ref={sectionRef}
+      className="relative h-screen bg-[#0A0A0B]"
+      style={{
+        background:
+          "radial-gradient(1200px 600px at 50% 40%, rgba(108,30,128,.22), transparent 60%), radial-gradient(1000px 500px at 50% 80%, rgba(155,28,49,.18), transparent 60%), #0A0A0B",
+      }}
+    >
       <StickyCanvas progress={progress} />
       <div className="pointer-events-none absolute inset-0 z-30 flex items-end justify-center pb-8">
         <div className="text-[10px] tracking-[0.35em] text-zinc-300/80">
