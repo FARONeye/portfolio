@@ -9,7 +9,7 @@ import { Line, Points, PointMaterial } from "@react-three/drei";
 const R_GLOBE = 1.35;
 const GLOBE_BASE_SCALE = 0.80; // ta valeur
 
-// Intro plus longue = plus d'inputs nécessaires pour atteindre 100
+// Intro plus longue (augmente le nombre d’inputs requis pour atteindre 100)
 const WHEEL_FACTOR = 0.04;
 const KEY_STEP = 2;
 const TOUCH_FACTOR = 0.12;
@@ -287,7 +287,7 @@ function BackgroundStars({ count = 3800, radius = 90, jitter = 28 }: { count?: n
   );
 }
 
-/* =================== TYPO OVERLAY (wipe plein → reveal) =================== */
+/* =================== TYPO OVERLAY (wipe → reveal) =================== */
 type Headline = {
   text: string;
   side: "left" | "right" | "center";
@@ -297,10 +297,9 @@ type Headline = {
 };
 
 function HeadlineBlock({ h, p }: { h: Headline; p: number }) {
-  // a = présence (fade / position) ; r = reveal (clip + wipe)
-  const a = smoothWindow(p, h.window[0], h.window[1], 0.08);
+  const a = smoothWindow(p, h.window[0], h.window[1], 0.08); // présence
   const enter = easeOut(a);
-  const reveal = clamp01((p - h.window[0]) / Math.max(1e-6, h.window[1] - h.window[0])); // 0..1 dans la fenêtre
+  const reveal = clamp01((p - h.window[0]) / Math.max(1e-6, h.window[1] - h.window[0])); // 0..1
 
   const fromX = h.side === "left" ? -70 : h.side === "right" ? 70 : 0;
   const basePos =
@@ -312,14 +311,13 @@ function HeadlineBlock({ h, p }: { h: Headline; p: number }) {
   const y = (1 - enter) * 10;
   const scale = 0.98 + 0.04 * enter;
 
-  // clipPath qui ouvre de la gauche vers la droite
-  const clip = `inset(0 ${100 - reveal * 100}% 0 0)`;
+  const clip = `inset(0 ${100 - reveal * 100}% 0 0)`; // ouvre de gauche à droite
 
   return (
     <div className="absolute" style={{ top: h.y, ...basePos }}>
-      {/* glow subtil */}
       {h.accent && (
-        <div className="absolute -z-10"
+        <div
+          className="absolute -z-10"
           style={{
             left: h.side === "center" ? "-10%" : "-4%",
             top: "38%",
@@ -334,7 +332,6 @@ function HeadlineBlock({ h, p }: { h: Headline; p: number }) {
         />
       )}
 
-      {/* container texte + clip reveal */}
       <div
         className="relative"
         style={{
@@ -359,23 +356,22 @@ function HeadlineBlock({ h, p }: { h: Headline; p: number }) {
           {h.text}
         </div>
 
-        {/* WIPE BLANC : couvre 100% au départ puis sort à droite */}
+        {/* WIPE BLANC qui couvre 100% au départ puis sort à droite */}
         <div
           style={{
             position: "absolute",
             inset: 0,
             background: "#fff",
-            transform: `translate3d(${reveal * 102}%, 0, 0)`, // 102% pour sortir bien hors cadre
+            transform: `translate3d(${reveal * 102}%, 0, 0)`,
             transition: "transform 120ms linear",
             boxShadow: "0 0 30px rgba(255,255,255,0.35)",
             willChange: "transform",
-            // s'évanouit doucement en fin de course
             opacity: 1 - THREE.MathUtils.smoothstep(reveal, 0.9, 1.0),
             pointerEvents: "none",
           }}
         />
 
-        {/* petit glint sur l’avant du wipe */}
+        {/* Glint */}
         <div
           style={{
             position: "absolute",
@@ -562,16 +558,32 @@ export default function GlobeIntro() {
     return r.top + window.scrollY;
   };
 
-  /* Toujours revenir en haut de l’intro au refresh */
-  useLayoutEffect(() => {
-    try { if ("scrollRestoration" in history) (history as any).scrollRestoration = "manual"; } catch {}
-    const snapTop = () => {
-      const top = getSectionTop();
-      window.scrollTo({ top, behavior: "auto" });
-      setProgress(0);
-      setLocked(true);
+  // force le snap au top (robuste mobile)
+  const forceSnapToIntro = () => {
+    const top = getSectionTop();
+    let tries = 0;
+    const snap = () => {
+      window.scrollTo({ top, left: 0, behavior: "auto" });
+      tries++;
+      if (Math.abs(window.scrollY - top) > 1 && tries < 10) {
+        requestAnimationFrame(snap);
+      }
     };
-    requestAnimationFrame(snapTop);
+    requestAnimationFrame(() => requestAnimationFrame(snap));
+  };
+
+  // Toujours revenir en haut de l’intro au refresh (desktop + mobile/BFCache)
+  useLayoutEffect(() => {
+    if ("scrollRestoration" in history) {
+      (history as History & { scrollRestoration: "auto" | "manual" }).scrollRestoration = "manual";
+    }
+    const onPageShow = () => forceSnapToIntro();
+    window.addEventListener("pageshow", onPageShow);
+    window.addEventListener("load", forceSnapToIntro, { once: true } as AddEventListenerOptions);
+    forceSnapToIntro();
+    return () => {
+      window.removeEventListener("pageshow", onPageShow);
+    };
   }, []);
 
   // Overflow manager
@@ -646,13 +658,23 @@ export default function GlobeIntro() {
       });
     };
 
-    const onWheel = (e: WheelEvent) => { e.preventDefault(); const dy = Math.max(-MAX_WHEEL_DELTA, Math.min(MAX_WHEEL_DELTA, e.deltaY)); advance(dy * WHEEL_FACTOR); };
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const dy = Math.max(-MAX_WHEEL_DELTA, Math.min(MAX_WHEEL_DELTA, e.deltaY));
+      advance(dy * WHEEL_FACTOR);
+    };
     const onKeyDown = (e: KeyboardEvent) => {
       if (["ArrowDown", "PageDown", " "].includes(e.key)) { e.preventDefault(); advance(+KEY_STEP); }
       else if (["ArrowUp", "PageUp"].includes(e.key)) { e.preventDefault(); advance(-KEY_STEP); }
     };
     const onTouchStart = (e: TouchEvent) => { touchStartY = e.touches[0]?.clientY ?? 0; };
-    const onTouchMove  = (e: TouchEvent) => { e.preventDefault(); const y = e.touches[0]?.clientY ?? touchStartY; const dy = touchStartY - y; advance(dy * TOUCH_FACTOR); touchStartY = y; };
+    const onTouchMove  = (e: TouchEvent) => {
+      e.preventDefault();
+      const y = e.touches[0]?.clientY ?? touchStartY;
+      const dy = touchStartY - y;
+      advance(dy * TOUCH_FACTOR);
+      touchStartY = y;
+    };
 
     if (!attachedRef.current) {
       attachedRef.current = true;
@@ -676,8 +698,11 @@ export default function GlobeIntro() {
   return (
     <section
       ref={sectionRef}
-      className="relative h-screen bg-[#0A0A0B]"
+      className="relative bg-[#0A0A0B]"
       style={{
+        // 100svh = hauteur visible fiable mobile
+        height: "100svh",
+        minHeight: "100svh",
         background:
           "radial-gradient(1200px 600px at 50% 40%, rgba(108,30,128,.22), transparent 60%), radial-gradient(1000px 500px at 50% 80%, rgba(155,28,49,.18), transparent 60%), #0A0A0B",
       }}
