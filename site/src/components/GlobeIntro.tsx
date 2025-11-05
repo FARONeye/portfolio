@@ -1,21 +1,18 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useRef, useState, useLayoutEffect } from "react";
+import { Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Line, QuadraticBezierLine, Points, PointMaterial } from "@react-three/drei";
 
-/* =========================================
-   Utils & types
-========================================= */
+/* ================= Utils ================= */
 type V3 = [number, number, number];
 const degToRad = (d: number) => (d * Math.PI) / 180;
-
+const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
 function hash01(x: number) {
   const s = Math.sin(x) * 43758.5453123;
   return s - Math.floor(s);
 }
-
 function latLngToVec3(lat: number, lon: number, r = 1.35): THREE.Vector3 {
   const phi = degToRad(90 - lat);
   const theta = degToRad(lon + 180);
@@ -24,16 +21,13 @@ function latLngToVec3(lat: number, lon: number, r = 1.35): THREE.Vector3 {
   const y = r * Math.cos(phi);
   return new THREE.Vector3(x, y, z);
 }
-
 function quadPoint(a: THREE.Vector3, b: THREE.Vector3, c: THREE.Vector3, t: number) {
   const ab = a.clone().lerp(b, t);
   const bc = b.clone().lerp(c, t);
   return ab.lerp(bc, t);
 }
 
-/* =========================================
-   Data
-========================================= */
+/* ================= Data ================= */
 const CITIES = {
   paris: { lat: 48.8566, lon: 2.3522 },
   london: { lat: 51.5072, lon: -0.1276 },
@@ -53,9 +47,7 @@ const LINKS: Array<[CityKey, CityKey]> = [
   ["nyc", "tokyo"],
 ];
 
-/* =========================================
-   Graticule (wireframe latitude/longitude)
-========================================= */
+/* ============== Graticule ============== */
 function buildLatitude(latDeg: number, seg = 128, r = 1.35) {
   const pts: THREE.Vector3[] = [];
   const lat = degToRad(latDeg);
@@ -78,16 +70,7 @@ function buildLongitude(lonDeg: number, seg = 128, r = 1.35) {
   }
   return pts;
 }
-
-function LatLongGrid({
-  step = 10,
-  color = "#8A7CFF",
-  opacity = 0.45,
-}: {
-  step?: number;
-  color?: string;
-  opacity?: number;
-}) {
+function LatLongGrid({ step = 10, color = "#8A7CFF", opacity = 0.45 }) {
   const lats = useMemo(() => {
     const arr: THREE.Vector3[][] = [];
     for (let lat = -80; lat <= 80; lat += step) arr.push(buildLatitude(lat));
@@ -98,7 +81,6 @@ function LatLongGrid({
     for (let lon = -180; lon < 180; lon += step) arr.push(buildLongitude(lon));
     return arr;
   }, [step]);
-
   return (
     <group>
       {lats.map((pts, i) => (
@@ -111,9 +93,7 @@ function LatLongGrid({
   );
 }
 
-/* =========================================
-   Orbital particles — sobres, toujours visibles
-========================================= */
+/* ========== Particules orbitales ========== */
 function OrbitalParticles({ count = 700, r = 1.36 }: { count?: number; r?: number }) {
   const positions = useMemo(() => {
     const arr = new Float32Array(count * 3);
@@ -128,7 +108,6 @@ function OrbitalParticles({ count = 700, r = 1.36 }: { count?: number; r?: numbe
     }
     return arr;
   }, [count, r]);
-
   return (
     <Points positions={positions} stride={3} frustumCulled={false} renderOrder={1}>
       <PointMaterial
@@ -146,13 +125,10 @@ function OrbitalParticles({ count = 700, r = 1.36 }: { count?: number; r?: numbe
   );
 }
 
-/* =========================================
-   Node ping (activité des nœuds)
-========================================= */
+/* ============= Ping des nœuds ============= */
 function NodePing({ position }: { position: THREE.Vector3 }) {
   const { camera } = useThree();
   const ref = useRef<THREE.Mesh>(null);
-
   useFrame(({ clock }) => {
     const t = clock.getElapsedTime();
     const a = (t % 1.6) / 1.6;
@@ -162,10 +138,9 @@ function NodePing({ position }: { position: THREE.Vector3 }) {
     const mat = ref.current.material as THREE.MeshBasicMaterial;
     mat.opacity = 0.9 * (1 - a);
   });
-
   return (
     <mesh ref={ref} position={position.toArray()} renderOrder={3}>
-      <ringGeometry args={[0.014, 0.085, 32 ]} />
+      <ringGeometry args={[0.014, 0.045, 32]} />
       <meshBasicMaterial
         color="#C084FC"
         transparent
@@ -179,17 +154,15 @@ function NodePing({ position }: { position: THREE.Vector3 }) {
   );
 }
 
-/* =========================================
-   ArcTraffic — MAJ via attribute ref (pas d’immutabilité hook)
-========================================= */
+/* ============ Trafic sur les arcs ============ */
 function ArcTraffic({
   start,
   mid,
   end,
-  count = 18,
-  baseSpeed = 0.35,
-  size = 0.058,
-  color = "#F472B6",
+  count = 24,
+  baseSpeed = 0.5,
+  size = 0.02,
+  color = "#F9A8D4",
   progress = 0,
 }: {
   start: THREE.Vector3;
@@ -201,14 +174,9 @@ function ArcTraffic({
   color?: string;
   progress?: number;
 }) {
-  // buffer initial (une seule fois)
   const initialPositions = useMemo(() => new Float32Array(count * 3), [count]);
-
-  // geometry & attribute refs
   const geomRef = useRef<THREE.BufferGeometry>(null!);
   const attrRef = useRef<THREE.BufferAttribute | null>(null);
-
-  // seeds deterministes
   const seeds = useMemo(
     () =>
       Array.from({ length: count }, (_, i) => ({
@@ -217,20 +185,16 @@ function ArcTraffic({
       })),
     [count]
   );
-
-  // récupérer l’attribut 'position' une fois monté
   useLayoutEffect(() => {
-    if (!geomRef.current) return;
-    attrRef.current = geomRef.current.getAttribute("position") as THREE.BufferAttribute;
+    if (geomRef.current) {
+      attrRef.current = geomRef.current.getAttribute("position") as THREE.BufferAttribute;
+    }
   }, []);
-
-  // animer en modifiant l’array de l’attribut (pas la valeur d’un hook)
   useFrame(({ clock }) => {
     const t = clock.getElapsedTime();
     const speedBoost = 0.6 + 0.8 * progress;
     const attr = attrRef.current;
     if (!attr) return;
-
     const arr = attr.array as Float32Array;
     for (let i = 0; i < count; i++) {
       const u = (seeds[i].o + t * baseSpeed * seeds[i].s * speedBoost) % 1;
@@ -241,12 +205,9 @@ function ArcTraffic({
     }
     attr.needsUpdate = true;
   });
-
-  // géométrie native (pas d’accès ref en render, pas de mutation de hook)
   return (
     <points frustumCulled={false} renderOrder={4}>
       <bufferGeometry ref={geomRef}>
-        {/* IMPORTANT: utiliser 'args' plutôt que 'array' pour éviter l’erreur TS */}
         <bufferAttribute attach="attributes-position" args={[initialPositions, 3]} />
       </bufferGeometry>
       <PointMaterial
@@ -264,17 +225,10 @@ function ArcTraffic({
   );
 }
 
-/* =========================================
-   Background starfield (camera-anchored)
-========================================= */
-function BackgroundStars({
-  count = 3800,
-  radius = 90,
-  jitter = 28,
-}: { count?: number; radius?: number; jitter?: number }) {
+/* ============ Ciel d’étoiles caméra ============ */
+function BackgroundStars({ count = 3800, radius = 90, jitter = 28 }) {
   const { camera } = useThree();
   const group = useRef<THREE.Group>(null);
-
   const positions = useMemo(() => {
     const seed = 1337;
     const arr = new Float32Array(count * 3);
@@ -290,41 +244,28 @@ function BackgroundStars({
     }
     return arr;
   }, [count, radius, jitter]);
-
   useFrame(() => {
     if (group.current) group.current.position.copy(camera.position);
   });
-
   return (
     <group ref={group} renderOrder={-1} frustumCulled={false}>
       <Points positions={positions} stride={3}>
-        <PointMaterial
-          size={0.015}
-          sizeAttenuation
-          transparent
-          opacity={0.85}
-          depthWrite={false}
-          depthTest={false}
-          toneMapped={false}
-        />
+        <PointMaterial size={0.015} sizeAttenuation transparent opacity={0.85} depthWrite={false} depthTest={false} toneMapped={false} />
       </Points>
     </group>
   );
 }
 
-/* =========================================
-   Globe 3D scene (driven by progress 0..100)
-========================================= */
+/* ============== GlobeScene ============== */
 function GlobeScene({ progress }: { progress: number }) {
-  const p = Math.max(0, Math.min(1, progress / 100));
-
+  const p = clamp01(progress / 100);
   const root = useRef<THREE.Group>(null);
   const fineGridRef = useRef<THREE.Group>(null);
   const coarseGridRef = useRef<THREE.Group>(null);
   const ringsRef = useRef<THREE.Group>(null);
   const { camera } = useThree();
 
-  // Mouse parallax target
+  // Mouse parallax
   const mouseTarget = useRef({ x: 0, y: 0 });
   useEffect(() => {
     const onMove = (e: MouseEvent) => {
@@ -353,15 +294,12 @@ function GlobeScene({ progress }: { progress: number }) {
     const t = performance.now() / 1000;
 
     if (root.current) {
-      // rotation pilotée par le scroll (spinT) + léger parallax
       const lerp = 1 - Math.pow(0.0005, dt);
       const targetRx = spinT * 0.35 + mouseTarget.current.y * 0.1;
       const targetRy = spinT * Math.PI * 2 + mouseTarget.current.x * 0.2;
       root.current.rotation.x = THREE.MathUtils.lerp(root.current.rotation.x, targetRx, lerp);
       root.current.rotation.y = THREE.MathUtils.lerp(root.current.rotation.y, targetRy, lerp);
-
-      const s = 1 + Math.sin(t * 0.9) * 0.015; // breathing
-      root.current.scale.setScalar(s);
+      root.current.scale.setScalar(1 + Math.sin(t * 0.9) * 0.015);
     }
 
     const drift = 1 - zoomT;
@@ -380,18 +318,11 @@ function GlobeScene({ progress }: { progress: number }) {
 
   return (
     <group ref={root}>
-      {/* soft halo — n’écrit plus dans le depth buffer */}
       <mesh>
         <sphereGeometry args={[1.38, 64, 32]} />
-        <meshBasicMaterial
-          color={"#6C1E80"}
-          transparent
-          opacity={0.06}
-          depthWrite={false}
-        />
+        <meshBasicMaterial color={"#6C1E80"} transparent opacity={0.06} depthWrite={false} />
       </mesh>
 
-      {/* grids */}
       <group ref={coarseGridRef}>
         <LatLongGrid step={10} color="#9E8AFF" opacity={0.28} />
       </group>
@@ -399,7 +330,6 @@ function GlobeScene({ progress }: { progress: number }) {
         <LatLongGrid step={5} color="#6C1E80" opacity={0.12} />
       </group>
 
-      {/* rings */}
       <group ref={ringsRef}>
         <mesh rotation={[Math.PI / 4, 0, 0]}>
           <torusGeometry args={[1.6, 0.0025, 8, 256]} />
@@ -411,31 +341,22 @@ function GlobeScene({ progress }: { progress: number }) {
         </mesh>
       </group>
 
-      {/* orbital particles */}
       <OrbitalParticles count={700} r={1.36} />
-
-      {/* pulses sur les nœuds */}
       {Object.values(cities).map((pos, i) => (
         <NodePing key={i} position={pos} />
       ))}
 
-      {/* arcs + trafic net */}
       {LINKS.map(([a, b], i) => {
         const start = cities[a];
         const end = cities[b];
-        const mid = start
-          .clone()
-          .add(end)
-          .multiplyScalar(0.5)
-          .normalize()
-          .multiplyScalar(2.0);
+        const mid = start.clone().add(end).multiplyScalar(0.5).normalize().multiplyScalar(2.0);
         return (
           <group key={i}>
             <QuadraticBezierLine
               start={start.toArray() as V3}
               end={end.toArray() as V3}
               mid={mid.toArray() as V3}
-              color="#C084FC"
+              color={"#C084FC"}
               lineWidth={1.4}
               dashed
               dashScale={1}
@@ -444,30 +365,10 @@ function GlobeScene({ progress }: { progress: number }) {
               transparent
               opacity={0.55}
             />
-
             {/* Aller */}
-            <ArcTraffic
-              start={start}
-              mid={mid}
-              end={end}
-              count={28}
-              baseSpeed={0.55}
-              size={0.10}
-              color="#F9A8D4"
-              progress={p}
-            />
-
-            {/* Retour (bidirectionnel) */}
-            <ArcTraffic
-              start={end}
-              mid={mid}
-              end={start}
-              count={18}
-              baseSpeed={0.4}
-              size={2}
-              color="#C084FC"
-              progress={p}
-            />
+            <ArcTraffic start={start} mid={mid} end={end} count={28} baseSpeed={0.55} size={0.02} color="#F9A8D4" progress={p} />
+            {/* Retour */}
+            <ArcTraffic start={end} mid={mid} end={start} count={18} baseSpeed={0.4} size={0.016} color="#C084FC" progress={p} />
           </group>
         );
       })}
@@ -475,9 +376,7 @@ function GlobeScene({ progress }: { progress: number }) {
   );
 }
 
-/* =========================================
-   Canvas sticky
-========================================= */
+/* ============== Canvas sticky ============== */
 function StickyCanvas({ progress }: { progress: number }) {
   return (
     <div className="pointer-events-none absolute inset-0">
@@ -494,9 +393,7 @@ function StickyCanvas({ progress }: { progress: number }) {
   );
 }
 
-/* =========================================
-   Intro 0..100 + lock/unlock scroll + re-entry snap
-========================================= */
+/* ============== Intro controller ============== */
 export default function GlobeIntro() {
   const [progress, setProgress] = useState(0); // 0 → 100
   const [locked, setLocked] = useState(true);
@@ -509,6 +406,7 @@ export default function GlobeIntro() {
 
   const SAFE_OFFSET = 220;
   const REENTRY_SNAP_ZONE = 180;
+  const EXIT_AT = 99;
 
   const getSectionTop = () => {
     const el = sectionRef.current;
@@ -516,6 +414,44 @@ export default function GlobeIntro() {
     const r = el.getBoundingClientRect();
     return r.top + window.scrollY;
   };
+
+  /* --- PRE-FLIGHT : si on recharge hors de l'intro → pas de lock --- */
+  useLayoutEffect(() => {
+    const el = sectionRef.current;
+    let needsUnlock = false;
+
+    if (!el) {
+      needsUnlock = true;
+    } else {
+      const top = getSectionTop();
+      const h = el.offsetHeight || window.innerHeight;
+      const yTop = window.scrollY;
+      const yBot = yTop + window.innerHeight;
+      const overlaps = yBot > top + 20 && yTop < top + h - 20; // petite marge
+      if (!overlaps) needsUnlock = true;
+    }
+
+    if (needsUnlock) {
+      // ⚠️ décale la mise à jour d'état hors du corps de l'effet
+      requestAnimationFrame(() => {
+        setLocked(false);
+        document.documentElement.style.overflow = "";
+        document.body.style.overflow = "";
+      });
+    }
+    // deps vides : on ne fait ce check qu'au mount
+  }, []);
+
+
+  /* --- Overflow manager (séparé) --- */
+  useEffect(() => {
+    document.documentElement.style.overflow = locked ? "hidden" : "";
+    document.body.style.overflow = locked ? "hidden" : "";
+    return () => {
+      document.documentElement.style.overflow = "";
+      document.body.style.overflow = "";
+    };
+  }, [locked]);
 
   useEffect(() => {
     const computeAfterTop = () => {
@@ -527,7 +463,7 @@ export default function GlobeIntro() {
     return () => window.removeEventListener("resize", computeAfterTop);
   }, []);
 
-  // re-entry quand on revient tout en haut
+  // re-entry quand on remonte très haut
   useEffect(() => {
     const onScroll = () => {
       if (locked || snappingRef.current) return;
@@ -544,7 +480,7 @@ export default function GlobeIntro() {
     return () => window.removeEventListener("scroll", onScroll);
   }, [locked]);
 
-  // lock inputs jusqu’à la fin de l’intro
+  // contrôle d’entrée (events) — actif seulement quand locked=true
   useEffect(() => {
     if (!locked) return;
 
@@ -552,42 +488,26 @@ export default function GlobeIntro() {
     const opts: AddEventListenerOptions = { passive: false };
     let touchStartY = 0;
 
-    const unlockBody = () => {
-      document.documentElement.style.overflow = "";
-      document.body.style.overflow = "";
-    };
-
     const exitToContent = () => {
       if (exitingRef.current) return;
       exitingRef.current = true;
-
       const anchorTop = afterTopRef.current ?? getSectionTop();
-
-      // unlock immédiatement
-      document.documentElement.style.overflow = "";
-      document.body.style.overflow = "";
       setLocked(false);
-
       requestAnimationFrame(() => {
         const root = document.documentElement;
         const prev = root.style.scrollBehavior;
         root.style.scrollBehavior = "auto";
         window.scrollTo(0, anchorTop + SAFE_OFFSET);
         root.style.scrollBehavior = prev;
-
         setTimeout(() => (exitingRef.current = false), 0);
       });
     };
-
-    // on lock maintenant
-    document.documentElement.style.overflow = "hidden";
-    document.body.style.overflow = "hidden";
 
     const advance = (delta: number) => {
       if (exitingRef.current) return;
       setProgress((p) => {
         const next = clamp100(p + delta);
-        if (delta > 0 && next >= 99) {
+        if (delta > 0 && next >= EXIT_AT) {
           requestAnimationFrame(() => exitToContent());
           return 100;
         }
@@ -595,23 +515,13 @@ export default function GlobeIntro() {
       });
     };
 
-    const onWheel = (e: WheelEvent) => {
-      e.preventDefault();
-      advance(e.deltaY * 0.12);
-    };
+    const onWheel = (e: WheelEvent) => { e.preventDefault(); advance(e.deltaY * 0.12); };
     const onKeyDown = (e: KeyboardEvent) => {
-      if (["ArrowDown", "PageDown", " "].includes(e.key)) {
-        e.preventDefault();
-        advance(+6);
-      } else if (["ArrowUp", "PageUp"].includes(e.key)) {
-        e.preventDefault();
-        advance(-6);
-      }
+      if (["ArrowDown", "PageDown", " "].includes(e.key)) { e.preventDefault(); advance(+6); }
+      else if (["ArrowUp", "PageUp"].includes(e.key)) { e.preventDefault(); advance(-6); }
     };
-    const onTouchStart = (e: TouchEvent) => {
-      touchStartY = e.touches[0]?.clientY ?? 0;
-    };
-    const onTouchMove = (e: TouchEvent) => {
+    const onTouchStart = (e: TouchEvent) => { touchStartY = e.touches[0]?.clientY ?? 0; };
+    const onTouchMove  = (e: TouchEvent) => {
       e.preventDefault();
       const y = e.touches[0]?.clientY ?? touchStartY;
       const dy = touchStartY - y;
@@ -635,7 +545,6 @@ export default function GlobeIntro() {
         window.removeEventListener("touchstart", onTouchStart, opts);
         window.removeEventListener("touchmove", onTouchMove, opts);
       }
-      unlockBody();
     };
   }, [locked]);
 
