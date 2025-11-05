@@ -7,9 +7,9 @@ import { Line, Points, PointMaterial } from "@react-three/drei";
 
 /* =================== Const & utils =================== */
 const R_GLOBE = 1.35;
-const GLOBE_BASE_SCALE = 0.80; // ta valeur
+const GLOBE_BASE_SCALE = 0.80;
 
-// Intro plus longue (augmente le nombre d’inputs requis pour atteindre 100)
+// Intro length: lower = longer
 const WHEEL_FACTOR = 0.04;
 const KEY_STEP = 2;
 const TOUCH_FACTOR = 0.12;
@@ -38,7 +38,7 @@ function latLngToVec3(lat: number, lon: number, r = R_GLOBE): THREE.Vector3 {
   return new THREE.Vector3(x, y, z);
 }
 
-/** Grand cercle surélevé (ne traverse jamais la planète) */
+/** Great-circle with lift (never intersects the globe) */
 function greatCirclePoint(a: THREE.Vector3, b: THREE.Vector3, t: number, r = R_GLOBE, lift = 0.18) {
   const u = a.clone().normalize();
   const v = b.clone().normalize();
@@ -287,6 +287,19 @@ function BackgroundStars({ count = 3800, radius = 90, jitter = 28 }: { count?: n
   );
 }
 
+/* =================== Responsive helper =================== */
+function useIsSmall(px = 700) {
+  const [small, setSmall] = useState(false);
+  useLayoutEffect(() => {
+    const mql = window.matchMedia(`(max-width:${px}px)`);
+    const update = () => setSmall(mql.matches);
+    update();
+    mql.addEventListener("change", update);
+    return () => mql.removeEventListener("change", update);
+  }, [px]);
+  return small;
+}
+
 /* =================== TYPO OVERLAY (wipe → reveal) =================== */
 type Headline = {
   text: string;
@@ -296,32 +309,40 @@ type Headline = {
   accent?: boolean;
 };
 
-function HeadlineBlock({ h, p }: { h: Headline; p: number }) {
-  const a = smoothWindow(p, h.window[0], h.window[1], 0.08); // présence
+function HeadlineBlock({ h, p, isSmall }: { h: Headline; p: number; isSmall: boolean }) {
+  const a = smoothWindow(p, h.window[0], h.window[1], 0.08); // presence
   const enter = easeOut(a);
   const reveal = clamp01((p - h.window[0]) / Math.max(1e-6, h.window[1] - h.window[0])); // 0..1
 
-  const fromX = h.side === "left" ? -70 : h.side === "right" ? 70 : 0;
+  // On phones, always center the anchor so long lines wrap nicely.
+  const anchorSide: "left" | "right" | "center" = isSmall ? "center" : h.side;
+  const fromX = anchorSide === "left" ? -60 : anchorSide === "right" ? 60 : 0;
+
   const basePos =
-    h.side === "left" ? { left: "6%", right: "auto" as const }
-      : h.side === "right" ? { right: "6%", left: "auto" as const }
-        : { left: "50%", transform: `translateX(-50%)` };
+    anchorSide === "left"
+      ? { left: "6%", right: "auto" as const }
+      : anchorSide === "right"
+      ? { right: "6%", left: "auto" as const }
+      : { left: "50%", transform: `translateX(-50%)` };
 
   const x = (1 - enter) * fromX;
-  const y = (1 - enter) * 10;
+  const y = (1 - enter) * 8;
   const scale = 0.98 + 0.04 * enter;
 
-  const clip = `inset(0 ${100 - reveal * 100}% 0 0)`; // ouvre de gauche à droite
+  const clip = `inset(0 ${100 - reveal * 100}% 0 0)`;
+
+  const fontSize = isSmall ? "clamp(20px, 6.2vw, 34px)" : "clamp(40px, 4.5vw, 64px)";
+  const topY = isSmall ? `calc(${h.y} - 8%)` : h.y;
 
   return (
-    <div className="absolute" style={{ top: h.y, ...basePos }}>
+    <div className="absolute" style={{ top: topY, ...basePos }}>
       {h.accent && (
         <div
           className="absolute -z-10"
           style={{
-            left: h.side === "center" ? "-10%" : "-4%",
+            left: anchorSide === "center" ? "-10%" : "-4%",
             top: "38%",
-            width: h.side === "center" ? "120%" : "108%",
+            width: anchorSide === "center" ? "120%" : "108%",
             height: "36%",
             background: "linear-gradient(90deg, rgba(236,72,153,0.18), rgba(124,58,237,0.18))",
             filter: "blur(12px)",
@@ -346,17 +367,19 @@ function HeadlineBlock({ h, p }: { h: Headline; p: number }) {
         <div
           style={{
             fontFamily: "ui-sans-serif, system-ui, Sora, Space Grotesk, Inter, Arial",
-            fontSize: 64,
-            lineHeight: 1.02,
-            letterSpacing: "-0.02em",
+            fontSize,
+            lineHeight: isSmall ? 1.12 : 1.04,
+            letterSpacing: isSmall ? "-0.01em" : "-0.02em",
             fontWeight: 900,
-            whiteSpace: "nowrap",
+            whiteSpace: isSmall ? "normal" : "nowrap",
+            textAlign: anchorSide === "center" ? "center" : "left",
+            maxWidth: isSmall ? "86vw" : "none",
           }}
         >
           {h.text}
         </div>
 
-        {/* WIPE BLANC qui couvre 100% au départ puis sort à droite */}
+        {/* White wipe covering 100% initially, sliding out to the right */}
         <div
           style={{
             position: "absolute",
@@ -368,6 +391,7 @@ function HeadlineBlock({ h, p }: { h: Headline; p: number }) {
             willChange: "transform",
             opacity: 1 - THREE.MathUtils.smoothstep(reveal, 0.9, 1.0),
             pointerEvents: "none",
+            borderRadius: 4,
           }}
         />
 
@@ -392,7 +416,7 @@ function HeadlineBlock({ h, p }: { h: Headline; p: number }) {
   );
 }
 
-function HeadlineOverlay({ progress }: { progress: number }) {
+function HeadlineOverlay({ progress, isSmall }: { progress: number; isSmall: boolean }) {
   const p = progress / 100;
   const headlines: Headline[] = [
     { text: "BONJOUR, JE SUIS MATHIS.", side: "left",   y: "16%", window: [0.06, 0.32], accent: true },
@@ -402,13 +426,13 @@ function HeadlineOverlay({ progress }: { progress: number }) {
 
   return (
     <div className="pointer-events-none absolute inset-0 z-40 select-none">
-      {headlines.map((h, i) => <HeadlineBlock key={i} h={h} p={p} />)}
+      {headlines.map((h, i) => <HeadlineBlock key={i} h={h} p={p} isSmall={isSmall} />)}
     </div>
   );
 }
 
 /* =================== Globe scene =================== */
-function GlobeScene({ progress }: { progress: number }) {
+function GlobeScene({ progress, isSmall }: { progress: number; isSmall: boolean }) {
   const p = clamp01(progress / 100);
 
   const root = useRef<THREE.Group>(null);
@@ -434,7 +458,7 @@ function GlobeScene({ progress }: { progress: number }) {
     return Object.fromEntries(entries.map(([k, v]) => [k, latLngToVec3(v.lat, v.lon)])) as Record<CityKey, THREE.Vector3>;
   }, []);
 
-  const AUTO_ARCS = useMemo(() => buildAutoLinks(36), []);
+  const AUTO_ARCS = useMemo(() => buildAutoLinks(isSmall ? 22 : 36), [isSmall]);
   const spinT = Math.min(p / 0.8, 1);
   const zoomT = THREE.MathUtils.clamp((p - 0.8) / 0.2, 0, 1);
   const france = useMemo(() => latLngToVec3(46.2276, 2.2137), []);
@@ -442,7 +466,7 @@ function GlobeScene({ progress }: { progress: number }) {
   useFrame((_, dt) => {
     const t = performance.now() / 1000;
     if (root.current) {
-      const lerp = 1 - Math.pow(0.0006, dt);
+      const lerp = 1 - Math.pow(0.00065, dt);
       const targetRx = spinT * 0.35 + mouseTarget.current.y * 0.1;
       const targetRy = spinT * Math.PI * 2 + mouseTarget.current.x * 0.2;
       root.current.rotation.x = THREE.MathUtils.lerp(root.current.rotation.x, targetRx, lerp);
@@ -511,7 +535,7 @@ function GlobeScene({ progress }: { progress: number }) {
         return (
           <group key={`auto-${i}`}>
             <Line points={pts} color="#7C3AED" lineWidth={1} dashed dashScale={1} dashSize={0.1} dashOffset={-(p * 6)} transparent opacity={0.35} />
-            <ArcTrafficInstanced start={a} end={b} lift={lift} count={26} baseSpeed={0.5} dotRadius={0.001} color="#E879F9" progress={p} />
+            <ArcTrafficInstanced start={a} end={b} lift={lift} count={isSmall ? 18 : 26} baseSpeed={0.5} dotRadius={0.001} color="#E879F9" progress={p} />
           </group>
         );
       })}
@@ -520,16 +544,20 @@ function GlobeScene({ progress }: { progress: number }) {
 }
 
 /* =================== Canvas sticky =================== */
-function StickyCanvas({ progress }: { progress: number }) {
+function StickyCanvas({ progress, isSmall }: { progress: number; isSmall: boolean }) {
   return (
     <div className="pointer-events-none absolute inset-0">
-      <Canvas dpr={[1, 1.8]} gl={{ antialias: true, alpha: true }} camera={{ position: [0, 0, 3.8], fov: 45 }}>
+      <Canvas
+        dpr={isSmall ? [1, 1.3] : [1, 1.8]}
+        gl={{ antialias: true, alpha: true }}
+        camera={{ position: [0, 0, 3.8], fov: 45 }}
+      >
         <Suspense fallback={null}>
-          <BackgroundStars count={3800} radius={90} jitter={28} />
+          <BackgroundStars count={isSmall ? 2400 : 3800} radius={90} jitter={28} />
           <ambientLight intensity={0.9} />
           <pointLight color={"#9B1C31"} intensity={2} position={[2, 1, 2]} />
           <pointLight color={"#6C1E80"} intensity={1.8} position={[-2, -1, -2]} />
-          <GlobeScene progress={progress} />
+          <GlobeScene progress={progress} isSmall={isSmall} />
         </Suspense>
       </Canvas>
     </div>
@@ -547,6 +575,8 @@ export default function GlobeIntro() {
   const snappingRef = useRef(false);
   const exitingRef = useRef(false);
 
+  const isSmall = useIsSmall(700);
+
   const SAFE_OFFSET = 220;
   const REENTRY_SNAP_ZONE = 180;
   const EXIT_AT = 99;
@@ -558,7 +588,7 @@ export default function GlobeIntro() {
     return r.top + window.scrollY;
   };
 
-  // force le snap au top (robuste mobile)
+  // force snap to top (mobile-friendly)
   const forceSnapToIntro = () => {
     const top = getSectionTop();
     let tries = 0;
@@ -572,14 +602,14 @@ export default function GlobeIntro() {
     requestAnimationFrame(() => requestAnimationFrame(snap));
   };
 
-  // Toujours revenir en haut de l’intro au refresh (desktop + mobile/BFCache)
+  // Always return to top on refresh (desktop + mobile/BFCache)
   useLayoutEffect(() => {
     if ("scrollRestoration" in history) {
       (history as History & { scrollRestoration: "auto" | "manual" }).scrollRestoration = "manual";
     }
     const onPageShow = () => forceSnapToIntro();
     window.addEventListener("pageshow", onPageShow);
-    window.addEventListener("load", forceSnapToIntro, { once: true } as AddEventListenerOptions);
+    window.addEventListener("load", forceSnapToIntro, { once: true });
     forceSnapToIntro();
     return () => {
       window.removeEventListener("pageshow", onPageShow);
@@ -606,6 +636,13 @@ export default function GlobeIntro() {
     return () => window.removeEventListener("resize", computeAfterTop);
   }, []);
 
+  // fix after rotation
+  useEffect(() => {
+    const onRotate = () => setTimeout(forceSnapToIntro, 60);
+    window.addEventListener("orientationchange", onRotate);
+    return () => window.removeEventListener("orientationchange", onRotate);
+  }, []);
+
   // re-entry
   useEffect(() => {
     const onScroll = () => {
@@ -623,7 +660,7 @@ export default function GlobeIntro() {
     return () => window.removeEventListener("scroll", onScroll);
   }, [locked]);
 
-  // contrôles quand locked = true
+  // controls when locked = true
   useEffect(() => {
     if (!locked) return;
 
@@ -700,15 +737,16 @@ export default function GlobeIntro() {
       ref={sectionRef}
       className="relative bg-[#0A0A0B]"
       style={{
-        // 100svh = hauteur visible fiable mobile
         height: "100svh",
         minHeight: "100svh",
+        paddingTop: "env(safe-area-inset-top)",
+        paddingBottom: "env(safe-area-inset-bottom)",
         background:
           "radial-gradient(1200px 600px at 50% 40%, rgba(108,30,128,.22), transparent 60%), radial-gradient(1000px 500px at 50% 80%, rgba(155,28,49,.18), transparent 60%), #0A0A0B",
       }}
     >
-      <StickyCanvas progress={progress} />
-      <HeadlineOverlay progress={progress} />
+      <StickyCanvas progress={progress} isSmall={isSmall} />
+      <HeadlineOverlay progress={progress} isSmall={isSmall} />
 
       <div className="pointer-events-none absolute inset-0 z-30 flex items-end justify-center pb-8">
         <div className="text-[10px] tracking-[0.35em] text-zinc-300/80">
