@@ -3,17 +3,21 @@
 import { Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Line, QuadraticBezierLine, Points, PointMaterial } from "@react-three/drei";
+import { Line, Points, PointMaterial } from "@react-three/drei";
 
-/* ================= Utils ================= */
-type V3 = [number, number, number];
-const degToRad = (d: number) => (d * Math.PI) / 180;
+/* =================== Utils & Const =================== */
+const R_GLOBE = 1.35;
+const GLOBE_BASE_SCALE = 0.80; // ← taille globale du globe (0.90–0.95 = léger)
 const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
+const degToRad = (d: number) => (d * Math.PI) / 180;
+const clamp = (x: number, a: number, b: number) => Math.min(b, Math.max(a, x));
+
 function hash01(x: number) {
   const s = Math.sin(x) * 43758.5453123;
   return s - Math.floor(s);
 }
-function latLngToVec3(lat: number, lon: number, r = 1.35): THREE.Vector3 {
+
+function latLngToVec3(lat: number, lon: number, r = R_GLOBE): THREE.Vector3 {
   const phi = degToRad(90 - lat);
   const theta = degToRad(lon + 180);
   const x = -r * Math.sin(phi) * Math.cos(theta);
@@ -21,13 +25,27 @@ function latLngToVec3(lat: number, lon: number, r = 1.35): THREE.Vector3 {
   const y = r * Math.cos(phi);
   return new THREE.Vector3(x, y, z);
 }
-function quadPoint(a: THREE.Vector3, b: THREE.Vector3, c: THREE.Vector3, t: number) {
-  const ab = a.clone().lerp(b, t);
-  const bc = b.clone().lerp(c, t);
-  return ab.lerp(bc, t);
+
+/** Grand cercle surélevé (ne traverse jamais la planète) */
+function greatCirclePoint(a: THREE.Vector3, b: THREE.Vector3, t: number, r = R_GLOBE, lift = 0.18) {
+  const u = a.clone().normalize();
+  const v = b.clone().normalize();
+  const dot = clamp(u.dot(v), -1, 1);
+  const ang = Math.acos(dot);
+  if (ang < 1e-4) return u.clone().multiplyScalar(r);
+  const s1 = Math.sin((1 - t) * ang) / Math.sin(ang);
+  const s2 = Math.sin(t * ang) / Math.sin(ang);
+  const dir = u.multiplyScalar(s1).add(v.multiplyScalar(s2)).normalize();
+  const radius = r * (1 + lift * Math.sin(Math.PI * t));
+  return dir.multiplyScalar(radius);
+}
+function greatCirclePoints(a: THREE.Vector3, b: THREE.Vector3, seg = 64, r = R_GLOBE, lift = 0.18) {
+  const pts: THREE.Vector3[] = [];
+  for (let i = 0; i <= seg; i++) pts.push(greatCirclePoint(a, b, i / seg, r, lift));
+  return pts;
 }
 
-/* ================= Data ================= */
+/* =================== Data =================== */
 const CITIES = {
   paris: { lat: 48.8566, lon: 2.3522 },
   london: { lat: 51.5072, lon: -0.1276 },
@@ -38,7 +56,7 @@ const CITIES = {
 } as const;
 type CityKey = keyof typeof CITIES;
 
-const LINKS: Array<[CityKey, CityKey]> = [
+const LINKS_BASE: Array<[CityKey, CityKey]> = [
   ["paris", "london"],
   ["paris", "nyc"],
   ["paris", "tokyo"],
@@ -47,8 +65,39 @@ const LINKS: Array<[CityKey, CityKey]> = [
   ["nyc", "tokyo"],
 ];
 
-/* ============== Graticule ============== */
-function buildLatitude(latDeg: number, seg = 128, r = 1.35) {
+function buildAutoLinks(n = 36) {
+  const pairs: Array<[THREE.Vector3, THREE.Vector3]> = [];
+  const seed = 20251105;
+  let i = 0;
+  while (pairs.length < n && i < n * 5) {
+    const u1 = hash01(seed + i * 1.37);
+    const v1 = hash01(seed + i * 2.71);
+    const u2 = hash01(seed + i * 3.11);
+    const v2 = hash01(seed + i * 4.53);
+    const theta1 = 2 * Math.PI * u1;
+    const phi1 = Math.acos(2 * v1 - 1);
+    const theta2 = 2 * Math.PI * u2;
+    const phi2 = Math.acos(2 * v2 - 1);
+    const a = new THREE.Vector3(
+      R_GLOBE * Math.sin(phi1) * Math.cos(theta1),
+      R_GLOBE * Math.cos(phi1),
+      R_GLOBE * Math.sin(phi1) * Math.sin(theta1)
+    );
+    const b = new THREE.Vector3(
+      R_GLOBE * Math.sin(phi2) * Math.cos(theta2),
+      R_GLOBE * Math.cos(phi2),
+      R_GLOBE * Math.sin(phi2) * Math.sin(theta2)
+    );
+    const ang = a.clone().normalize().dot(b.clone().normalize());
+    const deg = (Math.acos(clamp(ang, -1, 1)) * 180) / Math.PI;
+    if (deg > 25 && deg < 155) pairs.push([a, b]);
+    i++;
+  }
+  return pairs;
+}
+
+/* =================== Graticule =================== */
+function buildLatitude(latDeg: number, seg = 128, r = R_GLOBE) {
   const pts: THREE.Vector3[] = [];
   const lat = degToRad(latDeg);
   const y = r * Math.sin(lat);
@@ -59,7 +108,7 @@ function buildLatitude(latDeg: number, seg = 128, r = 1.35) {
   }
   return pts;
 }
-function buildLongitude(lonDeg: number, seg = 128, r = 1.35) {
+function buildLongitude(lonDeg: number, seg = 128, r = R_GLOBE) {
   const pts: THREE.Vector3[] = [];
   const lon = degToRad(lonDeg);
   for (let i = 0; i <= seg; i++) {
@@ -70,7 +119,7 @@ function buildLongitude(lonDeg: number, seg = 128, r = 1.35) {
   }
   return pts;
 }
-function LatLongGrid({ step = 10, color = "#8A7CFF", opacity = 0.45 }) {
+function LatLongGrid({ step = 10, color = "#8A7CFF", opacity = 0.45 }: { step?: number; color?: string; opacity?: number }) {
   const lats = useMemo(() => {
     const arr: THREE.Vector3[][] = [];
     for (let lat = -80; lat <= 80; lat += step) arr.push(buildLatitude(lat));
@@ -93,8 +142,8 @@ function LatLongGrid({ step = 10, color = "#8A7CFF", opacity = 0.45 }) {
   );
 }
 
-/* ========== Particules orbitales ========== */
-function OrbitalParticles({ count = 700, r = 1.36 }: { count?: number; r?: number }) {
+/* =================== Orbital particles =================== */
+function OrbitalParticles({ count = 700, r = R_GLOBE + 0.01 }: { count?: number; r?: number }) {
   const positions = useMemo(() => {
     const arr = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
@@ -108,11 +157,12 @@ function OrbitalParticles({ count = 700, r = 1.36 }: { count?: number; r?: numbe
     }
     return arr;
   }, [count, r]);
+
   return (
     <Points positions={positions} stride={3} frustumCulled={false} renderOrder={1}>
       <PointMaterial
         color="#BB69FF"
-        size={0.02}
+        size={0.025}
         sizeAttenuation={false}
         depthWrite={false}
         depthTest={false}
@@ -125,7 +175,7 @@ function OrbitalParticles({ count = 700, r = 1.36 }: { count?: number; r?: numbe
   );
 }
 
-/* ============= Ping des nœuds ============= */
+/* =================== Node ping =================== */
 function NodePing({ position }: { position: THREE.Vector3 }) {
   const { camera } = useThree();
   const ref = useRef<THREE.Mesh>(null);
@@ -154,79 +204,96 @@ function NodePing({ position }: { position: THREE.Vector3 }) {
   );
 }
 
-/* ============ Trafic sur les arcs ============ */
-function ArcTraffic({
+/* =================== ArcTraffic (INSTANCED, type-safe) =================== */
+type InstancedSphere = THREE.InstancedMesh<THREE.SphereGeometry, THREE.MeshBasicMaterial>;
+
+/** Sphères instanciées → taille en unités du monde (dotRadius) */
+function ArcTrafficInstanced({
   start,
-  mid,
   end,
-  count = 24,
-  baseSpeed = 0.5,
-  size = 0.02,
+  lift = 0.2,
+  count = 36,
+  baseSpeed = 0.55,
+  dotRadius = 0.06, // règle ici la taille
   color = "#F9A8D4",
   progress = 0,
 }: {
   start: THREE.Vector3;
-  mid: THREE.Vector3;
   end: THREE.Vector3;
+  lift?: number;
   count?: number;
   baseSpeed?: number;
-  size?: number;
+  dotRadius?: number;
   color?: string;
   progress?: number;
 }) {
-  const initialPositions = useMemo(() => new Float32Array(count * 3), [count]);
-  const geomRef = useRef<THREE.BufferGeometry>(null!);
-  const attrRef = useRef<THREE.BufferAttribute | null>(null);
+  const meshRef = useRef<InstancedSphere>(null!);
+
+  // géométrie & matériau TYPÉS (=> pas de any dans args)
+  const geo = useMemo(() => new THREE.SphereGeometry(1, 10, 10), []);
+  const mat = useMemo(
+    () =>
+      new THREE.MeshBasicMaterial({
+        transparent: true,
+        opacity: 0.95,
+        depthWrite: false,
+        depthTest: false,
+        blending: THREE.AdditiveBlending,
+        toneMapped: false,
+      }),
+    []
+  );
+  // couleur pilotée par prop
+  useEffect(() => {
+    mat.color.set(color);
+  }, [color, mat]);
+
   const seeds = useMemo(
     () =>
       Array.from({ length: count }, (_, i) => ({
         o: hash01(i * 2.13 + 0.17),
-        s: 0.6 + hash01(i * 7.7 + 0.29),
+        s: 0.7 + hash01(i * 7.7 + 0.29),
       })),
     [count]
   );
-  useLayoutEffect(() => {
-    if (geomRef.current) {
-      attrRef.current = geomRef.current.getAttribute("position") as THREE.BufferAttribute;
-    }
-  }, []);
+
+  const scratchMatrix = useMemo(() => new THREE.Matrix4(), []);
+  const scratchPos = useMemo(() => new THREE.Vector3(), []);
+  const scratchScale = useMemo(() => new THREE.Vector3(), []);
+  const scratchQuat = useMemo(() => new THREE.Quaternion(), []);
+
   useFrame(({ clock }) => {
     const t = clock.getElapsedTime();
     const speedBoost = 0.6 + 0.8 * progress;
-    const attr = attrRef.current;
-    if (!attr) return;
-    const arr = attr.array as Float32Array;
+    const m = meshRef.current;
+    if (!m) return;
+
     for (let i = 0; i < count; i++) {
       const u = (seeds[i].o + t * baseSpeed * seeds[i].s * speedBoost) % 1;
-      const p = quadPoint(start, mid, end, u);
-      arr[i * 3 + 0] = p.x;
-      arr[i * 3 + 1] = p.y;
-      arr[i * 3 + 2] = p.z;
+      const p = greatCirclePoint(start, end, u, R_GLOBE, lift);
+      scratchPos.copy(p);
+
+      // petite pulsation visuelle
+      const s = dotRadius * (1.0 + 0.25 * Math.sin((t + i) * 2.1));
+      scratchScale.set(s, s, s);
+      scratchMatrix.compose(scratchPos, scratchQuat, scratchScale);
+      m.setMatrixAt(i, scratchMatrix);
     }
-    attr.needsUpdate = true;
+    m.instanceMatrix.needsUpdate = true;
   });
+
   return (
-    <points frustumCulled={false} renderOrder={4}>
-      <bufferGeometry ref={geomRef}>
-        <bufferAttribute attach="attributes-position" args={[initialPositions, 3]} />
-      </bufferGeometry>
-      <PointMaterial
-        color={color}
-        size={size}
-        sizeAttenuation={false}
-        transparent
-        opacity={0.95}
-        depthWrite={false}
-        depthTest={false}
-        blending={THREE.AdditiveBlending}
-        toneMapped={false}
-      />
-    </points>
+    <instancedMesh
+      ref={meshRef}
+      args={[geo, mat, count]}
+      frustumCulled={false}
+      renderOrder={4}
+    />
   );
 }
 
-/* ============ Ciel d’étoiles caméra ============ */
-function BackgroundStars({ count = 3800, radius = 90, jitter = 28 }) {
+/* =================== Background stars =================== */
+function BackgroundStars({ count = 3800, radius = 90, jitter = 28 }: { count?: number; radius?: number; jitter?: number }) {
   const { camera } = useThree();
   const group = useRef<THREE.Group>(null);
   const positions = useMemo(() => {
@@ -256,9 +323,10 @@ function BackgroundStars({ count = 3800, radius = 90, jitter = 28 }) {
   );
 }
 
-/* ============== GlobeScene ============== */
+/* =================== Globe scene =================== */
 function GlobeScene({ progress }: { progress: number }) {
   const p = clamp01(progress / 100);
+
   const root = useRef<THREE.Group>(null);
   const fineGridRef = useRef<THREE.Group>(null);
   const coarseGridRef = useRef<THREE.Group>(null);
@@ -286,22 +354,22 @@ function GlobeScene({ progress }: { progress: number }) {
     >;
   }, []);
 
+  const AUTO_ARCS = useMemo(() => buildAutoLinks(36), []);
+
   const spinT = Math.min(p / 0.8, 1);
   const zoomT = THREE.MathUtils.clamp((p - 0.8) / 0.2, 0, 1);
   const france = useMemo(() => latLngToVec3(46.2276, 2.2137), []);
 
   useFrame((_, dt) => {
     const t = performance.now() / 1000;
-
     if (root.current) {
       const lerp = 1 - Math.pow(0.0005, dt);
       const targetRx = spinT * 0.35 + mouseTarget.current.y * 0.1;
       const targetRy = spinT * Math.PI * 2 + mouseTarget.current.x * 0.2;
       root.current.rotation.x = THREE.MathUtils.lerp(root.current.rotation.x, targetRx, lerp);
       root.current.rotation.y = THREE.MathUtils.lerp(root.current.rotation.y, targetRy, lerp);
-      root.current.scale.setScalar(1 + Math.sin(t * 0.9) * 0.015);
+      root.current.scale.setScalar(GLOBE_BASE_SCALE * (1 + Math.sin(t * 0.9) * 0.015));
     }
-
     const drift = 1 - zoomT;
     if (coarseGridRef.current) coarseGridRef.current.rotation.y += dt * 0.03 * drift;
     if (fineGridRef.current) fineGridRef.current.rotation.y -= dt * 0.05 * drift;
@@ -318,11 +386,13 @@ function GlobeScene({ progress }: { progress: number }) {
 
   return (
     <group ref={root}>
+      {/* halo */}
       <mesh>
-        <sphereGeometry args={[1.38, 64, 32]} />
+        <sphereGeometry args={[R_GLOBE + 0.03, 64, 32]} />
         <meshBasicMaterial color={"#6C1E80"} transparent opacity={0.06} depthWrite={false} />
       </mesh>
 
+      {/* grilles */}
       <group ref={coarseGridRef}>
         <LatLongGrid step={10} color="#9E8AFF" opacity={0.28} />
       </group>
@@ -330,6 +400,7 @@ function GlobeScene({ progress }: { progress: number }) {
         <LatLongGrid step={5} color="#6C1E80" opacity={0.12} />
       </group>
 
+      {/* anneaux */}
       <group ref={ringsRef}>
         <mesh rotation={[Math.PI / 4, 0, 0]}>
           <torusGeometry args={[1.6, 0.0025, 8, 256]} />
@@ -341,34 +412,55 @@ function GlobeScene({ progress }: { progress: number }) {
         </mesh>
       </group>
 
-      <OrbitalParticles count={700} r={1.36} />
+      <OrbitalParticles count={700} r={R_GLOBE + 0.01} />
       {Object.values(cities).map((pos, i) => (
         <NodePing key={i} position={pos} />
       ))}
 
-      {LINKS.map(([a, b], i) => {
-        const start = cities[a];
-        const end = cities[b];
-        const mid = start.clone().add(end).multiplyScalar(0.5).normalize().multiplyScalar(2.0);
+      {/* Villes : aller / retour en INSTANCED */}
+      {Object.keys(cities).length > 0 &&
+        LINKS_BASE.map(([a, b], i) => {
+          const start = cities[a];
+          const end = cities[b];
+          const lift = 0.2;
+          const pts = greatCirclePoints(start, end, 64, R_GLOBE, lift);
+          return (
+            <group key={`city-${i}`}>
+              <Line
+                points={pts}
+                color="#C084FC"
+                lineWidth={1.4}
+                dashed
+                dashScale={1}
+                dashSize={0.12}
+                dashOffset={-(p * 8)}
+                transparent
+                opacity={0.55}
+              />
+              <ArcTrafficInstanced start={start} end={end} lift={lift} count={16} baseSpeed={0.05} dotRadius={0.006} color="#F9A8D4" progress={p} />
+              <ArcTrafficInstanced start={end} end={start} lift={lift} count={18} baseSpeed={0.15} dotRadius={0.0052} color="#C084FC" progress={p} />
+            </group>
+          );
+        })}
+
+      {/* Arcs auto tout autour */}
+      {AUTO_ARCS.map(([a, b], i) => {
+        const lift = 0.22;
+        const pts = greatCirclePoints(a, b, 48, R_GLOBE, lift);
         return (
-          <group key={i}>
-            <QuadraticBezierLine
-              start={start.toArray() as V3}
-              end={end.toArray() as V3}
-              mid={mid.toArray() as V3}
-              color={"#C084FC"}
-              lineWidth={1.4}
+          <group key={`auto-${i}`}>
+            <Line
+              points={pts}
+              color="#7C3AED"
+              lineWidth={1}
               dashed
               dashScale={1}
-              dashSize={0.12}
-              dashOffset={-(p * 8)}
+              dashSize={0.1}
+              dashOffset={-(p * 6)}
               transparent
-              opacity={0.55}
+              opacity={0.35}
             />
-            {/* Aller */}
-            <ArcTraffic start={start} mid={mid} end={end} count={28} baseSpeed={0.55} size={0.02} color="#F9A8D4" progress={p} />
-            {/* Retour */}
-            <ArcTraffic start={end} mid={mid} end={start} count={18} baseSpeed={0.4} size={0.016} color="#C084FC" progress={p} />
+            <ArcTrafficInstanced start={a} end={b} lift={lift} count={26} baseSpeed={0.5} dotRadius={0.001} color="#E879F9" progress={p} />
           </group>
         );
       })}
@@ -376,7 +468,7 @@ function GlobeScene({ progress }: { progress: number }) {
   );
 }
 
-/* ============== Canvas sticky ============== */
+/* =================== Canvas sticky =================== */
 function StickyCanvas({ progress }: { progress: number }) {
   return (
     <div className="pointer-events-none absolute inset-0">
@@ -393,9 +485,9 @@ function StickyCanvas({ progress }: { progress: number }) {
   );
 }
 
-/* ============== Intro controller ============== */
+/* =================== Intro controller (anti-freeze) =================== */
 export default function GlobeIntro() {
-  const [progress, setProgress] = useState(0); // 0 → 100
+  const [progress, setProgress] = useState(0);
   const [locked, setLocked] = useState(true);
   const attachedRef = useRef(false);
 
@@ -415,35 +507,29 @@ export default function GlobeIntro() {
     return r.top + window.scrollY;
   };
 
-  /* --- PRE-FLIGHT : si on recharge hors de l'intro → pas de lock --- */
+  // PRE-FLIGHT : pas de lock si reload hors de l’intro
   useLayoutEffect(() => {
     const el = sectionRef.current;
     let needsUnlock = false;
-
-    if (!el) {
-      needsUnlock = true;
-    } else {
+    if (!el) needsUnlock = true;
+    else {
       const top = getSectionTop();
       const h = el.offsetHeight || window.innerHeight;
       const yTop = window.scrollY;
       const yBot = yTop + window.innerHeight;
-      const overlaps = yBot > top + 20 && yTop < top + h - 20; // petite marge
+      const overlaps = yBot > top + 20 && yTop < top + h - 20;
       if (!overlaps) needsUnlock = true;
     }
-
     if (needsUnlock) {
-      // ⚠️ décale la mise à jour d'état hors du corps de l'effet
       requestAnimationFrame(() => {
         setLocked(false);
         document.documentElement.style.overflow = "";
         document.body.style.overflow = "";
       });
     }
-    // deps vides : on ne fait ce check qu'au mount
   }, []);
 
-
-  /* --- Overflow manager (séparé) --- */
+  // Overflow manager
   useEffect(() => {
     document.documentElement.style.overflow = locked ? "hidden" : "";
     document.body.style.overflow = locked ? "hidden" : "";
@@ -463,7 +549,7 @@ export default function GlobeIntro() {
     return () => window.removeEventListener("resize", computeAfterTop);
   }, []);
 
-  // re-entry quand on remonte très haut
+  // re-entry
   useEffect(() => {
     const onScroll = () => {
       if (locked || snappingRef.current) return;
@@ -480,7 +566,7 @@ export default function GlobeIntro() {
     return () => window.removeEventListener("scroll", onScroll);
   }, [locked]);
 
-  // contrôle d’entrée (events) — actif seulement quand locked=true
+  // contrôles quand locked = true
   useEffect(() => {
     if (!locked) return;
 
