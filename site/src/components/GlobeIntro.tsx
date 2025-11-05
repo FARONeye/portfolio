@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState, useCallback } from "react";
 import * as THREE from "three";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Line, Points, PointMaterial } from "@react-three/drei";
@@ -314,7 +314,6 @@ function HeadlineBlock({ h, p, isSmall }: { h: Headline; p: number; isSmall: boo
   const enter = easeOut(a);
   const reveal = clamp01((p - h.window[0]) / Math.max(1e-6, h.window[1] - h.window[0])); // 0..1
 
-  // On phones, always center the anchor so long lines wrap nicely.
   const anchorSide: "left" | "right" | "center" = isSmall ? "center" : h.side;
   const fromX = anchorSide === "left" ? -60 : anchorSide === "right" ? 60 : 0;
 
@@ -471,14 +470,20 @@ function GlobeScene({ progress, isSmall }: { progress: number; isSmall: boolean 
       const targetRy = spinT * Math.PI * 2 + mouseTarget.current.x * 0.2;
       root.current.rotation.x = THREE.MathUtils.lerp(root.current.rotation.x, targetRx, lerp);
       root.current.rotation.y = THREE.MathUtils.lerp(root.current.rotation.y, targetRy, lerp);
-      root.current.scale.setScalar(GLOBE_BASE_SCALE * (1 + Math.sin(t * 0.9) * 0.015));
+
+      // *** mobile globe size ***
+      const mobileMult = 0.72; // planète plus petite sur téléphone
+      const baseScale = isSmall ? GLOBE_BASE_SCALE * mobileMult : GLOBE_BASE_SCALE;
+      root.current.scale.setScalar(baseScale * (1 + Math.sin(t * 0.9) * 0.015));
     }
     const drift = 1 - zoomT;
     if (coarseGridRef.current) coarseGridRef.current.rotation.y += dt * 0.03 * drift;
     if (fineGridRef.current)  fineGridRef.current.rotation.y -= dt * 0.05 * drift;
     if (ringsRef.current)     ringsRef.current.rotation.z += dt * 0.04 * drift;
 
-    const baseDist = 3.8, closeDist = 1.8;
+    // *** mobile camera travel ***
+    const baseDist = isSmall ? 4.8 : 3.8;
+    const closeDist = isSmall ? 2.35 : 1.8;
     const dist = THREE.MathUtils.lerp(baseDist, closeDist, zoomT);
     const targetPos = france.clone().normalize().multiplyScalar(dist);
     camera.position.lerp(targetPos, 1 - Math.pow(0.00008, dt));
@@ -550,7 +555,7 @@ function StickyCanvas({ progress, isSmall }: { progress: number; isSmall: boolea
       <Canvas
         dpr={isSmall ? [1, 1.3] : [1, 1.8]}
         gl={{ antialias: true, alpha: true }}
-        camera={{ position: [0, 0, 3.8], fov: 45 }}
+        camera={{ position: [0, 0, isSmall ? 4.6 : 3.8], fov: isSmall ? 55 : 45 }}
       >
         <Suspense fallback={null}>
           <BackgroundStars count={isSmall ? 2400 : 3800} radius={90} jitter={28} />
@@ -589,7 +594,7 @@ export default function GlobeIntro() {
   };
 
   // force snap to top (mobile-friendly)
-  const forceSnapToIntro = () => {
+  const forceSnapToIntro = useCallback(() => {
     const top = getSectionTop();
     let tries = 0;
     const snap = () => {
@@ -600,7 +605,7 @@ export default function GlobeIntro() {
       }
     };
     requestAnimationFrame(() => requestAnimationFrame(snap));
-  };
+  }, []);
 
   // Always return to top on refresh (desktop + mobile/BFCache)
   useLayoutEffect(() => {
@@ -614,7 +619,7 @@ export default function GlobeIntro() {
     return () => {
       window.removeEventListener("pageshow", onPageShow);
     };
-  }, []);
+  }, [forceSnapToIntro]);
 
   // Overflow manager
   useEffect(() => {
@@ -641,7 +646,7 @@ export default function GlobeIntro() {
     const onRotate = () => setTimeout(forceSnapToIntro, 60);
     window.addEventListener("orientationchange", onRotate);
     return () => window.removeEventListener("orientationchange", onRotate);
-  }, []);
+  }, [forceSnapToIntro]);
 
   // re-entry
   useEffect(() => {
