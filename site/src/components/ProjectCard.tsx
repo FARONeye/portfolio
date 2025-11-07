@@ -1,21 +1,28 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
-import { motion, useScroll, useSpring, useTransform } from "framer-motion";
-import { useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
 
-type Props = {
+import { motion, useScroll, useSpring, useTransform } from "framer-motion";
+import { useRef, useState, MouseEvent as ReactMouseEvent } from "react";
+
+export type ProjectCardProps = {
   title: string;
   subtitle: string;
   imageUrl: string;
   href: string;
   index: number;
+  onOpen?: (index: number) => void;
 };
 
-export default function ProjectCard({ title, subtitle, imageUrl, href, index }: Props) {
-  // 👉 ref sur un <a>, pas une <div>
-  const ref = useRef<HTMLAnchorElement>(null);
+export default function ProjectCard({
+  title,
+  subtitle,
+  imageUrl,
+  href,
+  index,
+  onOpen,
+}: ProjectCardProps) {
+  const ref = useRef<HTMLDivElement>(null);
 
-  // Scroll reveal réversible
+  // Scroll reveal
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start 90%", "end 30%"] });
   const p = useSpring(scrollYProgress, { stiffness: 120, damping: 20, mass: 0.3 });
 
@@ -23,36 +30,31 @@ export default function ProjectCard({ title, subtitle, imageUrl, href, index }: 
   const y = useTransform(p, [0, 1], [40, 0]);
   const scale = useTransform(p, [0, 1], [0.96, 1]);
   const skewY = useTransform(p, [0, 0.5, 1], [5, 1.5, 0]);
-  const clip = useTransform(p, [0, 1], [
-    "polygon(0 100%, 100% 100%, 100% 100%, 0 100%)",
-    "polygon(0 0%, 100% 0%, 100% 100%, 0 100%)",
-  ]);
 
-  // Tilt 3D au hover
+  // Hover tilt
   const [rx, setRx] = useState(0);
   const [ry, setRy] = useState(0);
   const [hovered, setHovered] = useState(false);
 
-  function handleMove(e: ReactMouseEvent<HTMLAnchorElement>) {
+  function handleMove(e: ReactMouseEvent<HTMLDivElement>) {
     const rect = e.currentTarget.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width;
-    const y = (e.clientY - rect.top) / rect.height;
+    const nx = (e.clientX - rect.left) / rect.width;
+    const ny = (e.clientY - rect.top) / rect.height;
     const max = 6;
-    setRy((x - 0.5) * max * 2);
-    setRx(-(y - 0.5) * max * 2);
+    setRy((nx - 0.5) * max * 2);
+    setRx(-(ny - 0.5) * max * 2);
   }
 
   return (
-    <motion.a
+    <motion.div
       ref={ref}
-      href={href}
-      className="group relative h-72 w-full overflow-hidden rounded-3xl border border-white/10 bg-zinc-900/40"
+      layoutId={`card-${index}`}
+      className="group relative h-72 w-full overflow-hidden rounded-3xl border border-white/10 bg-zinc-900/40 cursor-pointer"
       style={{
         opacity,
         y,
         scale,
         skewY,
-        clipPath: clip,
         transformStyle: "preserve-3d",
         rotateX: hovered ? rx : 0,
         rotateY: hovered ? ry : 0,
@@ -61,6 +63,9 @@ export default function ProjectCard({ title, subtitle, imageUrl, href, index }: 
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       transition={{ type: "spring", stiffness: 120, damping: 18, mass: 0.4 }}
+      onClick={() => onOpen?.(index)}
+      aria-label={`${title} — ouvrir`}
+      role="button"
     >
       {/* Fond dégradé */}
       <div
@@ -71,25 +76,31 @@ export default function ProjectCard({ title, subtitle, imageUrl, href, index }: 
         }}
       />
 
-      {/* Logo / visuel projet */}
-      <img
+      {/* Image */}
+      <motion.img
+        layoutId={`image-${index}`}
         src={imageUrl}
         alt={title}
         className="absolute inset-0 m-auto h-40 w-auto object-contain"
+        loading="lazy"
+        decoding="async"
       />
 
-      {/* Overlay & texte */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+      {/* Overlay & textes */}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
       <div className="absolute bottom-6 left-6">
         <div className="text-xs uppercase tracking-widest text-zinc-300/80">
           Projet #{String(index + 1).padStart(2, "0")}
         </div>
         <h3 className="mt-1 text-2xl font-semibold text-white">{title}</h3>
-        <p className="text-sm text-zinc-300">{subtitle}</p>
+        <p className="text-sm text-zinc-300 line-clamp-2">{subtitle}</p>
       </div>
 
-      {/* Liseré au hover */}
+      {/* Liseré hover */}
       <div className="absolute inset-0 rounded-3xl ring-1 ring-transparent transition-all duration-300 group-hover:ring-[#9B1C31]/50" />
-    </motion.a>
+
+      {/* Data access (pour le focus view) */}
+      <data value={href} className="hidden" />
+    </motion.div>
   );
 }

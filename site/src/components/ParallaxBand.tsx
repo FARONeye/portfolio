@@ -10,7 +10,7 @@ export default function ParallaxBand() {
       <motion.div style={{ x }} className="flex gap-10 whitespace-nowrap text-xl md:text-2xl">
         {Array.from({length:5}).map((_,i)=>(
           <span key={i} className="bg-gradient-to-r from-[#9B1C31] via-[#6C1E80] to-white bg-clip-text text-transparent">
-            • Webflow of Art • Creative Coding • Motion • Parallax • Micro-Interactions
+            • Student •  Dev • French • Bachelor • 21 yo
           </span>
         ))}
       </motion.div>

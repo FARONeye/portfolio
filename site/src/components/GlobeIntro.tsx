@@ -418,9 +418,9 @@ function HeadlineBlock({ h, p, isSmall }: { h: Headline; p: number; isSmall: boo
 function HeadlineOverlay({ progress, isSmall }: { progress: number; isSmall: boolean }) {
   const p = progress / 100;
   const headlines: Headline[] = [
-    { text: "BONJOUR, JE SUIS MATHIS.", side: "left",   y: "16%", window: [0.06, 0.32], accent: true },
-    { text: "JE RÉINVENTE L’INTERFACE PAR LE CODE.",   side: "center", y: "46%", window: [0.32, 0.64], accent: false },
-    { text: "FAIS DÉFILER POUR DÉCOLLER.",             side: "right",  y: "76%", window: [0.64, 0.92], accent: true },
+    { text: "HELLO, I AM MATHIS TRUONG", side: "left",   y: "16%", window: [0.06, 0.32], accent: true },
+    { text: "WELCOME TO MY WEBSITE",   side: "center", y: "46%", window: [0.32, 0.64], accent: false },
+    { text: "KEEP SCROLLING TO CONTINUE",             side: "right",  y: "76%", window: [0.64, 0.92], accent: true },
   ];
 
   return (
