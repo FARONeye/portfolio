@@ -1,6 +1,5 @@
 "use client";
 import { useState, useEffect } from "react";
-import ScrollReveal from "./ScrollReveal";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Gamepad2, Plane, Music, Zap, ScanFace, Cpu, Brain, BatteryCharging, Globe, Smile, Layers, Fingerprint, Target, ChevronDown } from "lucide-react"; 
 import ChibiModel from "./ChibiModel";
@@ -114,16 +113,21 @@ export default function AboutSection() {
     return () => clearTimeout(timer);
   }, [isExpanded]);
 
-  // --- NOUVEAU : BLOQUER LE SCROLL DU BODY QUAND LE MODAL EST OUVERT ---
+  // --- SCROLL LOCK RENFORCÉ (HTML + BODY) ---
   useEffect(() => {
     if (isExpanded) {
-      document.body.style.overflow = 'hidden';
+      // Bloque tout : html et body
+      document.documentElement.style.overflow = "hidden";
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = ''; // ou 'auto'
+      // Libère tout
+      document.documentElement.style.overflow = "";
+      document.body.style.overflow = "";
     }
-    // Nettoyage au démontage
+    // Nettoyage de sécurité
     return () => {
-      document.body.style.overflow = '';
+      document.documentElement.style.overflow = "";
+      document.body.style.overflow = "";
     };
   }, [isExpanded]);
 
@@ -134,27 +138,34 @@ export default function AboutSection() {
 
       <div className="mx-auto max-w-6xl px-6 grid gap-16 md:grid-cols-2 items-center">
         {/* Intro Texte */}
-        <ScrollReveal from={{ opacity: 0, x: -50 }} to={{ opacity: 1, x: 0 }}>
-          <div className="relative z-10">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight">
-              <span className="bg-linear-to-r from-[#9B1C31] via-[#6C1E80] to-white bg-clip-text text-transparent">
-                Select Your Character
-              </span>
-            </h2>
-            <div className="space-y-6 text-lg text-[#b3b3b3] leading-relaxed text-pretty">
-              <p>
-                Hello, I'm <span className="text-white font-medium">Mathis</span>. 
-                Life is an open-world game, and I'm grinding every day to level up my skills.
-              </p>
-              <div className="pt-4">
-                 <button onClick={() => setIsExpanded(true)} className="group flex items-center gap-3 px-6 py-3 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 hover:border-[#6C1E80]/50 transition-all active:scale-95">
-                    <span className="text-white font-medium">Open Inventory</span>
-                    <span className="group-hover:translate-x-1 transition-transform">→</span>
-                 </button>
-              </div>
+        <motion.div 
+          initial={{ opacity: 0, x: -30 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="relative z-10"
+        >
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight">
+            <span className="bg-linear-to-r from-[#9B1C31] via-[#6C1E80] to-white bg-clip-text text-transparent">
+              Select Your Character
+            </span>
+          </h2>
+          <div className="space-y-6 text-lg text-[#b3b3b3] leading-relaxed text-pretty">
+            <p>
+              Hello, I'm <span className="text-white font-medium">Mathis</span>. 
+              Life is an open-world game, and I'm grinding every day to level up my skills.
+            </p>
+            <div className="pt-4">
+               <button 
+                  onClick={() => setIsExpanded(true)}
+                  className="group flex items-center gap-3 px-6 py-3 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 hover:border-[#6C1E80]/50 transition-all active:scale-95"
+               >
+                  <span className="text-white font-medium">Open Inventory</span>
+                  <span className="group-hover:translate-x-1 transition-transform">→</span>
+               </button>
             </div>
           </div>
-        </ScrollReveal>
+        </motion.div>
 
         {/* Preview Card */}
         <div className="relative w-full h-[500px] flex items-center justify-center">
@@ -164,8 +175,14 @@ export default function AboutSection() {
                 onClick={() => setIsExpanded(true)}
                 className="relative w-[300px] h-[450px] bg-zinc-900 border border-white/10 rounded-3xl overflow-hidden cursor-pointer group shadow-2xl"
                 whileHover={{ scale: 1.02, y: -5 }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
               >
-                <img src="/portrait2.webp" alt="Preview" className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                <img 
+                    src="/portrait2.webp" 
+                    alt="Preview" 
+                    className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                />
+                
                 <div className="absolute top-4 left-4 right-4 flex justify-between items-center z-10">
                     <div className="flex flex-col">
                          <span className="text-xs text-zinc-500 font-mono">CLASS</span>
@@ -173,6 +190,7 @@ export default function AboutSection() {
                     </div>
                     <div className="px-2 py-1 bg-[#9B1C31] rounded text-xs font-bold text-white">LVL {stats.level}</div>
                 </div>
+
                 <div className="absolute bottom-0 inset-x-0 h-32 bg-linear-to-t from-black via-black/80 to-transparent flex items-end p-6">
                     <p className="text-white font-mono text-sm animate-pulse">Click to inspect gear...</p>
                 </div>
@@ -181,7 +199,7 @@ export default function AboutSection() {
         </div>
       </div>
 
-      {/* --- LE MODAL RPG (RESPONSIVE FIXE) --- */}
+      {/* --- LE MODAL RPG (RESPONSIVE) --- */}
       <AnimatePresence>
         {isExpanded && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-0 md:p-6 overflow-hidden">
@@ -197,15 +215,23 @@ export default function AboutSection() {
             <motion.div
               layoutId="character-sheet"
               transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              // RESPONSIVE : Flex-col sur mobile (empilé), Flex-row sur desktop (côte à côte)
+              // RESPONSIVE : Flex-col sur mobile pour empiler, Flex-row sur desktop
               className="relative w-full h-[100dvh] md:max-w-7xl md:h-auto md:max-h-[90vh] bg-[url('/grid-pattern.svg')] bg-zinc-950 border-white/10 md:border md:rounded-2xl overflow-hidden shadow-2xl flex flex-col md:flex-row"
             >
               
+              {/* --- BOUTON FERMER GLOBAL --- */}
+              <button 
+                onClick={() => setIsExpanded(false)} 
+                className="absolute top-4 right-4 z-50 p-2 bg-black/50 hover:bg-white/20 text-white rounded-full transition-all border border-white/10 backdrop-blur-md group shadow-lg"
+              >
+                <X size={24} className="group-hover:rotate-90 transition-transform duration-300"/>
+              </button>
+
               {/* --- 1. ZONE 3D CENTRALE (PERSONNAGE) --- */}
               {/* MOBILE: order-1 (HAUT) | DESKTOP: md:order-2 (CENTRE) */}
               <div className="relative w-full h-[40vh] md:h-auto md:flex-1 order-1 md:order-2 flex items-center justify-center bg-gradient-to-b from-transparent to-black/40 shrink-0">
                  
-                 {/* Lignes de connexion (Cachées sur mobile) */}
+                 {/* Lignes de connexion */}
                  {isModelReady && (
                    <svg className="absolute inset-0 w-full h-full z-0 pointer-events-none hidden md:block" xmlns="http://www.w3.org/2000/svg">
                       <defs>
@@ -228,6 +254,7 @@ export default function AboutSection() {
                    </svg>
                  )}
 
+                 {/* Container 3D */}
                  <div className="absolute inset-0 z-10 flex items-center justify-center">
                     {isModelReady ? (
                         <motion.div className="w-full h-full" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.8 }}>
@@ -239,11 +266,12 @@ export default function AboutSection() {
                                 <div className="absolute inset-0 border-4 border-white/10 rounded-full"></div>
                                 <div className="absolute inset-0 border-4 border-t-[#9B1C31] rounded-full animate-spin"></div>
                             </div>
-                            <p className="font-mono text-[10px] md:text-xs tracking-widest text-zinc-500 animate-pulse">LOADING ASSETS...</p>
+                            <p className="font-mono text-[10px] md:text-xs tracking-widest text-zinc-500 animate-pulse">LOADING SYSTEM...</p>
                         </div>
                     )}
                  </div>
 
+                 {/* Boutons Items */}
                  {isModelReady && (
                      <div className="absolute inset-0 z-20 pointer-events-none">
                         {GEAR.map((item, i) => (
@@ -262,17 +290,9 @@ export default function AboutSection() {
                         ))}
                      </div>
                  )}
-                 
-                 {/* Bouton Fermer Principal (Mobile) */}
-                 <button 
-                    onClick={() => setIsExpanded(false)} 
-                    className="md:hidden absolute top-4 right-4 p-2 bg-black/60 backdrop-blur rounded-full text-white z-50 border border-white/10 active:scale-90 transition-transform"
-                 >
-                    <X size={24}/>
-                 </button>
               </div>
 
-              {/* --- 2. GAUCHE : STATS & ATTRIBUTS --- */}
+              {/* --- 2. GAUCHE : STATS (PANNEAU INFO) --- */}
               {/* MOBILE: order-2 (BAS) | DESKTOP: md:order-1 (GAUCHE) */}
               <div className="w-full md:w-1/4 bg-[#0F0F11]/95 backdrop-blur-md border-t md:border-t-0 md:border-r border-white/10 p-4 md:p-6 flex flex-col gap-4 md:gap-6 order-2 md:order-1 z-20 shadow-2xl overflow-y-auto custom-scrollbar flex-1 md:flex-none">
                  
@@ -340,19 +360,14 @@ export default function AboutSection() {
               {/* --- 3. DROITE : DÉTAILS ITEM (MOBILE: BOTTOM SHEET / DESKTOP: DROITE) --- */}
               {/* MOBILE: absolute bottom | DESKTOP: md:order-3 (DROITE) */}
               <div 
-                className={`w-full md:w-1/4 bg-[#0F0F11] md:bg-[#0F0F11]/95 backdrop-blur-md border-t md:border-t-0 md:border-l border-white/10 p-6 flex flex-col z-40 shadow-2xl absolute inset-x-0 bottom-0 top-auto h-[60vh] md:h-auto md:inset-auto md:relative transition-transform duration-300 ease-out rounded-t-3xl md:rounded-none order-3 md:order-3 ${selectedGear ? 'translate-y-0' : 'translate-y-[110%] md:translate-y-0'} md:transform-none`}
+                className={`w-full md:w-1/4 bg-[#0F0F11] md:bg-[#0F0F11]/95 backdrop-blur-md border-t md:border-t-0 md:border-l border-white/10 p-6 flex flex-col z-40 shadow-2xl absolute inset-x-0 bottom-0 top-auto h-[60vh] md:h-auto md:inset-auto md:relative transition-transform duration-300 ease-out rounded-t-3xl md:rounded-none order-3 md:order-3 ${selectedGear ? 'translate-y-0' : 'translate-y-[110%] md:translate-y-0'} md:transform-none overflow-y-auto custom-scrollbar`}
               >
                  {/* Barre de drag pour mobile */}
-                 <div className="w-12 h-1 bg-zinc-700 rounded-full mx-auto mb-6 md:hidden"></div>
+                 <div className="w-12 h-1 bg-zinc-700 rounded-full mx-auto mb-6 md:hidden shrink-0"></div>
 
                  {/* Bouton pour fermer uniquement le tiroir sur Mobile */}
                  <button onClick={() => setSelectedGear(null)} className="md:hidden absolute top-4 right-4 p-2 bg-zinc-800/50 rounded-full text-zinc-400 hover:text-white">
                     <ChevronDown size={20} />
-                 </button>
-
-                 {/* Bouton pour fermer tout sur Desktop */}
-                 <button onClick={() => setIsExpanded(false)} className="hidden md:block absolute top-4 right-4 p-2 hover:bg-white/10 rounded-full text-zinc-400 hover:text-white transition-colors">
-                    <X size={20} />
                  </button>
 
                  <div className="flex-1 flex flex-col">
