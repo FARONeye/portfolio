@@ -356,13 +356,14 @@ export default function AboutSection() {
   );
 }
 
+// CORRECTION ICI : Ajout de text-right sur le composant helper
 function AttributeRow({ icon, label, value }: { icon: any, label: string, value: string }) {
     return (
         <div className="flex items-center justify-between group">
             <div className="flex items-center gap-3 text-zinc-400">
                 {icon} <span>{label}</span>
             </div>
-            <span className="text-white text-sm font-medium">{value}</span>
+            <span className="text-white text-sm font-medium text-right">{value}</span>
         </div>
     );
 }
