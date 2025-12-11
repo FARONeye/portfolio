@@ -7,7 +7,7 @@ export default function Navbar() {
       aria-label="Navigation principale"
       // Un seul markup pour mobile & desktop (CSS responsive uniquement)
       className={[
-        "fixed z-[90] pointer-events-auto flex justify-center",
+        "fixed z-90 pointer-events-auto flex justify-center",
         // position mobile (barre en bas avec safe-area)
         "inset-x-0 bottom-[calc(env(safe-area-inset-bottom,0px)+12px)]",
         // override desktop : barre centrée en haut
@@ -26,9 +26,9 @@ export default function Navbar() {
         ].join(" ")}
       >
         <ul className="flex justify-between md:justify-center gap-6 text-sm text-zinc-300">
-          <li><a href="#about"     className="hover:text-white">À propos</a></li>
-          <li><a href="#projects"  className="hover:text-white">Projets</a></li>
-          <li><a href="#skills"    className="hover:text-white">Compétences</a></li>
+          <li><a href="#about"     className="hover:text-white">About Me</a></li>
+          <li><a href="#projects"  className="hover:text-white">Projects</a></li>
+          <li><a href="#skills"    className="hover:text-white">Skills</a></li>
           <li><a href="#contact"   className="hover:text-white">Contact</a></li>
         </ul>
       </motion.div>
