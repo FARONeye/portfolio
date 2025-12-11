@@ -2,41 +2,59 @@
 import { useState, useEffect } from "react";
 import ScrollReveal from "./ScrollReveal";
 import { motion, AnimatePresence } from "framer-motion";
-// CORRECTION ICI : Ajout de "Cpu" dans la liste
-import { X, Gamepad2, Plane, Code2, Zap, Glasses, Cpu } from "lucide-react"; 
+import { X, Gamepad2, Plane, Music, Zap, ScanFace, Cpu, Brain, BatteryCharging, Globe, Smile, Layers, Fingerprint, Target } from "lucide-react"; 
 import ChibiModel from "./ChibiModel";
 
-// --- DONNÉES ---
+// --- CALCUL DYNAMIQUE AGE & XP ---
+const BIRTH_DATE = new Date("2004-06-24");
+
+function getProfileStats() {
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  let age = currentYear - BIRTH_DATE.getFullYear();
+  const hasHadBirthday = (now.getMonth() > BIRTH_DATE.getMonth()) || 
+                         (now.getMonth() === BIRTH_DATE.getMonth() && now.getDate() >= BIRTH_DATE.getDate());
+  if (!hasHadBirthday) age--;
+
+  const lastBirthday = new Date(hasHadBirthday ? currentYear : currentYear - 1, BIRTH_DATE.getMonth(), BIRTH_DATE.getDate());
+  const nextBirthday = new Date(hasHadBirthday ? currentYear + 1 : currentYear, BIRTH_DATE.getMonth(), BIRTH_DATE.getDate());
+  
+  const totalDuration = nextBirthday.getTime() - lastBirthday.getTime();
+  const elapsed = now.getTime() - lastBirthday.getTime();
+  const xpPercent = Math.min(100, Math.max(0, Math.round((elapsed / totalDuration) * 100)));
+
+  return { level: age, xp: xpPercent };
+}
+
+// --- DONNÉES ITEMS ---
 const GEAR = [
   {
     id: "head",
     slot: "HEAD",
-    name: "Visionary Lens MK-II",
+    name: "Neural Interface Visor",
     rarity: "legendary",
-    icon: <Glasses size={24} />,
+    icon: <ScanFace size={24} />,
     stats: [
-        { label: "Creativity", value: "+100" },
-        { label: "Focus", value: "Infinite" }
+        { label: "Vision", value: "Artistique" },
+        { label: "Focus", value: "Deep Work" }
     ],
-    desc: "Allows the user to capture moments in time and see the world through artistic angles.",
-    realHobby: "Photography & Filmmaking",
+    desc: "A direct link to digital inspiration, filtering noise and enhancing creative vision.",
+    realHobby: "Tech Watch & AI Exploration",
     position: "top-4 left-4 md:top-20 md:left-20", 
-    lineOrigin: "bottom-right",
   },
   {
     id: "r_hand",
     slot: "MAIN HAND",
-    name: "Mechanical Keyblade",
+    name: "Sonic Wave Amplifier",
     rarity: "epic",
-    icon: <Code2 size={24} />,
+    icon: <Music size={24} />,
     stats: [
-        { label: "Typing Speed", value: "110 WPM" },
-        { label: "Bugs Fixed", value: "99%" }
+        { label: "Genre", value: "Synthwave" },
+        { label: "Mood", value: "Focus Boost" }
     ],
-    desc: "A powerful tool capable of weaving complex logic into digital reality.",
-    realHobby: "Fullstack Development",
-    position: "top-1/2 left-4 md:top-1/2 md:left-10",
-    lineOrigin: "right",
+    desc: "Harmonizes frequencies to create immersive auditory experiences while coding.",
+    realHobby: "Music Production / Audiophile",
+    position: "top-1/2 left-4 md:top-1/2 md:left-10", 
   },
   {
     id: "l_hand",
@@ -45,13 +63,12 @@ const GEAR = [
     rarity: "rare",
     icon: <Gamepad2 size={24} />,
     stats: [
-        { label: "Reflexes", value: "0.15ms" },
-        { label: "Rank", value: "Diamond" }
+        { label: "Style", value: "Strategic" },
+        { label: "Rank", value: "Top 1%" }
     ],
-    desc: "Enhances strategic thinking and hand-eye coordination in virtual battlegrounds.",
+    desc: "Enhances strategic thinking and reflex coordination in competitive environments.",
     realHobby: "Competitive Gaming",
-    position: "top-1/2 right-4 md:top-1/2 md:right-10",
-    lineOrigin: "left",
+    position: "top-1/2 right-4 md:top-1/2 md:right-10", 
   },
   {
     id: "feet",
@@ -60,13 +77,12 @@ const GEAR = [
     rarity: "common",
     icon: <Plane size={24} />,
     stats: [
-        { label: "Stamina", value: "+50" },
-        { label: "Culture", value: "MAX" }
+        { label: "Visited", value: "12 Countries" },
+        { label: "Spirit", value: "Nomad" }
     ],
-    desc: "Grants the ability to traverse borders and absorb knowledge from new lands.",
+    desc: "Grants the ability to traverse borders and absorb knowledge from new cultures.",
     realHobby: "Travel & Exploration",
-    position: "bottom-10 right-10 md:bottom-20 md:right-20",
-    lineOrigin: "top-left",
+    position: "bottom-10 right-10 md:bottom-20 md:right-20", 
   }
 ];
 
@@ -82,14 +98,14 @@ const getRarityColor = (rarity: string) => {
 export default function AboutSection() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedGear, setSelectedGear] = useState<typeof GEAR[0] | null>(null);
-  
-  // État pour gérer le chargement différé de la 3D
   const [isModelReady, setIsModelReady] = useState(false);
+  const [stats, setStats] = useState({ level: 21, xp: 0 });
+
+  useEffect(() => { setStats(getProfileStats()); }, []);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (isExpanded) {
-      // On attend 600ms pour être sûr que la div est stable
       timer = setTimeout(() => setIsModelReady(true), 600);
     } else {
       setIsModelReady(false);
@@ -104,8 +120,7 @@ export default function AboutSection() {
       <div className="absolute top-1/4 left-0 w-96 h-96 bg-[#9B1C31]/20 rounded-full blur-[128px] pointer-events-none" />
 
       <div className="mx-auto max-w-6xl px-6 grid gap-16 md:grid-cols-2 items-center">
-        
-        {/* --- Colonne Gauche --- */}
+        {/* Intro Texte */}
         <ScrollReveal from={{ opacity: 0, x: -50 }} to={{ opacity: 1, x: 0 }}>
           <div className="relative z-10">
             <h2 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight">
@@ -113,17 +128,13 @@ export default function AboutSection() {
                 Select Your Character
               </span>
             </h2>
-            
             <div className="space-y-6 text-lg text-[#b3b3b3] leading-relaxed text-pretty">
               <p>
                 Hello, I'm <span className="text-white font-medium">Mathis</span>. 
                 Life is an open-world game, and I'm grinding every day to level up my skills.
               </p>
               <div className="pt-4">
-                 <button 
-                    onClick={() => setIsExpanded(true)}
-                    className="group flex items-center gap-3 px-6 py-3 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 hover:border-[#6C1E80]/50 transition-all active:scale-95"
-                 >
+                 <button onClick={() => setIsExpanded(true)} className="group flex items-center gap-3 px-6 py-3 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 hover:border-[#6C1E80]/50 transition-all active:scale-95">
                     <span className="text-white font-medium">Open Inventory</span>
                     <span className="group-hover:translate-x-1 transition-transform">→</span>
                  </button>
@@ -132,7 +143,7 @@ export default function AboutSection() {
           </div>
         </ScrollReveal>
 
-        {/* --- Colonne Droite (Preview) --- */}
+        {/* Preview Card */}
         <div className="relative w-full h-[500px] flex items-center justify-center">
             {!isExpanded && (
               <motion.div
@@ -141,11 +152,14 @@ export default function AboutSection() {
                 className="relative w-[300px] h-[450px] bg-zinc-900 border border-white/10 rounded-3xl overflow-hidden cursor-pointer group shadow-2xl"
                 whileHover={{ scale: 1.02, y: -5 }}
               >
-                <img 
-                    src="/portrait2.webp" 
-                    alt="Character Preview" 
-                    className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
-                />
+                <img src="/portrait2.webp" alt="Preview" className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute top-4 left-4 right-4 flex justify-between items-center z-10">
+                    <div className="flex flex-col">
+                         <span className="text-xs text-zinc-500 font-mono">CLASS</span>
+                         <span className="text-sm font-bold text-white tracking-widest">CREATIVE_DEV</span>
+                    </div>
+                    <div className="px-2 py-1 bg-[#9B1C31] rounded text-xs font-bold text-white">LVL {stats.level}</div>
+                </div>
                 <div className="absolute bottom-0 inset-x-0 h-32 bg-linear-to-t from-black via-black/80 to-transparent flex items-end p-6">
                     <p className="text-white font-mono text-sm animate-pulse">Click to inspect gear...</p>
                 </div>
@@ -158,12 +172,7 @@ export default function AboutSection() {
       <AnimatePresence>
         {isExpanded && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 md:p-6 overflow-hidden">
-            
-            <motion.div
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              onClick={() => setIsExpanded(false)}
-              className="absolute inset-0 bg-black/90 backdrop-blur-xl"
-            />
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsExpanded(false)} className="absolute inset-0 bg-black/90 backdrop-blur-xl" />
 
             <motion.div
               layoutId="character-sheet"
@@ -174,14 +183,32 @@ export default function AboutSection() {
               {/* --- 1. ZONE 3D CENTRALE --- */}
               <div className="relative flex-1 order-1 md:order-2 flex items-center justify-center h-[50vh] md:h-auto bg-gradient-to-b from-transparent to-black/40">
                  
-                 <div className="absolute inset-0 z-0 flex items-center justify-center">
+                 {/* Lignes de connexion visibles */}
+                 {isModelReady && (
+                   <svg className="absolute inset-0 w-full h-full z-0 pointer-events-none hidden md:block" xmlns="http://www.w3.org/2000/svg">
+                      <defs>
+                          <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                              <stop offset="0%" stopColor="rgba(255, 255, 255, 0)" />
+                              <stop offset="50%" stopColor="rgba(155, 28, 49, 0.6)" />
+                              <stop offset="100%" stopColor="rgba(255, 255, 255, 0)" />
+                          </linearGradient>
+                      </defs>
+                      <g stroke="url(#lineGradient)" strokeWidth="2" fill="none">
+                          <path d="M 18% 18% L 48% 30%" /> 
+                          <path d="M 18% 50% L 42% 50%" />
+                          <path d="M 82% 50% L 58% 50%" />
+                          <path d="M 82% 80% L 55% 72%" />
+                      </g>
+                      <circle cx="48%" cy="30%" r="3" fill="#9B1C31" />
+                      <circle cx="42%" cy="50%" r="3" fill="#9B1C31" />
+                      <circle cx="58%" cy="50%" r="3" fill="#9B1C31" />
+                      <circle cx="55%" cy="72%" r="3" fill="#9B1C31" />
+                   </svg>
+                 )}
+
+                 <div className="absolute inset-0 z-10 flex items-center justify-center">
                     {isModelReady ? (
-                        <motion.div 
-                            className="w-full h-full"
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 0.8 }}
-                        >
+                        <motion.div className="w-full h-full" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.8 }}>
                             <ChibiModel />
                         </motion.div>
                     ) : (
@@ -190,15 +217,13 @@ export default function AboutSection() {
                                 <div className="absolute inset-0 border-4 border-white/10 rounded-full"></div>
                                 <div className="absolute inset-0 border-4 border-t-[#9B1C31] rounded-full animate-spin"></div>
                             </div>
-                            <p className="font-mono text-xs tracking-widest text-zinc-500 animate-pulse">
-                                INITIALIZING SYSTEM...
-                            </p>
+                            <p className="font-mono text-xs tracking-widest text-zinc-500 animate-pulse">LOADING ASSETS...</p>
                         </div>
                     )}
                  </div>
 
                  {isModelReady && (
-                     <div className="absolute inset-0 z-10 pointer-events-none">
+                     <div className="absolute inset-0 z-20 pointer-events-none">
                         {GEAR.map((item, i) => (
                             <motion.button
                                 key={item.id}
@@ -217,63 +242,96 @@ export default function AboutSection() {
                  )}
               </div>
 
-              {/* --- 2. GAUCHE : STATS --- */}
-              <div className="w-full md:w-1/4 bg-[#0F0F11]/90 backdrop-blur-md border-r border-white/10 p-6 flex flex-col gap-6 order-2 md:order-1 z-20 shadow-2xl">
+              {/* --- 2. GAUCHE : STATS & ATTRIBUTS --- */}
+              <div className="w-full md:w-1/4 bg-[#0F0F11]/90 backdrop-blur-md border-r border-white/10 p-6 flex flex-col gap-6 order-2 md:order-1 z-20 shadow-2xl overflow-y-auto custom-scrollbar">
                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-zinc-800 rounded-full overflow-hidden border border-white/20">
-                        <img src="/portrait2.webp" className="w-full h-full object-cover" alt="Profile" />
+                    <div className="w-16 h-16 bg-zinc-800 rounded-full overflow-hidden border-2 border-white/10 p-1">
+                        <img src="/portrait2.webp" className="w-full h-full object-cover rounded-full" alt="Profile" />
                     </div>
                     <div>
                         <h3 className="text-white font-bold text-lg">Mathis Truong</h3>
-                        <div className="flex items-center gap-2">
-                            <div className="h-2 w-20 bg-zinc-800 rounded-full overflow-hidden">
-                                <div className="h-full w-[80%] bg-linear-to-r from-[#9B1C31] to-[#6C1E80]" />
+                        {/* XP BAR */}
+                        <div className="flex flex-col gap-1 w-full">
+                             <div className="flex justify-between text-[10px] text-zinc-400 font-mono tracking-wider">
+                                 <span>LVL {stats.level}</span>
+                                 <span>{stats.xp}% TO LVL {stats.level + 1}</span>
+                             </div>
+                             <div className="h-1.5 w-32 bg-zinc-800 rounded-full overflow-hidden">
+                                <div className="h-full bg-linear-to-r from-[#9B1C31] to-[#6C1E80]" style={{ width: `${stats.xp}%` }} />
                             </div>
-                            <span className="text-xs text-zinc-500">XP 80%</span>
                         </div>
                     </div>
                  </div>
 
-                 <div className="space-y-4 bg-white/5 p-4 rounded-xl border border-white/5">
-                    <div className="flex justify-between text-sm text-zinc-400"><span>STR (Coding)</span> <span className="text-white font-mono">18</span></div>
-                    <div className="flex justify-between text-sm text-zinc-400"><span>DEX (Gaming)</span> <span className="text-white font-mono">14</span></div>
-                    <div className="flex justify-between text-sm text-zinc-400"><span>INT (Learning)</span> <span className="text-white font-mono">20</span></div>
+                 <div className="space-y-4 bg-white/5 p-5 rounded-xl border border-white/5">
+                    <h4 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2 border-b border-white/5 pb-2">Human Attributes</h4>
+                    
+                    <AttributeRow icon={<Brain size={16} className="text-[#9B1C31]" />} label="Mindset" value="Kaizen" />
+                    <AttributeRow icon={<Smile size={16} className="text-yellow-500" />} label="Vibe" value="Chill & Focused" />
+                    
+                    {/* LANGUAGES : Design "Dashboard" Organisé */}
+                    <div className="flex flex-col gap-2 py-1">
+                        <div className="flex items-center gap-3 text-zinc-400 mb-1">
+                            <Globe size={16} className="text-blue-400" /> <span>Languages</span>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-2 pl-7">
+                            {/* Fluent Block */}
+                            <div className="bg-white/5 rounded p-2 flex flex-col items-center border border-white/5 hover:border-white/20 transition-colors">
+                                <span className="text-[9px] text-zinc-500 uppercase tracking-wider mb-1">Fluent</span>
+                                <div className="flex gap-2 items-center">
+                                     <span className="font-bold text-white text-sm">FR</span>
+                                     <span className="text-zinc-600 text-xs">/</span>
+                                     <span className="font-bold text-white text-sm">EN</span>
+                                </div>
+                            </div>
+
+                            {/* Learning Block */}
+                            <div className="bg-white/5 rounded p-2 flex flex-col items-center border border-white/5 border-dashed">
+                                <span className="text-[9px] text-zinc-500 uppercase tracking-wider mb-1">Loading...</span>
+                                <div className="flex flex-wrap justify-center gap-1">
+                                    {['ES','VN','CN','JP','KR'].map(l => (
+                                        <span key={l} className="text-[9px] bg-white/5 px-1 rounded text-zinc-400">{l}</span>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <AttributeRow icon={<BatteryCharging size={16} className="text-green-500" />} label="Fuel" value="Monster Energy" />
+                    
+                    <AttributeRow icon={<Layers size={16} className="text-pink-500" />} label="Archetype" value="Tech Artisan" />
+                    <AttributeRow icon={<Fingerprint size={16} className="text-cyan-400" />} label="Signature" value="Immersive UI" />
+                    <AttributeRow icon={<Target size={16} className="text-orange-500" />} label="Current Focus" value="WebGL Mastery" />
                  </div>
                  
-                 <div className="mt-auto text-xs text-zinc-600 text-center font-mono">
-                    ID: 8493-AD-X • SERVER: EU-WEST
+                 <div className="mt-auto pt-4 border-t border-white/5">
+                     <p className="text-xs text-zinc-500 text-center font-mono">ID: 8493-MT • LOC: EARTH-FR</p>
                  </div>
               </div>
 
-              {/* --- 3. DROITE : DÉTAILS --- */}
+              {/* --- 3. DROITE : DÉTAILS ITEM --- */}
               <div className="w-full md:w-1/4 bg-[#0F0F11]/90 backdrop-blur-md border-l border-white/10 p-6 flex flex-col order-3 z-20 relative shadow-2xl">
-                 <button 
-                    onClick={() => setIsExpanded(false)}
-                    className="absolute top-4 right-4 p-2 hover:bg-white/10 rounded-full text-zinc-400 hover:text-white transition-colors"
-                 >
-                    <X size={20} />
-                 </button>
-
+                 <button onClick={() => setIsExpanded(false)} className="absolute top-4 right-4 p-2 hover:bg-white/10 rounded-full text-zinc-400 hover:text-white transition-colors"><X size={20} /></button>
                  <div className="mt-8 flex-1">
                     {selectedGear ? (
-                        <motion.div 
-                            key={selectedGear.id}
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            className="space-y-6"
-                        >
+                        <motion.div key={selectedGear.id} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
                             <div>
                                 <div className={`text-xs font-bold tracking-widest uppercase mb-2 inline-block px-2 py-0.5 rounded ${selectedGear.rarity === 'legendary' ? 'text-yellow-400 bg-yellow-400/10' : selectedGear.rarity === 'epic' ? 'text-purple-400 bg-purple-400/10' : 'text-blue-400 bg-blue-400/10'}`}>
                                     {selectedGear.rarity} Item
                                 </div>
                                 <h2 className="text-2xl font-bold text-white font-mono leading-tight">{selectedGear.name}</h2>
                             </div>
-
-                            <p className="text-zinc-400 italic text-sm border-l-2 border-zinc-700 pl-3">
-                                "{selectedGear.desc}"
-                            </p>
-
-                            <div className="bg-white/5 p-4 rounded-xl border border-white/5">
+                            <p className="text-zinc-400 italic text-sm border-l-2 border-zinc-700 pl-3">"{selectedGear.desc}"</p>
+                            <div className="grid grid-cols-2 gap-2 my-4">
+                                {selectedGear.stats.map((stat, idx) => (
+                                    <div key={idx} className="bg-black/40 p-2 rounded border border-white/5">
+                                        <div className="text-[10px] text-zinc-500 uppercase">{stat.label}</div>
+                                        <div className="text-white font-mono text-sm">{stat.value}</div>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="bg-white/5 p-4 rounded-xl border border-white/5 mt-auto">
                                 <span className="text-xs text-zinc-500 uppercase">Equipped Skill</span>
                                 <div className="text-white font-bold mt-1 flex items-center gap-2">
                                     <Zap size={16} className="text-yellow-400" />
@@ -296,4 +354,15 @@ export default function AboutSection() {
       </AnimatePresence>
     </section>
   );
+}
+
+function AttributeRow({ icon, label, value }: { icon: any, label: string, value: string }) {
+    return (
+        <div className="flex items-center justify-between group">
+            <div className="flex items-center gap-3 text-zinc-400">
+                {icon} <span>{label}</span>
+            </div>
+            <span className="text-white text-sm font-medium">{value}</span>
+        </div>
+    );
 }
