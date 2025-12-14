@@ -1,5 +1,5 @@
 "use client";
-import CursorGlow from "@/components/CursorGlow";
+// import CursorGlow from "@/components/CursorGlow";
 import ScrollProgress from "@/components/ScrollProgress";
 import Navbar from "@/components/Navbar";
 import GlobeIntro from "@/components/GlobeIntro";
@@ -12,7 +12,7 @@ import ContactSection from "@/components/ContactSection";
 export default function Home() {
   return (
     <main className="min-h-screen bg-[#0A0A0B] text-white overflow-hidden">
-      <CursorGlow />
+      {/* <CursorGlow /> */}
       <ScrollProgress />
       <Navbar />
 
