@@ -57,29 +57,26 @@ const hubs: Hub[] = [
   },
 ];
 
-/** -------- Utils -------- */
 const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
-const clamp01 = (v: number) => clamp(v, 0, 1);
 
 function useIsTouchDevice() {
   const [isTouch, setIsTouch] = useState(false);
+
   useEffect(() => {
-    // Safe in client component
     const touch =
-      typeof window !== "undefined" &&
-      ("ontouchstart" in window ||
-        (navigator as any).maxTouchPoints > 0 ||
-        (navigator as any).msMaxTouchPoints > 0);
-    setIsTouch(!!touch);
+      "ontouchstart" in window || (navigator?.maxTouchPoints ?? 0) > 0;
+    setIsTouch(touch);
   }, []);
+
   return isTouch;
 }
 
-/**
- * Gyro tilt hook:
- * - Updates motion values mx/my in [-0.5..0.5]
- * - Handles iOS permission request (DeviceOrientationEvent.requestPermission)
- */
+type IOSPermissionState = "granted" | "denied";
+
+type DeviceOrientationEventIOS = typeof DeviceOrientationEvent & {
+  requestPermission?: () => Promise<IOSPermissionState>;
+};
+
 function useDeviceTilt(enabled: boolean) {
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
@@ -92,31 +89,24 @@ function useDeviceTilt(enabled: boolean) {
   useEffect(() => {
     if (!enabled) return;
 
-    // If iOS requires permission, we won't start until user triggers it
-    const D: any = typeof window !== "undefined" ? (window as any).DeviceOrientationEvent : null;
-    const requiresPermission = !!(D && typeof D.requestPermission === "function");
+    const D = DeviceOrientationEvent as DeviceOrientationEventIOS | undefined;
+    const requiresPermission = !!D?.requestPermission;
+
     setNeedsPermission(requiresPermission);
 
-    // Non-iOS: start immediately
-    if (!requiresPermission) {
-      setActive(true);
-    }
+    if (!requiresPermission) setActive(true);
   }, [enabled]);
 
   useEffect(() => {
     if (!enabled || !active) return;
 
     const onOri = (e: DeviceOrientationEvent) => {
-      // gamma: left-right [-90..90], beta: front-back [-180..180]
       const gamma = typeof e.gamma === "number" ? e.gamma : 0;
       const beta = typeof e.beta === "number" ? e.beta : 0;
 
-      // Make it feel nice: small tilts already visible
-      // Normalize into [-0.5..0.5]
       const nx = clamp(gamma / 45, -0.5, 0.5);
       const ny = clamp(beta / 60, -0.5, 0.5);
 
-      // simple smoothing (avoid jitter)
       const sx = last.current.x + (nx - last.current.x) * 0.12;
       const sy = last.current.y + (ny - last.current.y) * 0.12;
       last.current = { x: sx, y: sy };
@@ -131,20 +121,19 @@ function useDeviceTilt(enabled: boolean) {
 
   const requestPermission = async () => {
     try {
-      const D: any = (window as any).DeviceOrientationEvent;
-      if (D && typeof D.requestPermission === "function") {
+      const D = DeviceOrientationEvent as DeviceOrientationEventIOS | undefined;
+      if (D?.requestPermission) {
         const res = await D.requestPermission();
         if (res === "granted") setActive(true);
       }
     } catch {
-      // Ignore: keep inactive
+      // ignore
     }
   };
 
   return { mx, my, needsPermission, active, requestPermission };
 }
 
-/** -------- Visual bits -------- */
 function Sparks({ accentVia, count = 10 }: { accentVia: string; count?: number }) {
   const dots = useMemo(
     () =>
@@ -180,22 +169,6 @@ function Sparks({ accentVia, count = 10 }: { accentVia: string; count?: number }
           }}
         />
       ))}
-      <style jsx>{`
-        @keyframes sparkFloat {
-          0% {
-            transform: translate3d(0, 0, 0) scale(1);
-            opacity: 0.14;
-          }
-          50% {
-            transform: translate3d(8px, -12px, 0) scale(1.25);
-            opacity: 0.45;
-          }
-          100% {
-            transform: translate3d(0, 0, 0) scale(1);
-            opacity: 0.14;
-          }
-        }
-      `}</style>
     </div>
   );
 }
@@ -228,34 +201,6 @@ function NeonBorder({
           animation: `spinGlow2 ${speed * 1.35}s linear infinite`,
         }}
       />
-      <style jsx>{`
-        @keyframes spinGlow {
-          0% {
-            transform: rotate(0deg);
-            opacity: 0.28;
-          }
-          50% {
-            opacity: 0.85;
-          }
-          100% {
-            transform: rotate(360deg);
-            opacity: 0.28;
-          }
-        }
-        @keyframes spinGlow2 {
-          0% {
-            transform: rotate(360deg);
-            opacity: 0.18;
-          }
-          50% {
-            opacity: 0.55;
-          }
-          100% {
-            transform: rotate(0deg);
-            opacity: 0.18;
-          }
-        }
-      `}</style>
     </div>
   );
 }
@@ -265,9 +210,16 @@ function Motif({ type, accent }: { type: Hub["motif"]; accent: string }) {
     return (
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute right-[-10%] top-[10%] opacity-[0.16] blur-[0.2px]">
-          <Plane size={220} style={{ color: accent, filter: `drop-shadow(0 0 22px ${accent}55)` }} />
+          <Plane
+            size={220}
+            style={{ color: accent, filter: `drop-shadow(0 0 22px ${accent}55)` }}
+          />
         </div>
-        <svg className="absolute inset-0 opacity-[0.18]" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <svg
+          className="absolute inset-0 opacity-[0.18]"
+          viewBox="0 0 100 100"
+          preserveAspectRatio="none"
+        >
           <path
             d="M -10 70 C 20 40, 45 78, 70 42 S 125 40, 110 18"
             fill="none"
@@ -277,21 +229,6 @@ function Motif({ type, accent }: { type: Hub["motif"]; accent: string }) {
             style={{ animation: "dashTravel 7.5s linear infinite" }}
           />
         </svg>
-        <style jsx>{`
-          @keyframes dashTravel {
-            from {
-              stroke-dashoffset: 0;
-              opacity: 0.12;
-            }
-            50% {
-              opacity: 0.32;
-            }
-            to {
-              stroke-dashoffset: -18;
-              opacity: 0.12;
-            }
-          }
-        `}</style>
       </div>
     );
   }
@@ -300,7 +237,10 @@ function Motif({ type, accent }: { type: Hub["motif"]; accent: string }) {
     return (
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute left-[-6%] bottom-[-10%] opacity-[0.14] blur-[0.2px]">
-          <Gamepad2 size={240} style={{ color: accent, filter: `drop-shadow(0 0 22px ${accent}55)` }} />
+          <Gamepad2
+            size={240}
+            style={{ color: accent, filter: `drop-shadow(0 0 22px ${accent}55)` }}
+          />
         </div>
         <div className="absolute right-[8%] top-[18%] flex items-end gap-[6px] opacity-[0.20]">
           {Array.from({ length: 9 }).map((_, i) => (
@@ -317,22 +257,6 @@ function Motif({ type, accent }: { type: Hub["motif"]; accent: string }) {
             />
           ))}
         </div>
-        <style jsx>{`
-          @keyframes eq {
-            0% {
-              transform: scaleY(0.65);
-              opacity: 0.12;
-            }
-            50% {
-              transform: scaleY(1.25);
-              opacity: 0.38;
-            }
-            100% {
-              transform: scaleY(0.65);
-              opacity: 0.12;
-            }
-          }
-        `}</style>
       </div>
     );
   }
@@ -342,7 +266,15 @@ function Motif({ type, accent }: { type: Hub["motif"]; accent: string }) {
       <div className="absolute inset-0 opacity-[0.14] [background-image:linear-gradient(to_right,rgba(255,255,255,0.16)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.16)_1px,transparent_1px)] [background-size:34px_34px]" />
       <svg className="absolute inset-0 opacity-[0.16]" viewBox="0 0 100 100">
         <circle cx="72" cy="42" r="18" fill="none" stroke={accent} strokeWidth="0.6" />
-        <circle cx="72" cy="42" r="10" fill="none" stroke={accent} strokeWidth="0.5" opacity="0.75" />
+        <circle
+          cx="72"
+          cy="42"
+          r="10"
+          fill="none"
+          stroke={accent}
+          strokeWidth="0.5"
+          opacity="0.75"
+        />
         <path
           d="M 54 42 C 60 30, 88 28, 90 44"
           fill="none"
@@ -353,50 +285,40 @@ function Motif({ type, accent }: { type: Hub["motif"]; accent: string }) {
         />
       </svg>
       <div className="absolute right-[6%] bottom-[10%] opacity-[0.16]">
-        <Sparkles size={150} style={{ color: accent, filter: `drop-shadow(0 0 22px ${accent}55)` }} />
+        <Sparkles
+          size={150}
+          style={{ color: accent, filter: `drop-shadow(0 0 22px ${accent}55)` }}
+        />
       </div>
-      <style jsx>{`
-        @keyframes dashCreate {
-          from {
-            stroke-dashoffset: 0;
-            opacity: 0.12;
-          }
-          50% {
-            opacity: 0.35;
-          }
-          to {
-            stroke-dashoffset: -20;
-            opacity: 0.12;
-          }
-        }
-      `}</style>
     </div>
   );
 }
 
-/** -------- Main card -------- */
-function HubPanel({ hub, index, align = "left" }: { hub: Hub; index: number; align?: "left" | "right" }) {
+function HubPanel({
+  hub,
+  index,
+  align = "left",
+}: {
+  hub: Hub;
+  index: number;
+  align?: "left" | "right";
+}) {
   const isTouch = useIsTouchDevice();
 
-  // Mouse tilt (desktop)
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
-  // Gyro tilt (mobile)
   const gyro = useDeviceTilt(isTouch);
 
-  // Choose source for tilt
   const mx = isTouch ? gyro.mx : mouseX;
   const my = isTouch ? gyro.my : mouseY;
 
-  // Tilt mapping (same ranges as before)
   const rx = useTransform(my, [-0.5, 0.5], [10, -10]);
   const ry = useTransform(mx, [-0.5, 0.5], [-12, 12]);
 
   const srx = useSpring(rx, { stiffness: 120, damping: 18, mass: 0.65 });
   const sry = useSpring(ry, { stiffness: 120, damping: 18, mass: 0.65 });
 
-  // Parallax internal
   const px = useTransform(mx, [-0.5, 0.5], [-10, 10]);
   const py = useTransform(my, [-0.5, 0.5], [-8, 8]);
   const spx = useSpring(px, { stiffness: 110, damping: 20, mass: 0.65 });
@@ -459,27 +381,12 @@ function HubPanel({ hub, index, align = "left" }: { hub: Hub; index: number; ali
             <div
               className="absolute top-[-40%] left-[-60%] h-[160%] w-[40%] rotate-12 opacity-30 group-hover:opacity-60"
               style={{
-                background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent)",
+                background:
+                  "linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent)",
                 filter: "blur(1px)",
                 animation: "sweep 6.2s ease-in-out infinite",
               }}
             />
-            <style jsx>{`
-              @keyframes sweep {
-                0% {
-                  transform: translateX(-10%) rotate(12deg);
-                  opacity: 0.1;
-                }
-                50% {
-                  transform: translateX(340%) rotate(12deg);
-                  opacity: 0.55;
-                }
-                100% {
-                  transform: translateX(340%) rotate(12deg);
-                  opacity: 0.1;
-                }
-              }
-            `}</style>
           </div>
 
           {/* CONTENT */}
@@ -550,38 +457,20 @@ function HubPanel({ hub, index, align = "left" }: { hub: Hub; index: number; ali
                     animation: "ctaPulse 3.2s ease-in-out infinite",
                   }}
                 />
-                <style jsx>{`
-                  @keyframes ctaPulse {
-                    0% {
-                      transform: translateX(-10%);
-                      opacity: 0.18;
-                    }
-                    50% {
-                      transform: translateX(14%);
-                      opacity: 0.55;
-                    }
-                    100% {
-                      transform: translateX(-10%);
-                      opacity: 0.18;
-                    }
-                  }
-                `}</style>
               </div>
             </div>
 
-            {/* iOS: permission button overlay (only on touch devices, only if needed & not active) */}
             {isTouch && gyro.needsPermission && !gyro.active && (
               <button
                 type="button"
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  gyro.requestPermission();
+                  void gyro.requestPermission();
                 }}
                 className="mt-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/40 px-4 py-2 text-[11px] font-mono text-white/85 backdrop-blur-md hover:bg-black/55 transition"
               >
-                Enable Motion
-                <span className="opacity-70">(iOS)</span>
+                Enable Motion <span className="opacity-70">(iOS)</span>
               </button>
             )}
           </motion.div>
@@ -594,12 +483,15 @@ function HubPanel({ hub, index, align = "left" }: { hub: Hub; index: number; ali
   );
 }
 
-/** -------- Section -------- */
 export default function SkillsSection() {
   return (
     <section id="explore" className="py-24 sm:py-28 bg-[#0a0a0b] border-y border-white/10">
       <div className="mx-auto max-w-6xl px-6">
-        <ScrollReveal from={{ opacity: 0, y: 18 }} to={{ opacity: 1, y: 0 }} className="mb-12 sm:mb-14">
+        <ScrollReveal
+          from={{ opacity: 0, y: 18 }}
+          to={{ opacity: 1, y: 0 }}
+          className="mb-12 sm:mb-14"
+        >
           <h2 className="text-4xl md:text-6xl font-black tracking-tight">
             <span className="bg-gradient-to-r from-[#9B1C31] via-[#6C1E80] to-white bg-clip-text text-transparent">
               Explorer mon univers

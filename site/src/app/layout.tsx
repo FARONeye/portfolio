@@ -1,6 +1,8 @@
 // src/app/layout.tsx
 import type { Metadata } from "next";
 import "./globals.css";
+import "./teleport-fx.css";
+
 
 export const metadata: Metadata = {
   title: "Mathis Truong — Portfolio",

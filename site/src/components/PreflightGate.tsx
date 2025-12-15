@@ -66,20 +66,6 @@ function StarsMap() {
           }}
         />
       ))}
-
-      <style jsx global>{`
-        @keyframes twinkle {
-          0%,
-          100% {
-            transform: translateZ(0) scale(1);
-            opacity: 0.25;
-          }
-          50% {
-            transform: translateZ(0) scale(1.6);
-            opacity: 0.85;
-          }
-        }
-      `}</style>
     </div>
   );
 }

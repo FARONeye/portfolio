@@ -1,0 +1,84 @@
+/* ===============================
+   TELEPORT FX — CINEMATIC / NEON
+   =============================== */
+
+.tf-grain {
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.32'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+}
+
+.tf-scanlines {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,0.06),
+    rgba(255,255,255,0.06) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+  mix-blend-mode: overlay;
+}
+
+.tf-neonFrame {
+  background: conic-gradient(
+    from 180deg,
+    rgba(155,28,49,0.75),
+    rgba(108,30,128,0.75),
+    rgba(244,114,182,0.65),
+    rgba(155,28,49,0.75)
+  );
+  filter: blur(12px);
+  animation: tfSpin 5.8s linear infinite;
+}
+
+@keyframes tfSpin {
+  from { transform: rotate(0deg); opacity: 0.22; }
+  50% { opacity: 0.78; }
+  to { transform: rotate(360deg); opacity: 0.22; }
+}
+
+.tf-barGlow {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(244,114,182,0.20),
+    rgba(192,132,252,0.22),
+    transparent
+  );
+  filter: blur(1px);
+  animation: tfSweep 1.4s ease-in-out infinite;
+}
+
+@keyframes tfSweep {
+  0% { transform: translateX(-55%); opacity: 0.15; }
+  50% { transform: translateX(55%); opacity: 0.75; }
+  100% { transform: translateX(55%); opacity: 0.15; }
+}
+
+.tf-barFill {
+  background: linear-gradient(
+    90deg,
+    rgba(155,28,49,0.75),
+    rgba(108,30,128,0.85),
+    rgba(244,114,182,0.75)
+  );
+  box-shadow: 0 0 26px rgba(192,132,252,0.25);
+}
+
+.tf-iris {
+  background: radial-gradient(
+    circle at center,
+    transparent 0%,
+    transparent 44%,
+    rgba(0,0,0,0.55) 58%,
+    rgba(0,0,0,0.92) 72%,
+    rgba(0,0,0,1) 100%
+  );
+  animation: tfIrisClose 0.45s ease-in forwards;
+}
+
+@keyframes tfIrisClose {
+  from { transform: scale(1); opacity: 0; }
+  10% { opacity: 1; }
+  to { transform: scale(1.55); opacity: 1; }
+}
