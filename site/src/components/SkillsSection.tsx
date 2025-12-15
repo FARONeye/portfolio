@@ -5,8 +5,12 @@ import Link from "next/link";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { Plane, Gamepad2, Sparkles } from "lucide-react";
+import { useTranslations } from "next-intl";
+
+type HubMotif = "travel" | "passions" | "creation";
 
 type Hub = {
+  key: "travel" | "passions" | "creation";
   title: string;
   subtitle: string;
   description: string;
@@ -15,47 +19,8 @@ type Hub = {
   accentFrom: string;
   accentVia: string;
   accentTo: string;
-  motif: "travel" | "passions" | "creation";
+  motif: HubMotif;
 };
-
-const hubs: Hub[] = [
-  {
-    title: "Voyages",
-    subtitle: "Carnet d’exploration",
-    description:
-      "Pays visités, itinéraires, photos, histoires et inspirations qui nourrissent mon travail.",
-    href: "/travel",
-    tag: "WORLD MODE",
-    accentFrom: "#9B1C31",
-    accentVia: "#6C1E80",
-    accentTo: "#ffffff",
-    motif: "travel",
-  },
-  {
-    title: "Passions",
-    subtitle: "Création • Jeux • Culture",
-    description:
-      "Mes univers : gaming, musique, créativité, curiosités… tout ce qui me fait vibrer.",
-    href: "/passions",
-    tag: "SIDE QUESTS",
-    accentFrom: "#6C1E80",
-    accentVia: "#C084FC",
-    accentTo: "#F472B6",
-    motif: "passions",
-  },
-  {
-    title: "Création",
-    subtitle: "Projets personnels",
-    description:
-      "Expérimentations, idées, prototypes… un laboratoire où je teste des concepts visuels & techniques.",
-    href: "/creation",
-    tag: "LAB",
-    accentFrom: "#9B1C31",
-    accentVia: "#F472B6",
-    accentTo: "#C084FC",
-    motif: "creation",
-  },
-];
 
 const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
 
@@ -93,7 +58,6 @@ function useDeviceTilt(enabled: boolean) {
     const requiresPermission = !!D?.requestPermission;
 
     setNeedsPermission(requiresPermission);
-
     if (!requiresPermission) setActive(true);
   }, [enabled]);
 
@@ -205,7 +169,7 @@ function NeonBorder({
   );
 }
 
-function Motif({ type, accent }: { type: Hub["motif"]; accent: string }) {
+function Motif({ type, accent }: { type: HubMotif; accent: string }) {
   if (type === "travel") {
     return (
       <div className="pointer-events-none absolute inset-0">
@@ -215,11 +179,7 @@ function Motif({ type, accent }: { type: Hub["motif"]; accent: string }) {
             style={{ color: accent, filter: `drop-shadow(0 0 22px ${accent}55)` }}
           />
         </div>
-        <svg
-          className="absolute inset-0 opacity-[0.18]"
-          viewBox="0 0 100 100"
-          preserveAspectRatio="none"
-        >
+        <svg className="absolute inset-0 opacity-[0.18]" viewBox="0 0 100 100" preserveAspectRatio="none">
           <path
             d="M -10 70 C 20 40, 45 78, 70 42 S 125 40, 110 18"
             fill="none"
@@ -266,15 +226,7 @@ function Motif({ type, accent }: { type: Hub["motif"]; accent: string }) {
       <div className="absolute inset-0 opacity-[0.14] [background-image:linear-gradient(to_right,rgba(255,255,255,0.16)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.16)_1px,transparent_1px)] [background-size:34px_34px]" />
       <svg className="absolute inset-0 opacity-[0.16]" viewBox="0 0 100 100">
         <circle cx="72" cy="42" r="18" fill="none" stroke={accent} strokeWidth="0.6" />
-        <circle
-          cx="72"
-          cy="42"
-          r="10"
-          fill="none"
-          stroke={accent}
-          strokeWidth="0.5"
-          opacity="0.75"
-        />
+        <circle cx="72" cy="42" r="10" fill="none" stroke={accent} strokeWidth="0.5" opacity="0.75" />
         <path
           d="M 54 42 C 60 30, 88 28, 90 44"
           fill="none"
@@ -298,10 +250,16 @@ function HubPanel({
   hub,
   index,
   align = "left",
+  enterLabel,
+  portalLabel,
+  enableMotionLabel,
 }: {
   hub: Hub;
   index: number;
   align?: "left" | "right";
+  enterLabel: string;
+  portalLabel: string;
+  enableMotionLabel: string;
 }) {
   const isTouch = useIsTouchDevice();
 
@@ -400,7 +358,9 @@ function HubPanel({
           >
             <div className="flex items-center justify-between gap-6">
               <div className="flex items-center gap-3">
-                <span className="text-[10px] tracking-[0.35em] text-white/75 font-mono">{hub.tag}</span>
+                <span className="text-[10px] tracking-[0.35em] text-white/75 font-mono">
+                  {hub.tag}
+                </span>
                 <span className="h-[1px] w-12 bg-white/20" />
                 <span
                   className="h-2 w-2 rounded-full"
@@ -410,7 +370,9 @@ function HubPanel({
                   }}
                 />
               </div>
-              <span className="text-[10px] font-mono text-white/65">0{index + 1}</span>
+              <span className="text-[10px] font-mono text-white/65">
+                {String(index + 1).padStart(2, "0")}
+              </span>
             </div>
 
             <div className="mt-9 max-w-2xl">
@@ -436,7 +398,7 @@ function HubPanel({
                   }}
                 />
                 <span className="text-sm font-semibold text-white/90">
-                  Entrer
+                  {enterLabel}
                   <span className="inline-block translate-x-1 transition-transform duration-300 group-hover:translate-x-2">
                     →
                   </span>
@@ -449,7 +411,7 @@ function HubPanel({
                   background: `linear-gradient(90deg, ${hub.accentFrom}28, ${hub.accentVia}28, ${hub.accentTo}18)`,
                 }}
               >
-                <span className="relative z-10">ENTER PORTAL</span>
+                <span className="relative z-10">{portalLabel}</span>
                 <span
                   className="absolute inset-0 opacity-35"
                   style={{
@@ -470,7 +432,7 @@ function HubPanel({
                 }}
                 className="mt-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/40 px-4 py-2 text-[11px] font-mono text-white/85 backdrop-blur-md hover:bg-black/55 transition"
               >
-                Enable Motion <span className="opacity-70">(iOS)</span>
+                {enableMotionLabel} <span className="opacity-70">(iOS)</span>
               </button>
             )}
           </motion.div>
@@ -484,6 +446,50 @@ function HubPanel({
 }
 
 export default function SkillsSection() {
+  const t = useTranslations("skills");
+
+  const hubs: Hub[] = useMemo(
+    () => [
+      {
+        key: "travel",
+        title: t("hubs.travel.title"),
+        subtitle: t("hubs.travel.subtitle"),
+        description: t("hubs.travel.description"),
+        href: "/travel",
+        tag: t("hubs.travel.tag"),
+        accentFrom: "#9B1C31",
+        accentVia: "#6C1E80",
+        accentTo: "#ffffff",
+        motif: "travel",
+      },
+      {
+        key: "passions",
+        title: t("hubs.passions.title"),
+        subtitle: t("hubs.passions.subtitle"),
+        description: t("hubs.passions.description"),
+        href: "/passions",
+        tag: t("hubs.passions.tag"),
+        accentFrom: "#6C1E80",
+        accentVia: "#C084FC",
+        accentTo: "#F472B6",
+        motif: "passions",
+      },
+      {
+        key: "creation",
+        title: t("hubs.creation.title"),
+        subtitle: t("hubs.creation.subtitle"),
+        description: t("hubs.creation.description"),
+        href: "/creation",
+        tag: t("hubs.creation.tag"),
+        accentFrom: "#9B1C31",
+        accentVia: "#F472B6",
+        accentTo: "#C084FC",
+        motif: "creation",
+      },
+    ],
+    [t]
+  );
+
   return (
     <section id="explore" className="py-24 sm:py-28 bg-[#0a0a0b] border-y border-white/10">
       <div className="mx-auto max-w-6xl px-6">
@@ -494,25 +500,44 @@ export default function SkillsSection() {
         >
           <h2 className="text-4xl md:text-6xl font-black tracking-tight">
             <span className="bg-gradient-to-r from-[#9B1C31] via-[#6C1E80] to-white bg-clip-text text-transparent">
-              Explorer mon univers
+              {t("title")}
             </span>
           </h2>
-          <p className="mt-4 text-white/60 max-w-2xl">
-            Trois portails — PC à la souris, mobile à l’inclinaison du téléphone.
-          </p>
+          <p className="mt-4 text-white/60 max-w-2xl">{t("subtitle")}</p>
         </ScrollReveal>
 
         <div className="grid gap-8 sm:gap-10">
           <div className="h-[320px] sm:h-[380px] md:h-[430px]">
-            <HubPanel hub={hubs[0]} index={0} align="left" />
+            <HubPanel
+              hub={hubs[0]}
+              index={0}
+              align="left"
+              enterLabel={t("enter")}
+              portalLabel={t("portal")}
+              enableMotionLabel={t("enableMotion")}
+            />
           </div>
 
           <div className="h-[320px] sm:h-[380px] md:h-[430px] md:ml-14">
-            <HubPanel hub={hubs[1]} index={1} align="right" />
+            <HubPanel
+              hub={hubs[1]}
+              index={1}
+              align="right"
+              enterLabel={t("enter")}
+              portalLabel={t("portal")}
+              enableMotionLabel={t("enableMotion")}
+            />
           </div>
 
           <div className="h-[320px] sm:h-[380px] md:h-[430px]">
-            <HubPanel hub={hubs[2]} index={2} align="left" />
+            <HubPanel
+              hub={hubs[2]}
+              index={2}
+              align="left"
+              enterLabel={t("enter")}
+              portalLabel={t("portal")}
+              enableMotionLabel={t("enableMotion")}
+            />
           </div>
         </div>
       </div>

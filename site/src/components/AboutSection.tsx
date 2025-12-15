@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { ReactNode } from "react";
 import Image from "next/image";
@@ -19,9 +19,9 @@ import {
   Wrench,
   Sparkles,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import ChibiModel from "./ChibiModel";
 
-// --- CALCUL DYNAMIQUE AGE & XP (CLIENT-ONLY pour éviter hydration mismatch) ---
 const BIRTH_DATE = new Date("2004-06-24");
 
 function computeProfileStats() {
@@ -57,86 +57,20 @@ function computeProfileStats() {
   return { level: age, xp: xpPercent };
 }
 
-// --- DONNÉES ITEMS (PERSONA) ---
-const PERSONA = [
-  {
-    id: "origin",
-    slot: "ORIGIN",
-    name: "Identity Core",
-    rarity: "legendary",
-    icon: <Fingerprint size={24} />,
-    stats: [
-      { label: "Born", value: "France" },
-      { label: "Origins", value: "Vietnamese" },
-      { label: "Base", value: "Paris • Île-de-France" },
-      { label: "Languages", value: "FR (native) • EN (C1) • ES (A1/A2) • VI (A1)" },
-      { label: "Learning", value: "KR • JP • CN" },
-    ],
-    desc:
-      "Né en France, d’origine vietnamienne. Mon point d’ancrage : identité, langues, et ce que je construis.",
-    realHobby: "Profil & identité",
-    // ✅ position safe mobile + desktop
-    position: "top-6 left-4 md:top-20 md:left-20",
-  },
-  {
-    id: "studies",
-    slot: "STUDIES",
-    name: "Learning Path",
-    rarity: "epic",
-    icon: <Brain size={24} />,
-    stats: [
-      { label: "School", value: "ESCENTECH (ex WebTech Institute)" },
-      { label: "Degree", value: "Bachelor CDA" },
-      { label: "Cadence", value: "3 weeks company / 1 week school" },
-      { label: "Next", value: "RNCP 7 • Manager des Organisations (IT)" },
-    ],
-    desc:
-      "Parcours structuré : je construis mes skills avec un rythme d’alternance exigeant, et une vision long-terme.",
-    realHobby: "Études & progression",
-    position:
-      // ✅ centre gauche = stable, évite chevauchement
-      "top-1/2 -translate-y-1/2 left-4 md:left-10",
-  },
-  {
-    id: "work",
-    slot: "WORK",
-    name: "Guild Contract",
-    rarity: "rare",
-    icon: <BriefcaseBusiness size={24} />,
-    stats: [
-      { label: "Company", value: "Air Liquide IT" },
-      { label: "Team", value: "GIO (Global Infrastructure & Operations)" },
-      { label: "Role", value: "Admin & Dev • Google Apps" },
-      { label: "Core", value: "Automation • Dev • Optimization" },
-    ],
-    desc:
-      "Alternance côté IT Ops : automatiser, optimiser, livrer des solutions utiles — avec un focus Google & écosystème.",
-    realHobby: "Air Liquide / IT Ops",
-    position:
-      // ✅ centre droite = stable
-      "top-1/2 -translate-y-1/2 right-4 md:right-10",
-  },
-  {
-    id: "goals",
-    slot: "GOALS",
-    name: "Quest Log",
-    rarity: "common",
-    icon: <Target size={24} />,
-    stats: [
-      { label: "Main", value: "Grow personal projects & creativity" },
-      { label: "Focus", value: "Portfolio • Product sense • Experience" },
-      { label: "Secondary", value: "Ship consistently • Improve design • Level-up dev" },
-    ],
-    desc:
-      "Roadmap : progresser via mes projets perso, explorer mes passions, et construire un univers cohérent.",
-    realHobby: "Objectifs & ambitions",
-    // ✅ FIX IMPORTANT: le bouton était trop haut/chevauchait WORK
-    // -> on le place en bas à droite, avec marge + label ok
-    position: "bottom-24 right-6 md:bottom-20 md:right-20",
-  },
-] as const;
+type PersonaId = "origin" | "studies" | "work" | "goals";
+type Rarity = "legendary" | "epic" | "rare" | "common";
 
-type PersonaItem = (typeof PERSONA)[number];
+type PersonaItem = {
+  id: PersonaId;
+  slot: string;
+  name: string;
+  rarity: Rarity;
+  icon: ReactNode;
+  stats: { label: string; value: string }[];
+  desc: string;
+  realHobby: string;
+  position: string;
+};
 
 const getRarityColor = (rarity: string) => {
   switch (rarity) {
@@ -152,7 +86,8 @@ const getRarityColor = (rarity: string) => {
 };
 
 export default function AboutSection() {
-  // ✅ Hydration-safe: stats calculés après mount
+  const t = useTranslations("about");
+
   const [stats, setStats] = useState<{ level: number; xp: number }>({
     level: 0,
     xp: 0,
@@ -162,15 +97,110 @@ export default function AboutSection() {
   const [selectedItem, setSelectedItem] = useState<PersonaItem | null>(null);
   const [isModelReady, setIsModelReady] = useState(false);
 
-  // ✅ Remount complet du modèle à chaque ouverture
   const [modelSession, setModelSession] = useState(0);
-
-  // ✅ Timer géré hors useEffect
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     setStats(computeProfileStats());
   }, []);
+
+  type PersonaI18n = {
+  origin: {
+    slot: string;
+    name: string;
+    stats: { label: string; value: string }[];
+    desc: string;
+    realHobby: string;
+  };
+  studies: {
+    slot: string;
+    name: string;
+    stats: { label: string; value: string }[];
+    desc: string;
+    realHobby: string;
+  };
+  work: {
+    slot: string;
+    name: string;
+    stats: { label: string; value: string }[];
+    desc: string;
+    realHobby: string;
+  };
+  goals: {
+    slot: string;
+    name: string;
+    stats: { label: string; value: string }[];
+    desc: string;
+    realHobby: string;
+  };
+};
+
+function isPersonaI18n(v: unknown): v is PersonaI18n {
+  const o = v as Record<string, unknown> | null;
+  return (
+    !!o &&
+    typeof o === "object" &&
+    "origin" in o &&
+    "studies" in o &&
+    "work" in o &&
+    "goals" in o
+  );
+}
+
+  const PERSONA: PersonaItem[] = useMemo(() => {
+    const raw = t.raw("persona");
+    if (!isPersonaI18n(raw)) return [];
+
+    const p = raw;
+
+    return [
+      {
+        id: "origin",
+        slot: p.origin.slot,
+        name: p.origin.name,
+        rarity: "legendary",
+        icon: <Fingerprint size={24} />,
+        stats: p.origin.stats,
+        desc: p.origin.desc,
+        realHobby: p.origin.realHobby,
+        position: "top-6 left-4 md:top-20 md:left-20",
+      },
+      {
+        id: "studies",
+        slot: p.studies.slot,
+        name: p.studies.name,
+        rarity: "epic",
+        icon: <Brain size={24} />,
+        stats: p.studies.stats,
+        desc: p.studies.desc,
+        realHobby: p.studies.realHobby,
+        position: "top-1/2 -translate-y-1/2 left-4 md:left-10",
+      },
+      {
+        id: "work",
+        slot: p.work.slot,
+        name: p.work.name,
+        rarity: "rare",
+        icon: <BriefcaseBusiness size={24} />,
+        stats: p.work.stats,
+        desc: p.work.desc,
+        realHobby: p.work.realHobby,
+        position: "top-1/2 -translate-y-1/2 right-4 md:right-10",
+      },
+      {
+        id: "goals",
+        slot: p.goals.slot,
+        name: p.goals.name,
+        rarity: "common",
+        icon: <Target size={24} />,
+        stats: p.goals.stats,
+        desc: p.goals.desc,
+        realHobby: p.goals.realHobby,
+        position: "bottom-24 right-6 md:bottom-20 md:right-20",
+      },
+    ];
+  }, [t]);
+
 
   const lockScroll = () => {
     document.documentElement.style.overflow = "hidden";
@@ -222,7 +252,6 @@ export default function AboutSection() {
       <div className="absolute top-1/4 left-0 w-96 h-96 bg-[#9B1C31]/20 rounded-full blur-[128px] pointer-events-none" />
 
       <div className="mx-auto max-w-6xl px-6 grid gap-16 md:grid-cols-2 items-center">
-        {/* Intro Texte */}
         <motion.div
           initial={{ opacity: 0, x: -30 }}
           whileInView={{ opacity: 1, x: 0 }}
@@ -232,16 +261,17 @@ export default function AboutSection() {
         >
           <h2 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight">
             <span className="bg-linear-to-r from-[#9B1C31] via-[#6C1E80] to-white bg-clip-text text-transparent">
-              Select Your Character
+              {t("title")}
             </span>
           </h2>
 
           <div className="space-y-6 text-lg text-[#b3b3b3] leading-relaxed text-pretty">
             <p>
-              Hello, I&apos;m{" "}
-              <span className="text-white font-medium">Mathis</span>. Ici, tu
-              peux explorer mon profil : identité, parcours, alternance et
-              objectifs.
+              {t.rich("intro", {
+                name: (chunks) => (
+                  <span className="text-white font-medium">{chunks}</span>
+                ),
+              })}
             </p>
 
             <div className="pt-4">
@@ -249,22 +279,17 @@ export default function AboutSection() {
                 onClick={openInventory}
                 className="group flex items-center gap-3 px-6 py-3 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 hover:border-[#6C1E80]/50 transition-all active:scale-95"
               >
-                <span className="text-white font-medium">
-                  Open Character Sheet
-                </span>
+                <span className="text-white font-medium">{t("open")}</span>
                 <span className="group-hover:translate-x-1 transition-transform">
                   →
                 </span>
               </button>
 
-              <div className="mt-3 text-xs text-white/40">
-                Astuce : dans la fiche, clique sur les 4 boutons autour du perso.
-              </div>
+              <div className="mt-3 text-xs text-white/40">{t("tip")}</div>
             </div>
           </div>
         </motion.div>
 
-        {/* Preview Card */}
         <div className="relative w-full h-[500px] flex items-center justify-center">
           {!isExpanded && (
             <motion.div
@@ -296,7 +321,7 @@ export default function AboutSection() {
 
               <div className="absolute bottom-0 inset-x-0 h-32 bg-linear-to-t from-black via-black/80 to-transparent flex items-end p-6">
                 <p className="text-white font-mono text-sm animate-pulse">
-                  Click to inspect profile...
+                  {t("previewHint")}
                 </p>
               </div>
             </motion.div>
@@ -304,7 +329,6 @@ export default function AboutSection() {
         </div>
       </div>
 
-      {/* Modal */}
       <AnimatePresence>
         {isExpanded && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-0 md:p-6 overflow-hidden">
@@ -356,7 +380,6 @@ export default function AboutSection() {
                   )}
                 </div>
 
-                {/* Buttons items (plus clairs / cliquables) */}
                 {isModelReady && (
                   <div className="absolute inset-0 z-20 pointer-events-none p-2">
                     {PERSONA.map((item, i) => {
@@ -385,12 +408,13 @@ export default function AboutSection() {
                                 ? "scale-110 ring-2 ring-white/20 shadow-[0_0_22px_rgba(255,255,255,0.12)]"
                                 : "hover:scale-110 ring-1 ring-white/10",
                               getRarityColor(item.rarity),
-                              active ? "bg-white/15" : "bg-black/40 border-white/10",
+                              active
+                                ? "bg-white/15"
+                                : "bg-black/40 border-white/10",
                             ].join(" ")}
                           >
                             {item.icon}
 
-                            {/* Petit label visible */}
                             <div className="absolute -bottom-7 left-1/2 -translate-x-1/2 whitespace-nowrap">
                               <span
                                 className={[
@@ -406,13 +430,14 @@ export default function AboutSection() {
                               </span>
                             </div>
 
-                            {/* Tooltip */}
                             <div className="pointer-events-none absolute left-1/2 top-[-10px] -translate-x-1/2 -translate-y-full opacity-0 group-hover:opacity-100 transition-opacity">
                               <div className="rounded-xl border border-white/10 bg-black/80 px-3 py-2 text-[11px] text-white/80 shadow-xl backdrop-blur-md">
                                 <div className="font-semibold text-white/90">
                                   {item.name}
                                 </div>
-                                <div className="text-white/55">Clique pour ouvrir</div>
+                                <div className="text-white/55">
+                                  {t("tooltip")}
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -458,48 +483,50 @@ export default function AboutSection() {
 
                 <div className="space-y-3 md:space-y-4 bg-white/5 p-4 md:p-5 rounded-xl border border-white/5">
                   <h4 className="text-[10px] md:text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2 border-b border-white/5 pb-2">
-                    Player Summary
+                    {t("summaryTitle")}
                   </h4>
 
                   <AttributeRow
                     icon={<Globe size={16} className="text-blue-400" />}
-                    label="Location"
-                    value="Paris • Île-de-France"
+                    label={t("summary.location")}
+                    value={t("summary.locationValue")}
                   />
                   <AttributeRow
                     icon={<ScanFace size={16} className="text-[#9B1C31]" />}
-                    label="Role"
-                    value="Admin & Dev (Google Apps)"
+                    label={t("summary.role")}
+                    value={t("summary.roleValue")}
                   />
                   <AttributeRow
                     icon={<GraduationCap size={16} className="text-purple-400" />}
-                    label="Studies"
-                    value="Bachelor CDA"
+                    label={t("summary.studies")}
+                    value={t("summary.studiesValue")}
                   />
                   <AttributeRow
-                    icon={<BriefcaseBusiness size={16} className="text-blue-400" />}
-                    label="Company"
-                    value="Air Liquide IT (GIO)"
+                    icon={
+                      <BriefcaseBusiness size={16} className="text-blue-400" />
+                    }
+                    label={t("summary.company")}
+                    value={t("summary.companyValue")}
                   />
                   <AttributeRow
                     icon={<Languages size={16} className="text-emerald-400" />}
-                    label="Languages"
-                    value="FR • EN (C1) • ES (A1/A2) • VI (A1)"
+                    label={t("summary.languages")}
+                    value={t("summary.languagesValue")}
                   />
                   <AttributeRow
                     icon={<Target size={16} className="text-orange-400" />}
-                    label="Goal"
-                    value="RNCP 7 (Manager des Organisations IT)"
+                    label={t("summary.goal")}
+                    value={t("summary.goalValue")}
                   />
                   <AttributeRow
                     icon={<Sparkles size={16} className="text-pink-400" />}
-                    label="Status"
-                    value="Alternance (not available)"
+                    label={t("summary.status")}
+                    value={t("summary.statusValue")}
                   />
                   <AttributeRow
                     icon={<Wrench size={16} className="text-zinc-300" />}
-                    label="XP"
-                    value="Lvl 21 • Since 09/2024 @ Air Liquide"
+                    label={t("summary.xp")}
+                    value={t("summary.xpValue")}
                   />
                 </div>
 
@@ -576,7 +603,7 @@ export default function AboutSection() {
 
                       <div className="bg-white/5 p-4 rounded-xl border border-white/5 mt-auto">
                         <span className="text-xs text-zinc-500 uppercase">
-                          Active Node
+                          {t("right.activeNode")}
                         </span>
                         <div className="text-white font-bold mt-1 flex items-center gap-2">
                           <Zap size={16} className="text-yellow-400" />
@@ -588,9 +615,7 @@ export default function AboutSection() {
                     <div className="hidden md:flex h-full flex-col items-center justify-center text-zinc-600 opacity-50 space-y-4">
                       <Target size={48} className="animate-pulse" />
                       <p className="font-mono text-sm text-center">
-                        SELECT A SLOT
-                        <br />
-                        (ORIGIN / STUDIES / WORK / GOALS)
+                        {t("right.placeholder")}
                       </p>
                     </div>
                   )}

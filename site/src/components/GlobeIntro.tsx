@@ -12,6 +12,8 @@ import {
 import * as THREE from "three";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Line, Points, PointMaterial } from "@react-three/drei";
+import { useTranslations } from "next-intl";
+
 
 /* =================== Const & utils =================== */
 const R_GLOBE = 1.35;
@@ -525,12 +527,15 @@ function HeadlineBlock({ h, p, isSmall }: { h: Headline; p: number; isSmall: boo
 }
 
 function HeadlineOverlay({ progress, isSmall }: { progress: number; isSmall: boolean }) {
+  const t = useTranslations("globe");
   const p = progress / 100;
+
   const headlines: Headline[] = [
-    { text: "HELLO, I AM MATHIS TRUONG", side: "left", y: "16%", window: [0.06, 0.32], accent: true },
-    { text: "WELCOME TO MY WEBSITE", side: "center", y: "46%", window: [0.32, 0.64], accent: false },
-    { text: "KEEP SCROLLING TO CONTINUE", side: "right", y: "76%", window: [0.64, 0.92], accent: true },
+    { text: t("headlines.h1"), side: "left", y: "16%", window: [0.06, 0.32], accent: true },
+    { text: t("headlines.h2"), side: "center", y: "46%", window: [0.32, 0.64], accent: false },
+    { text: t("headlines.h3"), side: "right", y: "76%", window: [0.64, 0.92], accent: true },
   ];
+
   return (
     <div className="pointer-events-none absolute inset-0 z-40 select-none">
       {headlines.map((h, i) => (
@@ -540,8 +545,10 @@ function HeadlineOverlay({ progress, isSmall }: { progress: number; isSmall: boo
   );
 }
 
+
 /* =================== NEW: Scroll Hint (center) =================== */
 function ScrollHint({ show, isSmall }: { show: boolean; isSmall: boolean }) {
+  const t = useTranslations("globe");
   if (!show) return null;
 
   const fontSize = isSmall
@@ -550,16 +557,10 @@ function ScrollHint({ show, isSmall }: { show: boolean; isSmall: boolean }) {
 
   return (
     <div className="pointer-events-none absolute inset-0 z-50 flex items-center justify-center">
-      <div
-        style={{
-          transform: "translateY(34%)",
-          textAlign: "center",
-        }}
-      >
+      <div style={{ transform: "translateY(34%)", textAlign: "center" }}>
         <div
           style={{
-            fontFamily:
-              "ui-sans-serif, system-ui, Sora, Space Grotesk, Inter, Arial",
+            fontFamily: "ui-sans-serif, system-ui, Sora, Space Grotesk, Inter, Arial",
             fontSize,
             lineHeight: 1.05,
             letterSpacing: isSmall ? "0.18em" : "0.22em",
@@ -568,17 +569,10 @@ function ScrollHint({ show, isSmall }: { show: boolean; isSmall: boolean }) {
             textShadow: "0 10px 30px rgba(0,0,0,0.35)",
           }}
         >
-          SCROLL <span style={{ display: "inline-block" }}>↓</span>
+          {t("scroll")}
         </div>
 
-        <div
-          style={{
-            marginTop: 10,
-            display: "flex",
-            justifyContent: "center",
-            opacity: 0.85,
-          }}
-        >
+        <div style={{ marginTop: 10, display: "flex", justifyContent: "center", opacity: 0.85 }}>
           <div
             className="animate-bounce"
             style={{
@@ -594,6 +588,7 @@ function ScrollHint({ show, isSmall }: { show: boolean; isSmall: boolean }) {
     </div>
   );
 }
+
 
 
 function GlobeScene({ progress, isSmall }: { progress: number; isSmall: boolean }) {

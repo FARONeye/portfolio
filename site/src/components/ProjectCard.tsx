@@ -26,6 +26,16 @@ export default function ProjectCard({
   onOpen,
   onBack,
   onEnter,
+
+  // ✅ i18n labels
+  backLabel,
+  openAriaLabel,
+  focusAriaLabel,
+  ctaKickerGrid,
+  ctaKickerFocus,
+  focusHeaderLeft,
+  focusHeaderRight,
+  enterButtonLabel,
 }: {
   data: ProjectCardData;
   variant?: "featured" | "side" | "focus";
@@ -33,14 +43,42 @@ export default function ProjectCard({
   onOpen?: (index: number) => void;
   onBack?: () => void;
   onEnter?: (href: string) => void;
+
+  backLabel: string;
+  openAriaLabel: (title: string) => string;
+  focusAriaLabel: (title: string) => string;
+  ctaKickerGrid: string;
+  ctaKickerFocus: string;
+  focusHeaderLeft: string;
+  focusHeaderRight: string;
+  enterButtonLabel: string;
 }) {
-  const { title, subtitle, imageUrl, href, index, kind, year, stack, accentFrom, accentVia, accentTo } = data;
+  const {
+    title,
+    subtitle,
+    imageUrl,
+    href,
+    index,
+    kind,
+    year,
+    stack,
+    accentFrom,
+    accentVia,
+    accentTo,
+  } = data;
 
   const ref = useRef<HTMLDivElement>(null);
 
   // Scroll reveal (only meaningful in grid)
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start 92%", "end 40%"] });
-  const p = useSpring(scrollYProgress, { stiffness: 120, damping: 20, mass: 0.35 });
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start 92%", "end 40%"],
+  });
+  const p = useSpring(scrollYProgress, {
+    stiffness: 120,
+    damping: 20,
+    mass: 0.35,
+  });
 
   const opacity = useTransform(p, [0, 0.15, 1], [0, 1, 1]);
   const y = useTransform(p, [0, 1], [32, 0]);
@@ -92,7 +130,6 @@ export default function ProjectCard({
       : "text-2xl sm:text-3xl";
 
   const paddingClass = variant === "focus" ? "p-10 sm:p-12" : "p-8 sm:p-10";
-
   const showStack = variant === "featured" || variant === "focus";
 
   const handleClick = () => {
@@ -124,7 +161,7 @@ export default function ProjectCard({
       onMouseLeave={() => mode === "grid" && setHovered(false)}
       transition={{ type: "spring", stiffness: 120, damping: 18, mass: 0.45 }}
       onClick={handleClick}
-      aria-label={mode === "grid" ? `${title} — ouvrir` : `${title} — focus`}
+      aria-label={mode === "grid" ? openAriaLabel(title) : focusAriaLabel(title)}
       role={mode === "grid" ? "button" : undefined}
     >
       {/* Poster background */}
@@ -168,7 +205,7 @@ export default function ProjectCard({
         ))}
       </div>
 
-      {/* Corner logo (Option A) */}
+      {/* Corner logo */}
       <div className="absolute top-6 right-6">
         <div
           className="absolute -inset-6 rounded-3xl blur-2xl opacity-35"
@@ -183,7 +220,11 @@ export default function ProjectCard({
           height={160}
           className={[
             "relative w-auto",
-            variant === "focus" ? "h-16 sm:h-20" : variant === "featured" ? "h-16 sm:h-20" : "h-12 sm:h-14",
+            variant === "focus"
+              ? "h-16 sm:h-20"
+              : variant === "featured"
+              ? "h-16 sm:h-20"
+              : "h-12 sm:h-14",
             "opacity-85 grayscale transition-all duration-500",
             "group-hover:opacity-100 group-hover:grayscale-0 group-hover:scale-[1.04]",
           ].join(" ")}
@@ -191,7 +232,7 @@ export default function ProjectCard({
         />
       </div>
 
-      {/* Back button (only in focus mode) */}
+      {/* Back button (focus mode only) */}
       {mode === "focus" && (
         <button
           type="button"
@@ -203,7 +244,7 @@ export default function ProjectCard({
           className="absolute top-6 left-6 z-20 inline-flex items-center gap-2 rounded-full border border-white/12 bg-black/35 px-4 py-2 text-[12px] text-white/85 backdrop-blur-md hover:bg-black/55 transition"
         >
           <ArrowLeft size={16} />
-          Retour
+          {backLabel}
         </button>
       )}
 
@@ -225,7 +266,9 @@ export default function ProjectCard({
           </span>
         </div>
 
-        <h3 className={`mt-5 font-black tracking-tight text-white leading-[1.02] ${titleClass}`}>
+        <h3
+          className={`mt-5 font-black tracking-tight text-white leading-[1.02] ${titleClass}`}
+        >
           {title}
         </h3>
 
@@ -236,11 +279,11 @@ export default function ProjectCard({
           <div className="mt-6 flex items-center gap-3 text-white/60">
             <Clapperboard size={18} />
             <span className="text-[11px] font-mono tracking-[0.28em] uppercase">
-              Feature Presentation
+              {focusHeaderLeft}
             </span>
             <span className="h-[1px] w-20 bg-white/10" />
             <span className="text-[11px] font-mono tracking-[0.28em] uppercase">
-              Cut • Light • Motion
+              {focusHeaderRight}
             </span>
           </div>
         )}
@@ -269,7 +312,7 @@ export default function ProjectCard({
               }}
             />
             <span className="text-[11px] tracking-[0.28em] text-white/70 font-mono uppercase">
-              {mode === "focus" ? "Enter the project" : "Open project"}
+              {mode === "focus" ? ctaKickerFocus : ctaKickerGrid}
             </span>
           </div>
 
@@ -283,7 +326,7 @@ export default function ProjectCard({
               }}
               className="group relative overflow-hidden rounded-full border border-white/15 bg-white/[0.06] px-6 py-3 text-sm font-semibold text-white backdrop-blur-md transition hover:bg-white/[0.10]"
             >
-              <span className="relative z-10">Entrer dans ce projet</span>
+              <span className="relative z-10">{enterButtonLabel}</span>
               <span
                 className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
                 style={{
@@ -292,7 +335,9 @@ export default function ProjectCard({
               />
             </button>
           ) : (
-            <span className="text-white/60 text-sm group-hover:text-white/85 transition">→</span>
+            <span className="text-white/60 text-sm group-hover:text-white/85 transition">
+              →
+            </span>
           )}
         </div>
       </div>

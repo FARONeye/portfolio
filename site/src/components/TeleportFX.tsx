@@ -1,6 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslations } from "next-intl";
 
 export default function TeleportFX({
   running,
@@ -11,6 +12,8 @@ export default function TeleportFX({
   onDone: () => void;
   duration?: number;
 }) {
+  const t = useTranslations("teleport");
+
   return (
     <AnimatePresence>
       {running && (
@@ -32,9 +35,9 @@ export default function TeleportFX({
 
           {/* Center */}
           <div className="absolute inset-0 grid place-items-center">
-            <div className="relative w-[360px]">
+            <div className="relative w-[360px] max-w-[86vw]">
               <div className="mb-3 text-center text-[11px] tracking-[0.4em] text-white/60 font-mono">
-                SECURE ACCESS
+                {t("secureAccess")}
               </div>
 
               <div className="relative h-[3px] overflow-hidden rounded-full bg-white/10">
@@ -54,7 +57,7 @@ export default function TeleportFX({
                 animate={{ opacity: 1 }}
                 transition={{ delay: duration * 0.6 }}
               >
-                ACCESS GRANTED
+                {t("accessGranted")}
               </motion.div>
             </div>
           </div>

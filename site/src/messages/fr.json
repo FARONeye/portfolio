@@ -4,5 +4,185 @@
     "projects": "Projets",
     "skills": "Compétences",
     "contact": "Contact"
+  },
+  "globe": {
+    "scroll": "SCROLL ↓",
+    "headlines": {
+      "h1": "SALUT, MOI C’EST MATHIS TRUONG",
+      "h2": "BIENVENUE SUR MON SITE",
+      "h3": "CONTINUE DE SCROLLER"
+    }
+  },
+  "parallax": {
+    "items": ["Étudiant", "Dev", "Français", "Bachelor", "21 ans"]
+  },
+  "about": {
+    "title": "Sélectionne ton personnage",
+    "intro": "Salut, moi c'est <name>Mathis</name>. Ici, tu peux explorer mon profil : identité, parcours, alternance et objectifs.",
+    "open": "Ouvrir la fiche",
+    "tip": "Astuce : dans la fiche, clique sur les 4 boutons autour du perso.",
+    "previewHint": "Clique pour inspecter le profil...",
+    "tooltip": "Clique pour ouvrir",
+    "summaryTitle": "Résumé du joueur",
+    "summary": {
+      "location": "Localisation",
+      "locationValue": "Paris • Île-de-France",
+      "role": "Rôle",
+      "roleValue": "Admin & Dev (Google Apps)",
+      "studies": "Études",
+      "studiesValue": "Bachelor CDA",
+      "company": "Entreprise",
+      "companyValue": "Air Liquide IT (GIO)",
+      "languages": "Langues",
+      "languagesValue": "FR • EN (C1) • ES (A1/A2) • VI (A1)",
+      "goal": "Objectif",
+      "goalValue": "RNCP 7 (Manager des Organisations IT)",
+      "status": "Statut",
+      "statusValue": "Alternance (non disponible)",
+      "xp": "XP",
+      "xpValue": "Niv. 21 • Depuis 09/2024 chez Air Liquide"
+    },
+    "right": {
+      "activeNode": "Nœud actif",
+      "placeholder": "SÉLECTIONNE UN SLOT\n(ORIGIN / STUDIES / WORK / GOALS)"
+    },
+    "persona": {
+      "origin": {
+        "slot": "ORIGINE",
+        "name": "Noyau d'identité",
+        "stats": [
+          { "label": "Né", "value": "France" },
+          { "label": "Origines", "value": "Vietnamiennes" },
+          { "label": "Base", "value": "Paris • Île-de-France" },
+          {
+            "label": "Langues",
+            "value": "FR (natif) • EN (C1) • ES (A1/A2) • VI (A1)"
+          },
+          { "label": "À apprendre", "value": "KR • JP • CN" }
+        ],
+        "desc": "Né en France, d’origine vietnamienne. Mon point d’ancrage : identité, langues, et ce que je construis.",
+        "realHobby": "Profil & identité"
+      },
+      "studies": {
+        "slot": "ÉTUDES",
+        "name": "Parcours",
+        "stats": [
+          { "label": "École", "value": "SMTech (ex WebTech Institute)" },
+          { "label": "Diplôme", "value": "Bachelor CDA" },
+          {
+            "label": "Rythme",
+            "value": "3 semaines entreprise / 1 semaine école"
+          },
+          {
+            "label": "Objectif",
+            "value": "RNCP 7 • Manager des Organisations (IT)"
+          }
+        ],
+        "desc": "Parcours structuré : je construis mes skills avec un rythme d’alternance exigeant, et une vision long-terme.",
+        "realHobby": "Études & progression"
+      },
+      "work": {
+        "slot": "TRAVAIL",
+        "name": "Contrat de guilde",
+        "stats": [
+          { "label": "Entreprise", "value": "Air Liquide IT" },
+          {
+            "label": "Équipe",
+            "value": "GIO (Global Infrastructure & Operations)"
+          },
+          { "label": "Rôle", "value": "Admin & Dev • Google Apps" },
+          { "label": "Cœur", "value": "Automatisation • Dev • Optimisation" }
+        ],
+        "desc": "Alternance côté IT Ops : automatiser, optimiser, livrer des solutions utiles — avec un focus Google & écosystème.",
+        "realHobby": "Air Liquide / IT Ops"
+      },
+      "goals": {
+        "slot": "OBJECTIFS",
+        "name": "Journal de quêtes",
+        "stats": [
+          {
+            "label": "Principal",
+            "value": "Faire grandir mes projets perso & ma créativité"
+          },
+          {
+            "label": "Focus",
+            "value": "Portfolio • sens produit • expérience"
+          },
+          {
+            "label": "Secondaires",
+            "value": "Ship régulièrement • améliorer le design • progresser en dev"
+          }
+        ],
+        "desc": "Roadmap : progresser via mes projets perso, explorer mes passions, et construire un univers cohérent.",
+        "realHobby": "Objectifs & ambitions"
+      }
+    }
+  },
+  "projects": {
+    "kicker": "PROJECT SHOWCASE",
+    "mode": { "grid": "GRID", "focus": "FOCUS" },
+    "title": "Projets",
+    "desc": {
+      "grid": "Clique sur une carte pour la mettre en avant (mode focus).",
+      "focus": "Mode focus : la carte prend toute la scène, sans overlay."
+    },
+    "card": {
+      "back": "Retour",
+      "enter": "Entrer dans ce projet",
+      "ctaGrid": "Ouvrir le projet",
+      "ctaFocus": "Entrer dans le projet",
+      "focusHeaderLeft": "Feature Presentation",
+      "focusHeaderRight": "Cut • Light • Motion",
+      "ariaOpen": "{title} — ouvrir",
+      "ariaFocus": "{title} — focus"
+    },
+    "items": {
+      "styx": {
+        "title": "Styx Mobile",
+        "subtitle": "Application pour rejoindre des matchs de foot",
+        "kind": "MOBILE"
+      },
+      "echoNoir": {
+        "title": "ECHO NOIR",
+        "subtitle": "Expérience 3D immersive & direction artistique sombre",
+        "kind": "IMMERSIVE"
+      },
+      "esportwear": {
+        "title": "Esportwear",
+        "subtitle": "E-commerce (Next + Stripe)",
+        "kind": "COMMERCE"
+      }
+    }
+  },
+    "skills": {
+    "title": "Explorer mon univers",
+    "subtitle": "Trois portails — PC à la souris, mobile à l’inclinaison du téléphone.",
+    "enter": "Entrer",
+    "portal": "ENTRER DANS LE PORTAIL",
+    "enableMotion": "Activer le mouvement",
+    "hubs": {
+      "travel": {
+        "title": "Voyages",
+        "subtitle": "Carnet d’exploration",
+        "description": "Pays visités, itinéraires, photos, histoires et inspirations qui nourrissent mon travail.",
+        "tag": "MONDE"
+      },
+      "passions": {
+        "title": "Passions",
+        "subtitle": "Création • Jeux • Culture",
+        "description": "Mes univers : gaming, musique, créativité, curiosités… tout ce qui me fait vibrer.",
+        "tag": "QUËTES SECONDAIRES"
+      },
+      "creation": {
+        "title": "Création",
+        "subtitle": "Projets personnels",
+        "description": "Expérimentations, idées, prototypes… un laboratoire où je teste des concepts visuels & techniques.",
+        "tag": "LABO"
+      }
+    }
+  },
+  "teleport": {
+    "secureAccess": "ACCES SÉCURISÉ",
+    "accessGranted": "ACCES AUTORISÉ"
   }
 }

@@ -3,21 +3,23 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import ProjectCard, { type ProjectCardData } from "./ProjectCard";
 import TeleportFX from "./TeleportFX";
 
 export default function ProjectsSection() {
   const router = useRouter();
+  const t = useTranslations("projects");
 
   const projects: ProjectCardData[] = useMemo(
     () => [
       {
-        title: "Styx Mobile",
-        subtitle: "Application pour rejoindre des matchs de foot",
+        title: t("items.styx.title"),
+        subtitle: t("items.styx.subtitle"),
         imageUrl: "/styx-logo.webp",
         href: "/projets/styx",
         index: 1,
-        kind: "MOBILE",
+        kind: t("items.styx.kind"),
         year: "2025",
         stack: ["React Native", "Symfony API", "MySQL", "UX Flow"],
         accentFrom: "#1F2A92",
@@ -25,12 +27,12 @@ export default function ProjectsSection() {
         accentTo: "#F472B6",
       },
       {
-        title: "ECHO NOIR",
-        subtitle: "Expérience 3D immersive & direction artistique sombre",
+        title: t("items.echoNoir.title"),
+        subtitle: t("items.echoNoir.subtitle"),
         imageUrl: "/echo-noir.webp",
         href: "/projets/echo-noir",
         index: 0,
-        kind: "IMMERSIVE",
+        kind: t("items.echoNoir.kind"),
         year: "2024",
         stack: ["Next.js", "R3F", "Framer Motion", "DA / Lighting"],
         accentFrom: "#9B1C31",
@@ -38,12 +40,12 @@ export default function ProjectsSection() {
         accentTo: "#FFFFFF",
       },
       {
-        title: "Esportwear",
-        subtitle: "E-commerce (Next + Stripe)",
+        title: t("items.esportwear.title"),
+        subtitle: t("items.esportwear.subtitle"),
         imageUrl: "/esportwear.webp",
         href: "/projets/esportwear",
         index: 2,
-        kind: "COMMERCE",
+        kind: t("items.esportwear.kind"),
         year: "2024",
         stack: ["Next.js", "Stripe", "UI System", "SEO"],
         accentFrom: "#0B3A6B",
@@ -51,7 +53,7 @@ export default function ProjectsSection() {
         accentTo: "#9B1C31",
       },
     ],
-    []
+    [t]
   );
 
   // index de la carte active (celui de tes ProjectCardData.index)
@@ -59,9 +61,7 @@ export default function ProjectsSection() {
   const [teleportHref, setTeleportHref] = useState<string | null>(null);
 
   const activeProject =
-    activeIndex === null
-      ? null
-      : projects.find((p) => p.index === activeIndex) ?? null;
+    activeIndex === null ? null : projects.find((p) => p.index === activeIndex) ?? null;
 
   const handleEnter = (href: string) => setTeleportHref(href);
   const handleBack = () => setActiveIndex(null);
@@ -80,21 +80,19 @@ export default function ProjectsSection() {
         {/* Header */}
         <div className="mb-10 sm:mb-14">
           <div className="flex items-center gap-4 text-[10px] tracking-[0.42em] text-white/40 font-mono uppercase">
-            <span>PROJECT SHOWCASE</span>
+            <span>{t("kicker")}</span>
             <span className="h-[1px] w-14 bg-white/10" />
-            <span>{activeIndex === null ? "GRID" : "FOCUS"}</span>
+            <span>{activeIndex === null ? t("mode.grid") : t("mode.focus")}</span>
           </div>
 
           <h2 className="mt-4 text-5xl sm:text-6xl font-black tracking-tight">
             <span className="bg-gradient-to-r from-[#9B1C31] via-[#6C1E80] to-white bg-clip-text text-transparent">
-              Projets
+              {t("title")}
             </span>
           </h2>
 
           <p className="mt-3 max-w-2xl text-white/60">
-            {activeIndex === null
-              ? "Clique sur une carte pour la mettre en avant (mode focus)."
-              : "Mode focus : la carte prend toute la scène, sans overlay."}
+            {activeIndex === null ? t("desc.grid") : t("desc.focus")}
           </p>
         </div>
 
@@ -120,6 +118,14 @@ export default function ProjectsSection() {
                     mode="grid"
                     onOpen={(i) => setActiveIndex(i)}
                     onEnter={handleEnter}
+                    backLabel={t("card.back")}
+                    openAriaLabel={(title) => t("card.ariaOpen", { title })}
+                    focusAriaLabel={(title) => t("card.ariaFocus", { title })}
+                    ctaKickerGrid={t("card.ctaGrid")}
+                    ctaKickerFocus={t("card.ctaFocus")}
+                    focusHeaderLeft={t("card.focusHeaderLeft")}
+                    focusHeaderRight={t("card.focusHeaderRight")}
+                    enterButtonLabel={t("card.enter")}
                   />
                 </div>
 
@@ -132,6 +138,14 @@ export default function ProjectsSection() {
                       mode="grid"
                       onOpen={(i) => setActiveIndex(i)}
                       onEnter={handleEnter}
+                      backLabel={t("card.back")}
+                      openAriaLabel={(title) => t("card.ariaOpen", { title })}
+                      focusAriaLabel={(title) => t("card.ariaFocus", { title })}
+                      ctaKickerGrid={t("card.ctaGrid")}
+                      ctaKickerFocus={t("card.ctaFocus")}
+                      focusHeaderLeft={t("card.focusHeaderLeft")}
+                      focusHeaderRight={t("card.focusHeaderRight")}
+                      enterButtonLabel={t("card.enter")}
                     />
                   </div>
                   <div className="min-h-[240px] sm:min-h-[250px]">
@@ -141,13 +155,21 @@ export default function ProjectsSection() {
                       mode="grid"
                       onOpen={(i) => setActiveIndex(i)}
                       onEnter={handleEnter}
+                      backLabel={t("card.back")}
+                      openAriaLabel={(title) => t("card.ariaOpen", { title })}
+                      focusAriaLabel={(title) => t("card.ariaFocus", { title })}
+                      ctaKickerGrid={t("card.ctaGrid")}
+                      ctaKickerFocus={t("card.ctaFocus")}
+                      focusHeaderLeft={t("card.focusHeaderLeft")}
+                      focusHeaderRight={t("card.focusHeaderRight")}
+                      enterButtonLabel={t("card.enter")}
                     />
                   </div>
                 </div>
               </motion.div>
             )}
 
-            {/* Mode FOCUS (in-place, sans overlay) */}
+            {/* Mode FOCUS */}
             {activeIndex !== null && activeProject && (
               <motion.div
                 key="focus"
@@ -164,6 +186,14 @@ export default function ProjectsSection() {
                   mode="focus"
                   onBack={handleBack}
                   onEnter={handleEnter}
+                  backLabel={t("card.back")}
+                  openAriaLabel={(title) => t("card.ariaOpen", { title })}
+                  focusAriaLabel={(title) => t("card.ariaFocus", { title })}
+                  ctaKickerGrid={t("card.ctaGrid")}
+                  ctaKickerFocus={t("card.ctaFocus")}
+                  focusHeaderLeft={t("card.focusHeaderLeft")}
+                  focusHeaderRight={t("card.focusHeaderRight")}
+                  enterButtonLabel={t("card.enter")}
                 />
               </motion.div>
             )}

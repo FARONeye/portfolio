@@ -4,5 +4,177 @@
     "projects": "Projects",
     "skills": "Skills",
     "contact": "Contact"
+  },
+  "globe": {
+    "scroll": "SCROLL ↓",
+    "headlines": {
+      "h1": "HELLO, I AM MATHIS TRUONG",
+      "h2": "WELCOME TO MY WEBSITE",
+      "h3": "KEEP SCROLLING TO CONTINUE"
+    }
+  },
+  "parallax": {
+    "items": ["Student", "Dev", "French", "Bachelor", "21 yo"]
+  },
+  "about": {
+    "title": "Select Your Character",
+    "intro": "Hello, I'm <name>Mathis</name>. Here you can explore my profile: identity, education, apprenticeship and goals.",
+    "open": "Open Character Sheet",
+    "tip": "Tip: in the sheet, click the 4 buttons around the character.",
+    "previewHint": "Click to inspect profile...",
+    "tooltip": "Click to open",
+    "summaryTitle": "Player Summary",
+    "summary": {
+      "location": "Location",
+      "locationValue": "Paris • Île-de-France",
+      "role": "Role",
+      "roleValue": "Admin & Dev (Google Apps)",
+      "studies": "Studies",
+      "studiesValue": "Bachelor CDA",
+      "company": "Company",
+      "companyValue": "Air Liquide IT (GIO)",
+      "languages": "Languages",
+      "languagesValue": "FR • EN (C1) • ES (A1/A2) • VI (A1)",
+      "goal": "Goal",
+      "goalValue": "RNCP 7 (IT Organization Manager)",
+      "status": "Status",
+      "statusValue": "Apprenticeship (not available)",
+      "xp": "XP",
+      "xpValue": "Lvl 21 • Since 09/2024 @ Air Liquide"
+    },
+    "right": {
+      "activeNode": "Active Node",
+      "placeholder": "SELECT A SLOT\n(ORIGIN / STUDIES / WORK / GOALS)"
+    },
+    "persona": {
+      "origin": {
+        "slot": "ORIGIN",
+        "name": "Identity Core",
+        "stats": [
+          { "label": "Born", "value": "France" },
+          { "label": "Origins", "value": "Vietnamese" },
+          { "label": "Base", "value": "Paris • Île-de-France" },
+          {
+            "label": "Languages",
+            "value": "FR (native) • EN (C1) • ES (A1/A2) • VI (A1)"
+          },
+          { "label": "Learning", "value": "KR • JP • CN" }
+        ],
+        "desc": "Born in France with Vietnamese roots. My anchor point: identity, languages, and what I build.",
+        "realHobby": "Profile & identity"
+      },
+      "studies": {
+        "slot": "STUDIES",
+        "name": "Learning Path",
+        "stats": [
+          { "label": "School", "value": "SMTech (ex WebTech Institute)" },
+          { "label": "Degree", "value": "Bachelor CDA" },
+          { "label": "Cadence", "value": "3 weeks company / 1 week school" },
+          { "label": "Next", "value": "RNCP 7 • IT Organization Manager" }
+        ],
+        "desc": "A structured path: I build skills with a demanding apprenticeship rhythm and a long-term vision.",
+        "realHobby": "Studies & progression"
+      },
+      "work": {
+        "slot": "WORK",
+        "name": "Guild Contract",
+        "stats": [
+          { "label": "Company", "value": "Air Liquide IT" },
+          {
+            "label": "Team",
+            "value": "GIO (Global Infrastructure & Operations)"
+          },
+          { "label": "Role", "value": "Admin & Dev • Google Apps" },
+          { "label": "Core", "value": "Automation • Dev • Optimization" }
+        ],
+        "desc": "Apprenticeship in IT Ops: automate, optimize, ship useful solutions — with a Google ecosystem focus.",
+        "realHobby": "Air Liquide / IT Ops"
+      },
+      "goals": {
+        "slot": "GOALS",
+        "name": "Quest Log",
+        "stats": [
+          { "label": "Main", "value": "Grow personal projects & creativity" },
+          {
+            "label": "Focus",
+            "value": "Portfolio • Product sense • Experience"
+          },
+          {
+            "label": "Secondary",
+            "value": "Ship consistently • Improve design • Level-up dev"
+          }
+        ],
+        "desc": "Roadmap: progress through personal projects, explore my passions, and build a coherent universe.",
+        "realHobby": "Goals & ambitions"
+      }
+    }
+  },
+
+  "projects": {
+    "kicker": "PROJECT SHOWCASE",
+    "mode": { "grid": "GRID", "focus": "FOCUS" },
+    "title": "Projects",
+    "desc": {
+      "grid": "Click on a card to highlight it (focus mode).",
+      "focus": "Focus mode: the card takes the whole scene, no overlay."
+    },
+    "card": {
+      "back": "Back",
+      "enter": "Enter this project",
+      "ctaGrid": "Open project",
+      "ctaFocus": "Enter the project",
+      "focusHeaderLeft": "Feature Presentation",
+      "focusHeaderRight": "Cut • Light • Motion",
+      "ariaOpen": "{title} — open",
+      "ariaFocus": "{title} — focus"
+    },
+    "items": {
+      "styx": {
+        "title": "Styx Mobile",
+        "subtitle": "App to join nearby football matches",
+        "kind": "MOBILE"
+      },
+      "echoNoir": {
+        "title": "ECHO NOIR",
+        "subtitle": "Immersive 3D experience & dark art direction",
+        "kind": "IMMERSIVE"
+      },
+      "esportwear": {
+        "title": "Esportwear",
+        "subtitle": "E-commerce (Next + Stripe)",
+        "kind": "COMMERCE"
+      }
+    }
+  },
+    "skills": {
+    "title": "Explore my universe",
+    "subtitle": "Three portals — mouse on desktop, phone tilt on mobile.",
+    "enter": "Enter",
+    "portal": "ENTER PORTAL",
+    "enableMotion": "Enable Motion",
+    "hubs": {
+      "travel": {
+        "title": "Travel",
+        "subtitle": "Exploration journal",
+        "description": "Visited countries, itineraries, photos, stories and inspirations that fuel my work.",
+        "tag": "WORLD MODE"
+      },
+      "passions": {
+        "title": "Passions",
+        "subtitle": "Creation • Games • Culture",
+        "description": "My worlds: gaming, music, creativity, curiosities… everything that makes me feel alive.",
+        "tag": "SIDE QUESTS"
+      },
+      "creation": {
+        "title": "Creation",
+        "subtitle": "Personal projects",
+        "description": "Experiments, ideas, prototypes… a lab where I test visual & technical concepts.",
+        "tag": "LAB"
+      }
+    }
+  },
+  "teleport": {
+    "secureAccess": "SECURE ACCESS",
+    "accessGranted": "ACCESS GRANTED"
   }
 }
