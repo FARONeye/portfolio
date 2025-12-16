@@ -184,5 +184,22 @@
   "teleport": {
     "secureAccess": "ACCES SÉCURISÉ",
     "accessGranted": "ACCES AUTORISÉ"
+  },
+  "contact": {
+    "title": "Entrons en contact",
+    "subtitle": "Une idée, un projet, ou juste l’envie de créer quelque chose de beau\u00a0?",
+    "subject": "Contact — Portfolio",
+    "subjectWithName": "Contact — {name}",
+    "ctaGmail": "Ouvrir Gmail (prérempli)",
+    "ctaMailto": "Ouvrir Mail (fallback)",
+    "note": "Le message est prérempli. Il ne reste plus qu’à cliquer sur Envoyer dans Gmail.",
+    "form": {
+      "nameLabel": "Nom",
+      "namePlaceholder": "Ton nom",
+      "emailLabel": "Email",
+      "emailPlaceholder": "ton@email.com",
+      "messageLabel": "Message",
+      "messagePlaceholder": "Écris ton message ici…"
+    }
   }
 }

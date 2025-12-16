@@ -2,14 +2,14 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import ProjectCard, { type ProjectCardData } from "./ProjectCard";
-import TeleportFX from "./TeleportFX";
+import { useTeleport } from "@/components/TeleportProvider";
 
 export default function ProjectsSection() {
-  const router = useRouter();
   const t = useTranslations("projects");
+  const locale = useLocale();
+  const { startTeleport } = useTeleport();
 
   const projects: ProjectCardData[] = useMemo(
     () => [
@@ -17,7 +17,7 @@ export default function ProjectsSection() {
         title: t("items.styx.title"),
         subtitle: t("items.styx.subtitle"),
         imageUrl: "/styx-logo.webp",
-        href: "/projets/styx",
+        href: `/${locale}/projects/en-cours?p=styx`,
         index: 1,
         kind: t("items.styx.kind"),
         year: "2025",
@@ -30,7 +30,7 @@ export default function ProjectsSection() {
         title: t("items.echoNoir.title"),
         subtitle: t("items.echoNoir.subtitle"),
         imageUrl: "/echo-noir.webp",
-        href: "/projets/echo-noir",
+        href: `/${locale}/projects/en-cours?p=echo-noir`,
         index: 0,
         kind: t("items.echoNoir.kind"),
         year: "2024",
@@ -43,7 +43,7 @@ export default function ProjectsSection() {
         title: t("items.esportwear.title"),
         subtitle: t("items.esportwear.subtitle"),
         imageUrl: "/esportwear.webp",
-        href: "/projets/esportwear",
+        href: `/${locale}/projects/en-cours?p=esportwear`,
         index: 2,
         kind: t("items.esportwear.kind"),
         year: "2024",
@@ -53,21 +53,26 @@ export default function ProjectsSection() {
         accentTo: "#9B1C31",
       },
     ],
-    [t]
+    [t, locale]
   );
 
-  // index de la carte active (celui de tes ProjectCardData.index)
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const [teleportHref, setTeleportHref] = useState<string | null>(null);
 
   const activeProject =
-    activeIndex === null ? null : projects.find((p) => p.index === activeIndex) ?? null;
+    activeIndex === null
+      ? null
+      : projects.find((p) => p.index === activeIndex) ?? null;
 
-  const handleEnter = (href: string) => setTeleportHref(href);
+  // ✅ Lance le portail + push immédiatement, et le FX reste le temps du chargement (min 1.5s)
+  const handleEnter = (href: string) => startTeleport(href, { minMs: 1500 });
+
   const handleBack = () => setActiveIndex(null);
 
   return (
-    <section id="projects" className="relative bg-[#0A0A0B] py-24 overflow-hidden">
+    <section
+      id="projects"
+      className="relative bg-[#0A0A0B] py-24 overflow-hidden"
+    >
       {/* Ambient */}
       <div className="pointer-events-none absolute inset-0 cinematic-vignette opacity-80" />
       <div className="pointer-events-none absolute inset-0 cinematic-grain opacity-55" />
@@ -82,7 +87,9 @@ export default function ProjectsSection() {
           <div className="flex items-center gap-4 text-[10px] tracking-[0.42em] text-white/40 font-mono uppercase">
             <span>{t("kicker")}</span>
             <span className="h-[1px] w-14 bg-white/10" />
-            <span>{activeIndex === null ? t("mode.grid") : t("mode.focus")}</span>
+            <span>
+              {activeIndex === null ? t("mode.grid") : t("mode.focus")}
+            </span>
           </div>
 
           <h2 className="mt-4 text-5xl sm:text-6xl font-black tracking-tight">
@@ -148,6 +155,7 @@ export default function ProjectsSection() {
                       enterButtonLabel={t("card.enter")}
                     />
                   </div>
+
                   <div className="min-h-[240px] sm:min-h-[250px]">
                     <ProjectCard
                       data={projects[2]}
@@ -200,17 +208,6 @@ export default function ProjectsSection() {
           </AnimatePresence>
         </motion.div>
       </div>
-
-      {/* Teleportation FX */}
-      <TeleportFX
-        running={teleportHref !== null}
-        duration={1.5}
-        onDone={() => {
-          const target = teleportHref;
-          setTeleportHref(null);
-          if (target) router.push(target);
-        }}
-      />
     </section>
   );
 }

@@ -37,14 +37,27 @@ export default function Navbar() {
               "[&::-webkit-scrollbar]:hidden",
             ].join(" ")}
           >
-            <ul className="flex items-center gap-3 md:gap-6 text-[12px] md:text-sm text-zinc-300 whitespace-nowrap pr-2">
+            <ul
+              className={[
+                "flex items-center whitespace-nowrap text-[12px] md:text-sm text-zinc-300",
+                // ✅ MOBILE: prend toute la place et répartit les liens
+                "w-full justify-between gap-0",
+                // ✅ DESKTOP: comportement normal
+                "md:w-auto md:justify-start md:gap-6",
+                // petit padding pour respirer avant le switcher
+                "pr-2",
+              ].join(" ")}
+            >
               <li>
                 <a href="#about" className="hover:text-white transition-colors">
                   {t("about")}
                 </a>
               </li>
               <li>
-                <a href="#projects" className="hover:text-white transition-colors">
+                <a
+                  href="#projects"
+                  className="hover:text-white transition-colors"
+                >
                   {t("projects")}
                 </a>
               </li>
@@ -54,7 +67,10 @@ export default function Navbar() {
                 </a>
               </li>
               <li>
-                <a href="#contact" className="hover:text-white transition-colors">
+                <a
+                  href="#contact"
+                  className="hover:text-white transition-colors"
+                >
                   {t("contact")}
                 </a>
               </li>

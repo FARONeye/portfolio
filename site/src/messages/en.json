@@ -176,5 +176,22 @@
   "teleport": {
     "secureAccess": "SECURE ACCESS",
     "accessGranted": "ACCESS GRANTED"
+  },
+  "contact": {
+    "title": "Let’s connect",
+    "subtitle": "An idea, a project, or simply the desire to create something beautiful?",
+    "subject": "Contact — Portfolio",
+    "subjectWithName": "Contact — {name}",
+    "ctaGmail": "Open Gmail (prefilled)",
+    "ctaMailto": "Open Mail (fallback)",
+    "note": "The email is prefilled. You just need to hit Send in Gmail.",
+    "form": {
+      "nameLabel": "Name",
+      "namePlaceholder": "Your name",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@email.com",
+      "messageLabel": "Message",
+      "messagePlaceholder": "Write your message here…"
+    }
   }
 }

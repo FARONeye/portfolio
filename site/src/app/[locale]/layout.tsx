@@ -3,6 +3,8 @@ import { NextIntlClientProvider } from "next-intl";
 import { notFound } from "next/navigation";
 import { getMessages } from "next-intl/server";
 import LangAttributeSync from "@/components/LangAttributeSync";
+import { TeleportProvider } from "@/components/TeleportProvider";
+
 
 const locales = ["en", "fr"] as const;
 type AppLocale = (typeof locales)[number];
@@ -28,7 +30,9 @@ export default async function LocaleLayout({
     <NextIntlClientProvider locale={locale} messages={messages}>
       {/* Optionnel mais utile : met à jour <html lang=".."> côté client */}
       <LangAttributeSync locale={locale} />
-      {children}
+
+      {/* ✅ FX global (survit aux changements de page) */}
+      <TeleportProvider>{children}</TeleportProvider>
     </NextIntlClientProvider>
   );
 }

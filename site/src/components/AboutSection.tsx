@@ -163,7 +163,8 @@ function isPersonaI18n(v: unknown): v is PersonaI18n {
         stats: p.origin.stats,
         desc: p.origin.desc,
         realHobby: p.origin.realHobby,
-        position: "top-6 left-4 md:top-20 md:left-20",
+        // mobile un poil plus “aéré”
+        position: "top-6 left-3 sm:top-8 sm:left-4 md:top-20 md:left-20",
       },
       {
         id: "studies",
@@ -174,7 +175,9 @@ function isPersonaI18n(v: unknown): v is PersonaI18n {
         stats: p.studies.stats,
         desc: p.studies.desc,
         realHobby: p.studies.realHobby,
-        position: "top-1/2 -translate-y-1/2 left-4 md:left-10",
+        // mobile: légèrement plus bas que work
+        position:
+          "top-[58%] -translate-y-1/2 left-3 sm:top-1/2 sm:-translate-y-1/2 sm:left-4 md:left-10",
       },
       {
         id: "work",
@@ -185,7 +188,9 @@ function isPersonaI18n(v: unknown): v is PersonaI18n {
         stats: p.work.stats,
         desc: p.work.desc,
         realHobby: p.work.realHobby,
-        position: "top-1/2 -translate-y-1/2 right-4 md:right-10",
+        // mobile: un peu plus haut pour éviter goals
+        position:
+          "top-[40%] -translate-y-1/2 right-3 sm:top-1/2 sm:-translate-y-1/2 sm:right-4 md:right-10",
       },
       {
         id: "goals",
@@ -196,7 +201,8 @@ function isPersonaI18n(v: unknown): v is PersonaI18n {
         stats: p.goals.stats,
         desc: p.goals.desc,
         realHobby: p.goals.realHobby,
-        position: "bottom-24 right-6 md:bottom-20 md:right-20",
+        // mobile: beaucoup plus bas (et un peu plus “inset”)
+        position: "bottom-8 right-3 sm:bottom-16 sm:right-4 md:bottom-20 md:right-20",
       },
     ];
   }, [t]);
