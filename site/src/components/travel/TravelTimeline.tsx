@@ -24,7 +24,8 @@ type Trip = {
 };
 
 type Stop = Trip & {
-  x: number;
+  x: number; // desktop position
+  y: number; // mobile position
   year: number;
   dateLabel: string;
   durationDays: number;
@@ -45,6 +46,20 @@ function useViewport() {
   }, []);
 
   return { vw, vh };
+}
+
+function useIsMobile(breakpointPx = 768) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia(`(max-width:${breakpointPx - 1}px)`);
+    const onChange = () => setIsMobile(mq.matches);
+    onChange();
+    mq.addEventListener?.("change", onChange);
+    return () => mq.removeEventListener?.("change", onChange);
+  }, [breakpointPx]);
+
+  return isMobile;
 }
 
 function iso(y: number, m: number, d: number) {
@@ -243,6 +258,8 @@ function TravelCard({
   topY,
   midY,
   botY,
+  isMobile,
+  mobileLineX,
 }: {
   stop: Stop;
   unlocked: boolean;
@@ -250,6 +267,8 @@ function TravelCard({
   topY: number;
   midY: number;
   botY: number;
+  isMobile: boolean;
+  mobileLineX: number;
 }) {
   const fog = near ? 0 : unlocked ? 0.28 : 0.70;
   const sat = unlocked ? 1 : 0;
@@ -257,8 +276,130 @@ function TravelCard({
 
   const flag = flagFromCode(stop.country);
 
-  const y =
-    stop.lane === -1 ? topY : stop.lane === 1 ? botY : midY;
+  if (isMobile) {
+    const left = mobileLineX + 34;
+    const width = clamp(Math.round(window.innerWidth - left - 18), 280, 520);
+
+    return (
+      <div
+        className="absolute"
+        style={{
+          left,
+          top: stop.y,
+          transform: "translateY(-50%)",
+          width,
+          maxWidth: "92vw",
+          pointerEvents: "none",
+        }}
+      >
+        <div
+          className="relative rounded-[20px] border border-white/12 bg-black/55 backdrop-blur-xl shadow-[0_28px_110px_rgba(0,0,0,0.70)] overflow-hidden"
+          style={{
+            filter: `saturate(${sat})`,
+            opacity,
+          }}
+        >
+          <div
+            className="absolute inset-0"
+            style={{
+              background: `radial-gradient(560px 220px at 12% 40%, ${stop.accent}20, transparent 60%),
+                           radial-gradient(520px 240px at 85% 55%, rgba(255,255,255,0.08), transparent 62%),
+                           linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0.80))`,
+            }}
+          />
+
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "radial-gradient(520px 160px at 45% 35%, rgba(255,255,255,0.12), transparent 66%), linear-gradient(180deg, rgba(0,0,0,0.35), rgba(0,0,0,0.78))",
+              opacity: fog,
+              transition: "opacity 420ms ease",
+            }}
+          />
+
+          <div className="absolute right-0 top-0 h-full w-[40%]">
+            {stop.imageUrl ? (
+              <div className="absolute inset-0 opacity-[0.92]">
+                <Image
+                  src={stop.imageUrl}
+                  alt={stop.places}
+                  fill
+                  sizes="(max-width: 640px) 40vw, 240px"
+                  className="object-cover"
+                  priority={false}
+                />
+                <div className="absolute inset-0 bg-[linear-gradient(to_left,rgba(0,0,0,0.78),transparent_55%)]" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_35%,rgba(155,28,49,0.16),transparent_62%)]" />
+              </div>
+            ) : (
+              <div className="absolute inset-0 opacity-[0.20]">
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background: `radial-gradient(240px 240px at 30% 35%, ${stop.accent}55, transparent 65%),
+                                 radial-gradient(210px 210px at 70% 65%, rgba(255,255,255,0.18), transparent 70%)`,
+                  }}
+                />
+              </div>
+            )}
+            <div className="absolute inset-0 [mask-image:linear-gradient(to_left,black,transparent)] bg-[linear-gradient(to_bottom,rgba(0,0,0,0.12),rgba(0,0,0,0.70))]" />
+          </div>
+
+          <div className="relative z-10 p-4 pr-6">
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <div className="flex items-center gap-3">
+                  <div className="text-[11px] font-mono tracking-[0.30em] text-white/55 uppercase">
+                    {stop.year}
+                  </div>
+
+                  <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-3 py-1 text-[10px] font-mono tracking-[0.16em] text-white/85 backdrop-blur-md">
+                    <span className="text-[14px] leading-none">{flag}</span>
+                    <span className="opacity-80">{stop.country}</span>
+                  </span>
+                </div>
+
+                <div className="mt-2 text-[20px] sm:text-[22px] font-semibold text-white/92 leading-tight">
+                  {stop.places}
+                </div>
+
+                <div className="mt-1 text-[10px] font-mono tracking-[0.16em] text-white/55 uppercase">
+                  {stop.dateLabel} · {stop.durationDays}j
+                </div>
+              </div>
+
+              <div className="flex flex-col items-end gap-2">
+                <KindBadge kind={stop.kind} />
+                <div
+                  className="h-3 w-3 rounded-full"
+                  style={{
+                    background: unlocked ? stop.accent : "rgba(255,255,255,0.22)",
+                    boxShadow: unlocked ? `0 0 18px ${stop.accent}88` : "none",
+                  }}
+                />
+              </div>
+            </div>
+
+            <div
+              className="mt-3 text-[13px] text-white/72 leading-relaxed max-w-[58ch]"
+              style={clampText2LinesStyle()}
+            >
+              {stop.mood}
+            </div>
+
+            <div
+              className="mt-3 h-[2px] w-16 rounded-full"
+              style={{ background: stop.accent, opacity: unlocked ? 0.8 : 0.25 }}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // desktop (inchangé)
+  const y = stop.lane === -1 ? topY : stop.lane === 1 ? botY : midY;
 
   return (
     <div
@@ -279,7 +420,6 @@ function TravelCard({
           opacity,
         }}
       >
-        {/* fond interne */}
         <div
           className="absolute inset-0"
           style={{
@@ -289,7 +429,6 @@ function TravelCard({
           }}
         />
 
-        {/* Fog */}
         <div
           className="absolute inset-0"
           style={{
@@ -300,7 +439,6 @@ function TravelCard({
           }}
         />
 
-        {/* zone image à droite */}
         <div className="absolute right-0 top-0 h-full w-[42%]">
           {stop.imageUrl ? (
             <div className="absolute inset-0 opacity-[0.92]">
@@ -384,11 +522,17 @@ function TravelCard({
 export default function TravelTimeline() {
   const locale = useLocale();
   const { vw, vh } = useViewport();
+  const isMobile = useIsMobile(768);
 
+  // Desktop anchor
   const centerX = Math.round(vw * 0.5);
   const baselineY = Math.round(vh * 0.54);
 
-  // ✅ Zone safe header : évite que les cartes “haut” passent derrière le titre
+  // Mobile anchor (line left + point centered vertically)
+  const mobileLineX = vw < 420 ? 22 : 28;
+  const centerY = Math.round(vh * 0.52);
+
+  // ✅ Zone safe header : évite que les cartes “haut” passent derrière le titre (desktop)
   const HEADER_SAFE = vw < 640 ? 165 : 210;
   const TOP_LANE_Y = Math.max(HEADER_SAFE + 55, Math.round(vh * 0.30));
   const MID_LANE_Y = baselineY - 8;
@@ -766,31 +910,45 @@ export default function TravelTimeline() {
   const stops: Stop[] = useMemo(() => {
     const sorted = [...trips].sort((a, b) => parseISO(a.start) - parseISO(b.start));
 
-    const START_OFFSET = 180;
-    const BASE_GAP = 420;
-    const PER_DAY = 18;
-    const EXTRA_YEAR = 120;
+    // desktop spacing
+    const START_OFFSET_X = 180;
+    const BASE_GAP_X = 420;
+    const PER_DAY_X = 18;
+    const EXTRA_YEAR_X = 120;
 
-    let x = START_OFFSET;
+    // mobile spacing
+    const START_OFFSET_Y = 220;
+    const BASE_GAP_Y = 260;
+    const PER_DAY_Y = 10;
+    const EXTRA_YEAR_Y = 90;
+
+    let x = START_OFFSET_X;
+    let y = START_OFFSET_Y;
+
     let prevYear = new Date(parseISO(sorted[0]?.start ?? iso(2018, 1, 1))).getFullYear();
 
     return sorted.map((t) => {
-      const y = new Date(parseISO(t.start)).getFullYear();
+      const yr = new Date(parseISO(t.start)).getFullYear();
       const dur = daysBetween(t.start, t.end);
 
-      const jump = Math.max(0, y - prevYear);
-      if (jump > 0) x += jump * EXTRA_YEAR;
+      const jump = Math.max(0, yr - prevYear);
+      if (jump > 0) {
+        x += jump * EXTRA_YEAR_X;
+        y += jump * EXTRA_YEAR_Y;
+      }
 
       const s: Stop = {
         ...t,
         x,
-        year: y,
+        y,
+        year: yr,
         dateLabel: formatDateRangeDeterministic(t.start, t.end, locale),
         durationDays: dur,
       };
 
-      x += BASE_GAP + dur * PER_DAY;
-      prevYear = y;
+      x += BASE_GAP_X + dur * PER_DAY_X;
+      y += BASE_GAP_Y + dur * PER_DAY_Y;
+      prevYear = yr;
       return s;
     });
   }, [trips, locale]);
@@ -801,17 +959,30 @@ export default function TravelTimeline() {
     return Math.max(end, vw + 400);
   }, [stops, vw]);
 
+  const contentHeight = useMemo(() => {
+    const last = stops[stops.length - 1];
+    const end = (last?.y ?? 0) + 520;
+    return Math.max(end, vh + 420);
+  }, [stops, vh]);
+
   const target = useMotionValue(0);
   const progress = useSpring(target, { stiffness: 70, damping: 22, mass: 0.9 });
 
-  const maxProgress = Math.max(0, contentWidth - centerX - 120);
+  // bounds
+  const maxProgressDesktop = Math.max(0, contentWidth - centerX - 120);
+  const maxProgressMobile = Math.max(0, contentHeight - centerY - 140);
   const minProgress = 0;
 
-  const worldX = useTransform(progress, (p) => centerX - p);
+  const maxProgress = isMobile ? maxProgressMobile : maxProgressDesktop;
+
+  const worldX = useTransform(progress, (p) => (isMobile ? 0 : centerX - p));
+  const worldY = useTransform(progress, (p) => (isMobile ? centerY - p : 0));
 
   const viewportRef = useRef<HTMLElement | null>(null);
 
+  // Desktop wheel -> horizontal advance
   useEffect(() => {
+    if (isMobile) return;
     const el = viewportRef.current;
     if (!el) return;
 
@@ -819,25 +990,46 @@ export default function TravelTimeline() {
       e.preventDefault();
       const raw = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
       const delta = raw * 0.9;
-      const next = clamp(target.get() + delta, minProgress, maxProgress);
+      const next = clamp(target.get() + delta, minProgress, maxProgressDesktop);
       target.set(next);
     };
 
     el.addEventListener("wheel", onWheel, { passive: false });
     return () => el.removeEventListener("wheel", onWheel);
-  }, [target, minProgress, maxProgress]);
+  }, [isMobile, target, maxProgressDesktop]);
 
-  const dragRef = useRef<{ x: number; p: number } | null>(null);
+  // Mobile wheel (trackpad) -> vertical advance (sans preventDefault)
+  useEffect(() => {
+    if (!isMobile) return;
+    const el = viewportRef.current;
+    if (!el) return;
+
+    const onWheel = (e: WheelEvent) => {
+      const delta = e.deltaY * 0.9;
+      const next = clamp(target.get() + delta, minProgress, maxProgressMobile);
+      target.set(next);
+    };
+
+    el.addEventListener("wheel", onWheel, { passive: true });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, [isMobile, target, maxProgressMobile]);
+
+  const dragRef = useRef<{ pos: number; p: number } | null>(null);
 
   const onPointerDown = (e: React.PointerEvent<HTMLElement>) => {
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-    dragRef.current = { x: e.clientX, p: target.get() };
+    dragRef.current = { pos: isMobile ? e.clientY : e.clientX, p: target.get() };
   };
 
   const onPointerMove = (e: React.PointerEvent<HTMLElement>) => {
     if (!dragRef.current) return;
-    const dx = e.clientX - dragRef.current.x;
-    const next = clamp(dragRef.current.p - dx * 1.12, minProgress, maxProgress);
+
+    const current = isMobile ? e.clientY : e.clientX;
+    const d = current - dragRef.current.pos;
+
+    // desktop: drag right -> go back (p - dx)
+    // mobile: drag down -> go back (p - dy)
+    const next = clamp(dragRef.current.p - d * 1.12, minProgress, maxProgress);
     target.set(next);
   };
 
@@ -856,7 +1048,7 @@ export default function TravelTimeline() {
   }, [progress]);
 
   const visibleUntil = pNow + PATH_AHEAD;
-  const pointXInWorld = pNow;
+  const pointPosInWorld = pNow;
 
   const backHref = `/${locale}`;
 
@@ -870,6 +1062,9 @@ export default function TravelTimeline() {
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerUp}
+      style={{
+        touchAction: isMobile ? "pan-y" : "pan-x",
+      }}
     >
       <div className="pointer-events-none absolute inset-0 z-[1]">
         <div className="absolute inset-0 opacity-70 [background:radial-gradient(1100px_520px_at_18%_20%,rgba(155,28,49,0.18),transparent_62%),radial-gradient(900px_520px_at_92%_30%,rgba(108,30,128,0.16),transparent_64%),radial-gradient(1200px_820px_at_50%_70%,rgba(0,0,0,0.60),rgba(0,0,0,0.92))]" />
@@ -886,7 +1081,7 @@ export default function TravelTimeline() {
           <div className="pointer-events-auto absolute left-0 top-0">
             <Link
               href={backHref}
-              onPointerDown={(e) => e.stopPropagation()} // évite de déclencher le drag
+              onPointerDown={(e) => e.stopPropagation()}
               onMouseDown={(e) => e.stopPropagation()}
               className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/40 px-4 py-2 text-[11px] font-mono tracking-[0.20em] text-white/85 backdrop-blur-md hover:bg-black/55 transition"
             >
@@ -911,100 +1106,224 @@ export default function TravelTimeline() {
         </div>
       </div>
 
-      {/* Contenu */}
-      <motion.div className="absolute inset-0 z-[4]" style={{ x: worldX }} aria-hidden="true">
-        <svg width={contentWidth} height={vh} viewBox={`0 0 ${contentWidth} ${vh}`} className="absolute left-0 top-0">
-          <line x1={0} y1={baselineY} x2={contentWidth} y2={baselineY} stroke="rgba(255,255,255,0.08)" strokeWidth={2} />
-          <line x1={0} y1={baselineY} x2={Math.max(0, visibleUntil)} y2={baselineY} stroke="rgba(155,28,49,0.65)" strokeWidth={2.5} />
+      {/* Contenu (desktop horizontal / mobile vertical) */}
+      <motion.div
+        className="absolute inset-0 z-[4]"
+        style={{ x: worldX, y: worldY }}
+        aria-hidden="true"
+      >
+        {!isMobile ? (
+          <>
+            <svg
+              width={contentWidth}
+              height={vh}
+              viewBox={`0 0 ${contentWidth} ${vh}`}
+              className="absolute left-0 top-0"
+            >
+              <line
+                x1={0}
+                y1={baselineY}
+                x2={contentWidth}
+                y2={baselineY}
+                stroke="rgba(255,255,255,0.08)"
+                strokeWidth={2}
+              />
+              <line
+                x1={0}
+                y1={baselineY}
+                x2={Math.max(0, visibleUntil)}
+                y2={baselineY}
+                stroke="rgba(155,28,49,0.65)"
+                strokeWidth={2.5}
+              />
 
-          {stops.map((s) => {
-            const dx = Math.abs(pointXInWorld - s.x);
-            const near = dx < REVEAL_NEAR;
-            const unlocked = pointXInWorld >= s.x + UNLOCK_AT;
+              {stops.map((s) => {
+                const dx = Math.abs(pointPosInWorld - s.x);
+                const near = dx < REVEAL_NEAR;
+                const unlocked = pointPosInWorld >= s.x + UNLOCK_AT;
+                const showBranch = unlocked || near;
 
-            const showBranch = unlocked || near;
+                const laneY = s.lane === -1 ? TOP_LANE_Y : s.lane === 1 ? BOT_LANE_Y : baselineY;
 
-            const laneY =
-              s.lane === -1 ? TOP_LANE_Y : s.lane === 1 ? BOT_LANE_Y : baselineY;
+                return (
+                  <g key={s.id}>
+                    {(unlocked || near) && (
+                      <>
+                        <circle
+                          cx={s.x}
+                          cy={baselineY}
+                          r={unlocked ? 6 : 4}
+                          fill={unlocked ? s.accent : "rgba(255,255,255,0.25)"}
+                          opacity={unlocked ? 1 : 0.7}
+                        />
+                        {unlocked && (
+                          <circle
+                            cx={s.x}
+                            cy={baselineY}
+                            r={16}
+                            fill="transparent"
+                            stroke={s.accent}
+                            strokeWidth={1.2}
+                            opacity={0.20}
+                          />
+                        )}
+                      </>
+                    )}
 
-            return (
-              <g key={s.id}>
-                {(unlocked || near) && (
-                  <>
-                    <circle
-                      cx={s.x}
-                      cy={baselineY}
-                      r={unlocked ? 6 : 4}
-                      fill={unlocked ? s.accent : "rgba(255,255,255,0.25)"}
-                      opacity={unlocked ? 1 : 0.7}
-                    />
-                    {unlocked && (
-                      <circle
-                        cx={s.x}
-                        cy={baselineY}
-                        r={16}
-                        fill="transparent"
-                        stroke={s.accent}
-                        strokeWidth={1.2}
-                        opacity={0.20}
+                    {showBranch && s.lane !== 0 && (
+                      <line
+                        x1={s.x}
+                        y1={baselineY}
+                        x2={s.x}
+                        y2={laneY}
+                        stroke={unlocked ? "rgba(255,255,255,0.22)" : "rgba(255,255,255,0.12)"}
+                        strokeWidth={1.6}
                       />
                     )}
-                  </>
-                )}
 
-                {showBranch && s.lane !== 0 && (
-                  <line
-                    x1={s.x}
-                    y1={baselineY}
-                    x2={s.x}
-                    y2={laneY}
-                    stroke={unlocked ? "rgba(255,255,255,0.22)" : "rgba(255,255,255,0.12)"}
-                    strokeWidth={1.6}
-                  />
-                )}
+                    {showBranch && s.lane !== 0 && (
+                      <circle
+                        cx={s.x}
+                        cy={laneY}
+                        r={unlocked ? 4 : 3}
+                        fill={unlocked ? s.accent : "rgba(255,255,255,0.18)"}
+                        opacity={unlocked ? 1 : 0.65}
+                      />
+                    )}
+                  </g>
+                );
+              })}
+            </svg>
 
-                {showBranch && s.lane !== 0 && (
-                  <circle
-                    cx={s.x}
-                    cy={laneY}
-                    r={unlocked ? 4 : 3}
-                    fill={unlocked ? s.accent : "rgba(255,255,255,0.18)"}
-                    opacity={unlocked ? 1 : 0.65}
-                  />
-                )}
-              </g>
-            );
-          })}
-        </svg>
+            {stops.map((s) => {
+              const dx = Math.abs(pointPosInWorld - s.x);
+              const near = dx < REVEAL_NEAR;
+              const unlocked = pointPosInWorld >= s.x + UNLOCK_AT;
 
-        {stops.map((s) => {
-          const dx = Math.abs(pointXInWorld - s.x);
-          const near = dx < REVEAL_NEAR;
-          const unlocked = pointXInWorld >= s.x + UNLOCK_AT;
+              const visible = unlocked || dx < 280;
+              if (!visible) return null;
 
-          const visible = unlocked || dx < 280;
-          if (!visible) return null;
+              return (
+                <TravelCard
+                  key={s.id}
+                  stop={s}
+                  unlocked={unlocked}
+                  near={near}
+                  topY={TOP_LANE_Y}
+                  midY={MID_LANE_Y}
+                  botY={BOT_LANE_Y}
+                  isMobile={false}
+                  mobileLineX={mobileLineX}
+                />
+              );
+            })}
+          </>
+        ) : (
+          <>
+            <svg
+              width={vw}
+              height={contentHeight}
+              viewBox={`0 0 ${vw} ${contentHeight}`}
+              className="absolute left-0 top-0"
+            >
+              {/* line left */}
+              <line
+                x1={mobileLineX}
+                y1={0}
+                x2={mobileLineX}
+                y2={contentHeight}
+                stroke="rgba(255,255,255,0.10)"
+                strokeWidth={2}
+              />
 
-          return (
-            <TravelCard
-              key={s.id}
-              stop={s}
-              unlocked={unlocked}
-              near={near}
-              topY={TOP_LANE_Y}
-              midY={MID_LANE_Y}
-              botY={BOT_LANE_Y}
-            />
-          );
-        })}
+              {/* progress */}
+              <line
+                x1={mobileLineX}
+                y1={0}
+                x2={mobileLineX}
+                y2={Math.max(0, visibleUntil)}
+                stroke="rgba(155,28,49,0.65)"
+                strokeWidth={2.6}
+              />
+
+              {stops.map((s) => {
+                const dy = Math.abs(pointPosInWorld - s.y);
+                const near = dy < REVEAL_NEAR;
+                const unlocked = pointPosInWorld >= s.y + UNLOCK_AT;
+
+                const show = unlocked || near;
+
+                return (
+                  <g key={s.id}>
+                    {show && (
+                      <>
+                        <circle
+                          cx={mobileLineX}
+                          cy={s.y}
+                          r={unlocked ? 6 : 4}
+                          fill={unlocked ? s.accent : "rgba(255,255,255,0.25)"}
+                          opacity={unlocked ? 1 : 0.7}
+                        />
+                        {unlocked && (
+                          <circle
+                            cx={mobileLineX}
+                            cy={s.y}
+                            r={16}
+                            fill="transparent"
+                            stroke={s.accent}
+                            strokeWidth={1.2}
+                            opacity={0.20}
+                          />
+                        )}
+
+                        {/* tiny connector to the card */}
+                        <line
+                          x1={mobileLineX}
+                          y1={s.y}
+                          x2={mobileLineX + 18}
+                          y2={s.y}
+                          stroke={unlocked ? "rgba(255,255,255,0.20)" : "rgba(255,255,255,0.10)"}
+                          strokeWidth={1.6}
+                        />
+                      </>
+                    )}
+                  </g>
+                );
+              })}
+            </svg>
+
+            {stops.map((s) => {
+              const dy = Math.abs(pointPosInWorld - s.y);
+              const near = dy < REVEAL_NEAR;
+              const unlocked = pointPosInWorld >= s.y + UNLOCK_AT;
+
+              const visible = unlocked || dy < 320;
+              if (!visible) return null;
+
+              return (
+                <TravelCard
+                  key={s.id}
+                  stop={s}
+                  unlocked={unlocked}
+                  near={near}
+                  topY={TOP_LANE_Y}
+                  midY={MID_LANE_Y}
+                  botY={BOT_LANE_Y}
+                  isMobile={true}
+                  mobileLineX={mobileLineX}
+                />
+              );
+            })}
+          </>
+        )}
       </motion.div>
 
-      {/* Point centre */}
+      {/* Point fixe (desktop centre / mobile left-centre) */}
       <div
         className="pointer-events-none absolute z-[6]"
         style={{
-          left: centerX,
-          top: baselineY,
+          left: isMobile ? mobileLineX : centerX,
+          top: isMobile ? centerY : baselineY,
           transform: "translate(-50%, -50%)",
         }}
       >
@@ -1032,7 +1351,7 @@ export default function TravelTimeline() {
 
       <div className="pointer-events-none absolute bottom-6 left-0 right-0 z-[7] flex justify-center">
         <div className="text-[10px] font-mono tracking-[0.42em] text-white/40 uppercase">
-          SCROLL / DRAG → ADVANCE
+          {isMobile ? "DRAG ↑/↓ → ADVANCE" : "SCROLL / DRAG → ADVANCE"}
         </div>
       </div>
 
