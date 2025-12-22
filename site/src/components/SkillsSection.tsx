@@ -386,7 +386,7 @@ export default function SkillsSection() {
         title: t("hubs.passions.title"),
         subtitle: t("hubs.passions.subtitle"),
         description: t("hubs.passions.description"),
-        href: `/${locale}/projects/en-cours?p=passions`,
+        href: `/${locale}/passions`,
         tag: t("hubs.passions.tag"),
         accentFrom: "#6C1E80",
         accentVia: "#C084FC",
