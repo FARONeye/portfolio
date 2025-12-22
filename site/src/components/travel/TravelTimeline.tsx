@@ -22,7 +22,7 @@ type Trip = {
   lane: Lane;
   kind: TripKind;
   coverUrl?: string; 
-  gallery?: string[];
+  gallery?: string[]; 
   description?: string;
   coordinates?: string;
 };
@@ -233,7 +233,7 @@ function ShootingStars() {
   );
 }
 
-/* ---------- GALERIE CINÉMATOGRAPHIQUE + LIGHTBOX (Responsive) ---------- */
+/* ---------- NOUVEAU COMPOSANT : GALERIE CINÉMATOGRAPHIQUE + LIGHTBOX ---------- */
 
 function PortfolioGalleryModal({ trip, onClose }: { trip: Stop; onClose: () => void }) {
     const flag = flagFromCode(trip.country);
@@ -267,45 +267,29 @@ function PortfolioGalleryModal({ trip, onClose }: { trip: Stop; onClose: () => v
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, [lightboxIndex, nextImage, prevImage]);
   
-    // Variants Animations
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: { opacity: 1, transition: { duration: 0.6 } },
-        exit: { opacity: 0, transition: { duration: 0.4 } }
-    };
-
-    const heroImageVariants = {
-        hidden: { scale: 1.1, opacity: 0 },
-        visible: { 
-            scale: 1, 
-            opacity: 1,
-            transition: { duration: 1.2, ease: "easeOut" }
-        }
-    };
-
-    const lightLeakVariants = {
-        initial: { opacity: 0, x: -100 },
-        animate: { 
-            opacity: [0, 0.4, 0], 
-            x: [0, 500],
-            transition: { duration: 5, repeat: Infinity, ease: "linear", repeatDelay: 3 }
-        }
-    };
-
     return (
       <motion.div 
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        exit="exit"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1, transition: { duration: 0.6 } }}
+        exit={{ opacity: 0, transition: { duration: 0.4 } }}
         className="fixed inset-0 z-50 bg-[#0A0A0B] flex flex-col font-sans"
       >
         {/* --- FX: Grain & Light Leaks --- */}
         <div className="pointer-events-none absolute inset-0 z-40 opacity-[0.05] bg-[url('/noise.png')] bg-repeat mix-blend-overlay animate-pulse"></div>
+        
+        {/* CORRECTION: Animation directe dans les props pour éviter erreur de typage */}
         <motion.div 
-            variants={lightLeakVariants}
-            initial="initial"
-            animate="animate"
+            initial={{ opacity: 0, x: -100 }}
+            animate={{ 
+                opacity: [0, 0.4, 0], 
+                x: [0, 500] 
+            }}
+            transition={{ 
+                duration: 5, 
+                repeat: Infinity, 
+                ease: "linear", 
+                repeatDelay: 3 
+            }}
             className="pointer-events-none absolute top-0 left-0 w-[50vw] h-full bg-gradient-to-r from-transparent via-[#ff4d0033] to-transparent mix-blend-screen blur-[100px] z-30"
         />
 
@@ -334,7 +318,12 @@ function PortfolioGalleryModal({ trip, onClose }: { trip: Stop; onClose: () => v
             {/* === SCÈNE D'OUVERTURE === */}
             <div className="relative w-full h-[65vh] md:h-[85vh] overflow-hidden">
                 <motion.div 
-                    variants={heroImageVariants}
+                    initial={{ scale: 1.15, opacity: 0 }}
+                    animate={{ 
+                        scale: 1, 
+                        opacity: 1,
+                        transition: { duration: 2, ease: [0.16, 1, 0.3, 1] } 
+                    }}
                     className="relative w-full h-full"
                 >
                     {trip.coverUrl && (
@@ -723,7 +712,6 @@ export default function TravelTimeline() {
         start: iso(2019, 7, 15), end: iso(2019, 7, 31),
         places: "Boston",
         country: "US",
-        // Correction apostrophe
         mood: "Choc d&apos;échelle. Lumières, routes, énergie.",
         accent: "#F472B6", lane: 1, kind: "Trip",
         coverUrl: "/travel/landscape.jpg",
@@ -787,7 +775,6 @@ export default function TravelTimeline() {
         mood: "Mythologie, mer turquoise et chaleur antique.",
         accent: "#C084FC", lane: -1, kind: "Trip",
         coverUrl: "/travel/landscape.jpg",
-        // Correction apostrophe
         description: "Exploration des palais minoens, randonnées dans les gorges de Samaria et détente sur les plages de sable rose d&apos;Elafonissi.",
         coordinates: "35.2401° N, 24.8093° E"
       },
