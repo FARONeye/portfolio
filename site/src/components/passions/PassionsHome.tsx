@@ -30,7 +30,7 @@ const CATEGORIES: PassionCategory[] = [
     icon: Headphones,
     color: "#C084FC",
     href: "/passions/music",
-    image: "/passions/music-bg.jpg", 
+    image: "/passions/glimpseofus.jpg", 
     coords: "AUDIO.FREQ.808",
   },
   {
@@ -40,7 +40,7 @@ const CATEGORIES: PassionCategory[] = [
     icon: Gamepad2,
     color: "#F472B6",
     href: "/passions/gaming",
-    image: "/passions/gaming-bg.jpg",
+    image: "/passions/r6.jpg",
     coords: "SYS.rank.GLB",
   },
   {
@@ -50,7 +50,7 @@ const CATEGORIES: PassionCategory[] = [
     icon: Clapperboard,
     color: "#38BDF8",
     href: "/passions/cinematics",
-    image: "/passions/cinema-bg.jpg",
+    image: "/passions/cine.webp",
     coords: "CAM.ISO.400",
   },
 ];
