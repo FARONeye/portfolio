@@ -51,3 +51,7 @@ public/        Ressources statiques
 ## Direction artistique
 
 La bibliothèque de références et les règles de conception de la V2 sont dans [docs/design-references.md](docs/design-references.md).
+
+## Assets
+
+La préparation des portraits, visuels de projets et images d'ambiance est documentée dans [docs/assets.md](docs/assets.md).
