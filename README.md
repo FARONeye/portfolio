@@ -47,3 +47,7 @@ Chaque push sur `main` déclenchera ensuite un déploiement de production, et ch
 src/app/       Routes, layout et styles globaux
 public/        Ressources statiques
 ```
+
+## Direction artistique
+
+La bibliothèque de références et les règles de conception de la V2 sont dans [docs/design-references.md](docs/design-references.md).
