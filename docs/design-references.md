@@ -67,6 +67,12 @@ Les mécanismes retenus sont précis :
 
 La traduction propre au portfolio suit désormais ce parcours : le portrait quitte son cadre comme une photographie entière tandis que le décor se transforme en volets éditoriaux, le mot « REGARDER » se recompose lettre par lettre, puis trois images circulent dans un rail spatial où chaque verbe devient une matière typographique. Les plans se replient ensuite en un signe abstrait et ouvrent un losange noir vers la conclusion de l’introduction, avant les transitions horizontales par volets entre les trois chapitres. Le troisième acte devient la galerie de cinq projets : les cartes partent d’une pile, s’ouvrent dans un carrousel 3D et occupent successivement le premier plan avec profondeur, superposition, parallaxe interne et objets flottants, avant une conclusion plein écran. Chaque valeur est synchronisée en continu à la progression du scroll. `prefers-reduced-motion` retire les séquences longues et garde les informations accessibles.
 
+### Palette et interaction projets
+
+La base reste noire, grise et blanc cassé. L’améthyste est l’accent principal ; le bordeaux, le turquoise et une nuance coucher de soleil identifient les projets et éclairent ponctuellement les scènes. L’environnement évoque l’espace, les interfaces high-tech et le rythme des jeux d’aventure sans reprendre les codes littéraux d’un HUD de jeu.
+
+La section 03 s’annonce explicitement comme une galerie de projets. Le scroll choisit la carte active ; son bouton « Voir le projet » ouvre une fiche immersive native, utilisable à la souris, au clavier et avec `Échap`. Sur mobile et en mouvement réduit, toutes les cartes restent directement accessibles sans dépendre du carrousel.
+
 ## Familles explorées
 
 Choisir une seule famille visuelle dominante pour la V2 :

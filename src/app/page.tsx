@@ -1,4 +1,5 @@
 import Image from "next/image";
+import type { CSSProperties } from "react";
 
 const portrait = "/media/portraits/21C7AA17-2AB3-464F-9942-D4346396FAD9_1_102_o.jpeg";
 const landscape = "/media/editorial/179A20D3-83DA-4AD6-82FF-CDAB89055602_1_105_c.jpeg";
@@ -42,6 +43,9 @@ const projectCards = [
     image: "/media/editorial/AC28D49D-9D04-4929-A23A-DA9494540415_1_105_c.jpeg",
     imageAlt: "Paysage lumineux utilisé comme visuel provisoire du projet Fragments",
     accent: "Lumière / 001",
+    color: "#9273b2",
+    detail: "Une exploration de la narration web : les images deviennent des chapitres, le mouvement guide la lecture et chaque interaction révèle une nouvelle couche du récit.",
+    role: "Direction créative · Développement",
   },
   {
     number: "02",
@@ -52,6 +56,9 @@ const projectCards = [
     image: "/media/editorial/A34DDE4B-24DD-4894-80AF-DBC037B986B0_1_105_c.jpeg",
     imageAlt: "Installation lumineuse bleue utilisée comme visuel provisoire du projet Afterimage",
     accent: "Mouvement / 002",
+    color: "#3faaa5",
+    detail: "Un espace réactif inspiré des interfaces high-tech, où la lumière et le son répondent à la présence pour créer une expérience toujours différente.",
+    role: "Concept · Interaction",
   },
   {
     number: "03",
@@ -62,6 +69,9 @@ const projectCards = [
     image: "/media/editorial/188E0467-E3CD-4547-8DCD-CCD6A6751292_1_105_c.jpeg",
     imageAlt: "Vue urbaine utilisée comme visuel provisoire du projet Horizon",
     accent: "Perspective / 003",
+    color: "#568ca8",
+    detail: "Un langage visuel modulaire, entre cartographie stellaire et interface éditoriale, capable de changer sans perdre son identité.",
+    role: "Identité · Design système",
   },
   {
     number: "04",
@@ -72,6 +82,9 @@ const projectCards = [
     image: "/media/editorial/5697E241-CEB6-4301-90A5-D370B221FD6C_1_105_c.jpeg",
     imageAlt: "Ville sous un ciel orange utilisée comme visuel provisoire du projet Solstice",
     accent: "Temps / 004",
+    color: "#d17b68",
+    detail: "Une histoire photographique construite comme un cycle : couleurs du couchant, variations de rythme et transitions lentes racontent le passage du temps.",
+    role: "Photographie · Éditorial",
   },
   {
     number: "05",
@@ -82,6 +95,9 @@ const projectCards = [
     image: "/media/editorial/E6D07DB3-7C44-4319-BC7F-B20A524CA3DB_1_105_c.jpeg",
     imageAlt: "Voyageur face à une vaste prairie utilisé comme visuel provisoire du projet Elsewhere",
     accent: "Ailleurs / 005",
+    color: "#75344f",
+    detail: "Une aventure contemplative pensée comme un journal de bord : chaque destination ouvre une scène, un souvenir et une nouvelle trajectoire.",
+    role: "Narration · Expérience",
   },
 ];
 
@@ -244,16 +260,26 @@ export default function Home() {
       <section id="projets" className="project-journey capability-journey" data-capability-journey aria-labelledby="capability-title">
         <div className="capability-sticky">
           <div className="capability-heading">
-            <span className="eyebrow">03 / Projets sélectionnés</span>
+            <span className="eyebrow">03 / Galerie de projets</span>
             <span className="temporary-label">Concepts provisoires</span>
           </div>
           <h2 id="capability-title" className="capability-title">
-            Une idée peut<br /><em>devenir beaucoup.</em>
+            Mes projets.<br /><em>Choisissez une histoire.</em>
           </h2>
+          <div className="project-instruction" aria-live="polite">
+            <span className="project-instruction-kicker">Mode exploration</span>
+            <p><strong>Faites défiler</strong> pour choisir un projet, puis <strong>cliquez sur la carte active</strong> pour l&apos;ouvrir.</p>
+            <span className="project-instruction-icon" aria-hidden="true">↘</span>
+          </div>
 
           <div className="capability-deck">
             {projectCards.map((card, index) => (
-              <article className={`project-card capability-card capability-card-${index}`} data-capability-card={index} key={card.number}>
+              <article
+                className={`project-card capability-card capability-card-${index}`}
+                data-capability-card={index}
+                key={card.number}
+                style={{ "--project-accent": card.color } as CSSProperties}
+              >
                 <figure className="project-card-image">
                   <Image src={card.image} alt={card.imageAlt} fill sizes="(max-width: 760px) 100vw, 58vw" />
                   <figcaption>{card.accent}</figcaption>
@@ -271,6 +297,16 @@ export default function Home() {
                 </div>
                 <span className="project-card-object" aria-hidden="true"><i /><i /></span>
                 <span className="project-card-sequence" aria-hidden="true">Projet — {card.number} / 05</span>
+                <button
+                  className="project-card-hit"
+                  type="button"
+                  data-project-open={index}
+                  aria-haspopup="dialog"
+                  aria-controls="project-viewer"
+                  aria-label={`Ouvrir le projet ${card.title}`}
+                >
+                  <span>Voir le projet</span><i aria-hidden="true">↗</i>
+                </button>
               </article>
             ))}
           </div>
@@ -281,10 +317,46 @@ export default function Home() {
             <i>↓</i>
           </div>
           <div className="capability-meter" aria-hidden="true">
-            <span>Déplier les projets</span><i><b /></i><span className="capability-count">01 / 05</span>
+            <span>Défiler · choisir · cliquer</span><i><b /></i><span className="capability-count">01 / 05</span>
           </div>
         </div>
       </section>
+
+      <dialog id="project-viewer" className="project-viewer" data-project-viewer aria-label="Détail du projet sélectionné">
+        <button className="project-viewer-close" type="button" data-project-close aria-label="Fermer le projet">
+          <span>Fermer</span><i aria-hidden="true">×</i>
+        </button>
+        {projectCards.map((card, index) => (
+          <article
+            className="project-viewer-panel"
+            data-project-panel={index}
+            style={{ "--project-accent": card.color } as CSSProperties}
+            hidden={index !== 0}
+            key={card.number}
+          >
+            <figure className="project-viewer-image">
+              <Image src={card.image} alt={card.imageAlt} fill sizes="(max-width: 760px) 100vw, 54vw" />
+              <figcaption>{card.accent}</figcaption>
+            </figure>
+            <div className="project-viewer-copy">
+              <div className="project-viewer-meta">
+                <span>Projet {card.number} / 05</span><span>Concept provisoire</span>
+              </div>
+              <p className="project-viewer-label">{card.label}</p>
+              <h2 id={`project-viewer-title-${index}`}>{card.title}</h2>
+              <p className="project-viewer-detail">{card.detail}</p>
+              <dl>
+                <div><dt>Rôle</dt><dd>{card.role}</dd></div>
+                <div><dt>Statut</dt><dd>À personnaliser</dd></div>
+              </dl>
+              <ul aria-label={`Mots-clés : ${card.tags.join(", ")}`}>
+                {card.tags.map((tag) => <li key={tag}>{tag}</li>)}
+              </ul>
+              <p className="project-viewer-note">Contenu de démonstration — cette fiche accueillera bientôt le vrai projet.</p>
+            </div>
+          </article>
+        ))}
+      </dialog>
 
       <section id="univers" className="about" aria-labelledby="about-title">
         <div className="about-heading" data-reveal>

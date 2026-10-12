@@ -20,6 +20,10 @@
     const capabilityCards = Array.from(document.querySelectorAll("[data-capability-card]"));
     const capabilityCount = capabilityJourney?.querySelector(".capability-count");
     const capabilityMeterLabel = capabilityJourney?.querySelector(".capability-meter > span:first-child");
+    const projectViewer = document.querySelector("[data-project-viewer]");
+    const projectPanels = Array.from(document.querySelectorAll("[data-project-panel]"));
+    const projectOpenButtons = Array.from(document.querySelectorAll("[data-project-open]"));
+    const projectCloseButton = projectViewer?.querySelector("[data-project-close]");
     const about = document.querySelector(".about");
     const reveals = Array.from(document.querySelectorAll("[data-reveal]"));
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -32,6 +36,48 @@
     const ease = (value) => value * value * (3 - 2 * value);
     const mix = (from, to, amount) => from + (to - from) * amount;
     const set = (element, property, value) => element?.style.setProperty(property, String(value));
+
+    let lastProjectTrigger = null;
+    let projectCloseTimer = 0;
+
+    const openProject = (index, trigger) => {
+      if (!projectViewer || !projectPanels[index]) return;
+      window.clearTimeout(projectCloseTimer);
+      lastProjectTrigger = trigger;
+      projectPanels.forEach((panel, panelIndex) => { panel.hidden = panelIndex !== index; });
+      projectViewer.setAttribute("aria-labelledby", `project-viewer-title-${index}`);
+      const accent = getComputedStyle(projectPanels[index]).getPropertyValue("--project-accent").trim();
+      if (accent) set(projectViewer, "--project-accent", accent);
+      if (typeof projectViewer.showModal === "function") projectViewer.showModal();
+      else projectViewer.setAttribute("open", "");
+      root.classList.add("project-viewer-open");
+      window.requestAnimationFrame(() => {
+        projectViewer.classList.add("is-open");
+        projectCloseButton?.focus();
+      });
+    };
+
+    const closeProject = () => {
+      if (!projectViewer?.hasAttribute("open")) return;
+      projectViewer.classList.remove("is-open");
+      const finish = () => {
+        if (typeof projectViewer.close === "function") projectViewer.close();
+        else projectViewer.removeAttribute("open");
+        root.classList.remove("project-viewer-open");
+        lastProjectTrigger?.focus();
+      };
+      if (reducedMotion.matches) finish();
+      else projectCloseTimer = window.setTimeout(finish, 320);
+    };
+
+    projectOpenButtons.forEach((button, index) => button.addEventListener("click", () => openProject(index, button)));
+    projectCloseButton?.addEventListener("click", closeProject);
+    projectViewer?.addEventListener("click", (event) => { if (event.target === projectViewer) closeProject(); });
+    projectViewer?.addEventListener("cancel", (event) => { event.preventDefault(); closeProject(); });
+    projectViewer?.addEventListener("close", () => {
+      projectViewer.classList.remove("is-open");
+      root.classList.remove("project-viewer-open");
+    });
 
     if (!reducedMotion.matches) {
       root.classList.add("motion-enhanced");
@@ -281,6 +327,7 @@
         set(card, "--project-object-rotate", `${progress * (index % 2 ? -180 : 180) + delta * 12}deg`);
         set(card, "--project-object-scale", (.72 + focus * .28).toFixed(3));
         set(card, "--project-glint-x", `${mix(-140, 145, focus)}%`);
+        set(card, "--project-action-opacity", (focus > .62 && unfold > .7 && exit < .2 ? 1 : 0).toFixed(3));
         card.style.zIndex = String(20 - Math.round(distance * 8));
         card.classList.toggle("is-current", index === active);
       });
@@ -293,7 +340,7 @@
       capabilitySticky.dataset.phase = progress > .9 ? "final" : "cards";
       capabilitySticky.dataset.activeProject = String(active);
       if (capabilityCount) capabilityCount.textContent = `${String(active + 1).padStart(2, "0")} / ${String(capabilityCards.length).padStart(2, "0")}`;
-      if (capabilityMeterLabel) capabilityMeterLabel.textContent = progress > .9 ? "Poursuivre l’histoire" : progress < .18 ? "Déplier les projets" : "Explorer les projets";
+      if (capabilityMeterLabel) capabilityMeterLabel.textContent = progress > .9 ? "Poursuivre l’histoire" : progress < .18 ? "Déplier les projets" : "Cliquer pour ouvrir le projet";
     };
 
     const update = () => {
