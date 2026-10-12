@@ -2,6 +2,8 @@
 
 Nouveau portfolio personnel de Mathis Truong, construit avec Next.js et déployé sur Vercel.
 
+La première page de présentation est disponible en local : portrait animé, récit en trois chapitres, carrousel 3D de projets provisoires, section « Mon univers » et accès au GitHub. La direction visuelle et le langage de mouvement sont documentés dans [docs/design-references.md](docs/design-references.md).
+
 ## État du projet
 
 La V2 démarre volontairement sur une base technique propre. Le contenu, l'identité visuelle et les sections seront définis avant l'implémentation de l'interface.

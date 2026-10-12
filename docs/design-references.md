@@ -48,7 +48,26 @@ Le portfolio doit paraître conçu, pas assemblé depuis un template. Nous empru
 - **Refs.Gallery :** Best Portfolio Websites, Storytelling Websites, Typography Website Design, Web Animation & Motion Design, 3D & WebGL Websites.
 - **Behance / Dribbble :** personal branding, editorial portfolio, case study, creative developer.
 
-## Décision à prendre avant l'implémentation
+## Direction retenue pour la première page
+
+**Éditorial cinématique**, à partir de [SiteInspire](https://www.siteinspire.com/) et [Minimal Gallery](https://minimal.gallery/) pour la hiérarchie typographique, puis d’Awwwards pour la chorégraphie. Le portrait noir et blanc sert d'ancrage ; une seule couleur accentue les repères et les liens. La page réinterprète ces principes avec les photos personnelles de Mathis, sans reprendre une composition existante.
+
+Les autres familles restent des pistes pour les futures pages, si les projets à présenter le justifient.
+
+### Langage de mouvement de la page d'accueil
+
+La structure éditoriale reste la base, avec un récit animé inspiré des collections [Storytelling](https://refs.gallery/collections/storytelling-websites) et [Web Animation & Motion Design](https://refs.gallery/collections/web-animation-motion-design) de Refs.Gallery.
+
+Les mécanismes retenus sont précis :
+
+- le traitement d’image, le scroll et la typographie contour observés dans [Kirschberg](https://www.awwwards.com/inspiration/image-effect-transition-scrolling-navigation-kirschberg) ;
+- le passage grille → image immersive, la typographie au scroll et les micro-interactions documentés pour [Invisible North](https://www.awwwards.com/sites/invisible-north) ;
+- le récit interactif dont les transitions relient réellement les scènes, comme dans [Bright Biotech](https://www.awwwards.com/inspiration/team-interactive-scrolling-story-bright-biotech) ;
+- le mélange assumé du scroll vertical et horizontal, le `clip-path` et le `scroll-sync` relevés dans les présentations Awwwards.
+
+La traduction propre au portfolio suit désormais ce parcours : le portrait quitte son cadre comme une photographie entière tandis que le décor se transforme en volets éditoriaux, le mot « REGARDER » se recompose lettre par lettre, puis trois images circulent dans un rail spatial où chaque verbe devient une matière typographique. Les plans se replient ensuite en un signe abstrait et ouvrent un losange noir vers la conclusion de l’introduction, avant les transitions horizontales par volets entre les trois chapitres. Le troisième acte devient la galerie de cinq projets : les cartes partent d’une pile, s’ouvrent dans un carrousel 3D et occupent successivement le premier plan avec profondeur, superposition, parallaxe interne et objets flottants, avant une conclusion plein écran. Chaque valeur est synchronisée en continu à la progression du scroll. `prefers-reduced-motion` retire les séquences longues et garde les informations accessibles.
+
+## Familles explorées
 
 Choisir une seule famille visuelle dominante pour la V2 :
 
