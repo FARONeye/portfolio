@@ -416,7 +416,6 @@ html:not(.motion-enhanced) .story-layout:has(#chapitre-03:target) .story-visual-
 .travel-intro-pass strong { grid-row: span 2; align-self: center; color: var(--paper); font-size: 22px; letter-spacing: -.04em; }
 
 .story-sticky { background: #0b0d12; }
-.motion-enhanced .story-journey { height: 650svh; }
 .travel-route { position: absolute; z-index: 45; top: 0; right: 0; left: 0; height: clamp(118px, 17vh, 170px); overflow: hidden; color: white; pointer-events: none; background: linear-gradient(180deg, #090a10eb, #090a109e 64%, transparent); }
 .travel-route-heading { position: absolute; z-index: 3; top: 19px; right: clamp(24px, 4vw, 70px); left: clamp(24px, 4vw, 70px); display: flex; justify-content: space-between; color: #96959f; font-size: 8px; font-weight: 800; letter-spacing: .17em; text-transform: uppercase; }
 .travel-route-heading b { color: var(--turquoise); font-weight: inherit; }
@@ -479,6 +478,7 @@ html:not(.motion-enhanced) .story-layout:has(#chapitre-03:target) .story-visual-
 .story-sticky[data-active-chapter="4"] .story-rail-count b:nth-child(5) { display: inline; }
 
 @media (min-width: 761px) and (prefers-reduced-motion: no-preference) {
+  .motion-enhanced .story-journey { height: 650svh; }
   .motion-enhanced .travel-panel { transform-origin: 50% 100%; }
   .motion-enhanced .travel-ticket { transform: translate3d(var(--panel-copy-x, 0), var(--panel-copy-y, 0), 60px) rotate(var(--travel-ticket-rotate, 0deg)); }
   .motion-enhanced .travel-panel .story-panel-image { transform: translate3d(var(--panel-image-x, 0), var(--panel-image-y, 0), 80px) rotate(var(--panel-image-rotate, 0deg)) scale(var(--panel-image-scale, 1)); }
