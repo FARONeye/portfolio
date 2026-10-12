@@ -73,6 +73,10 @@ La base reste noire, grise et blanc cassé. L’améthyste est l’accent princi
 
 La section 03 s’annonce explicitement comme une galerie de projets. Le scroll choisit la carte active ; son bouton « Voir le projet » ouvre une fiche immersive native, utilisable à la souris, au clavier et avec `Échap`. Sur mobile et en mouvement réduit, toutes les cartes restent directement accessibles sans dépendre du carrousel.
 
+### Acte 02 — carnet de voyages d’études
+
+Le deuxième acte raconte désormais cinq étapes académiques : France (Paris et Lyon), Dublin, Barcelone, Montréal et Boston. La métaphore n’est pas décorative : la progression du scroll dessine l’itinéraire, déplace un avion entre les codes de destination, tourne les scènes comme des pages de passeport et fait apparaître chaque photo comme une carte postale tamponnée. Une carte d’embarquement rassemble le pays, la ville et le sens de l’étape sans inventer d’établissement ni de date. Sur mobile, la route devient un carnet vertical lisible et chaque escale reste une section autonome.
+
 ## Familles explorées
 
 Choisir une seule famille visuelle dominante pour la V2 :

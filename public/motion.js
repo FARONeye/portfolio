@@ -15,6 +15,7 @@
     const storyJourney = document.querySelector("[data-story-journey]");
     const storySticky = storyJourney?.querySelector(".story-sticky");
     const panels = Array.from(document.querySelectorAll("[data-chapter]"));
+    const travelStops = Array.from(storyJourney?.querySelectorAll("[data-travel-stop]") || []);
     const capabilityJourney = document.querySelector("[data-capability-journey]");
     const capabilitySticky = capabilityJourney?.querySelector(".capability-sticky");
     const capabilityCards = Array.from(document.querySelectorAll("[data-capability-card]"));
@@ -228,6 +229,24 @@
       set(storySticky, "--story-progress", progress.toFixed(4));
       storySticky.dataset.activeChapter = String(active);
 
+      const routePoints = [[7, 61], [30, 41], [52, 59], [75, 40], [93, 35]];
+      const routeIndex = Math.min(routePoints.length - 2, Math.floor(position));
+      const routeAmount = Math.min(1, position - routeIndex);
+      const routeFrom = routePoints[routeIndex];
+      const routeTo = routePoints[routeIndex + 1];
+      const planeX = mix(routeFrom[0], routeTo[0], routeAmount);
+      const planeY = mix(routeFrom[1], routeTo[1], routeAmount) - Math.sin(routeAmount * Math.PI) * 13;
+      const planeAngle = Math.atan2((routeTo[1] - routeFrom[1]) * .58, routeTo[0] - routeFrom[0]) * 180 / Math.PI;
+      const landingPulse = 1 - Math.min(1, Math.min(routeAmount, 1 - routeAmount) * 8);
+      set(storySticky, "--travel-plane-x", `${planeX}%`);
+      set(storySticky, "--travel-plane-y", `${planeY}%`);
+      set(storySticky, "--travel-plane-rotate", `${planeAngle}deg`);
+      set(storySticky, "--travel-plane-scale", (1 + landingPulse * .22).toFixed(3));
+      travelStops.forEach((stop, index) => {
+        stop.classList.toggle("is-passed", index <= active);
+        stop.classList.toggle("is-current", index === active);
+      });
+
       panels.forEach((panel, index) => {
         const delta = index - position;
         const absoluteDelta = Math.abs(delta);
@@ -236,8 +255,8 @@
         const visible = absoluteDelta <= 1.05 ? 1 : 0;
         set(panel, "--scene-x", "0vw");
         set(panel, "--scene-y", `${Math.sin(distance * Math.PI) * direction * 1.2}vh`);
-        set(panel, "--scene-rotate-y", `${delta * -4}deg`);
-        set(panel, "--scene-rotate-z", `${delta * .6}deg`);
+        set(panel, "--scene-rotate-y", `${delta * -11}deg`);
+        set(panel, "--scene-rotate-z", `${delta * .9}deg`);
         set(panel, "--scene-scale", (1 - distance * .03).toFixed(3));
         set(panel, "--scene-opacity", String(visible));
         set(panel, "--scene-clip-left", `${delta > 0 ? Math.min(100, delta * 100) : 0}%`);
@@ -245,6 +264,7 @@
         set(panel, "--panel-copy-x", `${delta * 60}px`);
         set(panel, "--panel-copy-y", `${distance * 24}px`);
         set(panel, "--panel-copy-opacity", (1 - distance * .72).toFixed(3));
+        set(panel, "--travel-ticket-rotate", `${delta * -2.2}deg`);
         set(panel, "--panel-image-x", `${delta * -6}vw`);
         set(panel, "--panel-image-y", `${Math.sin((position - index) * Math.PI) * 7}vh`);
         set(panel, "--panel-image-rotate", `${direction * distance * 8}deg`);
@@ -259,6 +279,9 @@
         set(panel, "--panel-light-x", `${68 - delta * 20}%`);
         set(panel, "--title-mask", `${distance * 62}%`);
         set(panel, "--title-x", `${delta * 2}vw`);
+        set(panel, "--travel-stamp-opacity", (1 - distance).toFixed(3));
+        set(panel, "--travel-stamp-scale", (1 + distance * 1.8).toFixed(3));
+        set(panel, "--travel-stamp-rotate", `${-12 + delta * 28}deg`);
         panel.style.zIndex = String(10 + index);
         panel.classList.toggle("is-current", index === active);
       });

@@ -6,30 +6,66 @@ const landscape = "/media/editorial/179A20D3-83DA-4AD6-82FF-CDAB89055602_1_105_c
 const introGlyphs = Array.from("REGARDER");
 const introVerbs = ["Cadrer", "Déplacer", "Composer"];
 
-const chapters = [
+const studyTrips = [
   {
     number: "01",
-    word: "Observer",
-    title: "Tout part d’un regard.",
-    body: "Une lumière, un lieu, un détail. Je prends le temps de regarder autour de moi : les idées commencent souvent là.",
-    image: "/media/editorial/AC28D49D-9D04-4929-A23A-DA9494540415_1_105_c.jpeg",
-    caption: "Lumière / collection personnelle",
+    code: "FR",
+    place: "France",
+    country: "France",
+    cities: "Paris ↔ Lyon",
+    title: "Le point de départ.",
+    body: "De Paris à Lyon, cette première étape ouvre le parcours : changer de ville, découvrir d’autres méthodes et apprendre à regarder chaque environnement comme un nouveau terrain d’étude.",
+    image: "/media/editorial/7A7E0BCD-AB71-4BA1-A135-0D157678584A_1_105_c.jpeg",
+    caption: "France / archive personnelle",
+    color: "#9273b2",
   },
   {
     number: "02",
-    word: "Expérimenter",
-    title: "Puis vient l’envie d’essayer.",
-    body: "Explorer une piste, changer d’angle, recommencer. J’aime ce moment où une intuition devient une expérience.",
-    image: "/media/editorial/A34DDE4B-24DD-4894-80AF-DBC037B986B0_1_105_c.jpeg",
-    caption: "Exploration / collection personnelle",
+    code: "DUB",
+    place: "Dublin",
+    country: "Irlande",
+    cities: "Dublin",
+    title: "Apprendre en anglais.",
+    body: "Dublin transforme le voyage en immersion : écouter autrement, prendre confiance, échanger et apprendre au contact d’une culture nouvelle.",
+    image: "/media/editorial/E6D07DB3-7C44-4319-BC7F-B20A524CA3DB_1_105_c.jpeg",
+    caption: "Irlande / archive personnelle",
+    color: "#3faaa5",
   },
   {
     number: "03",
-    word: "Construire",
-    title: "Enfin, donner forme aux idées.",
-    body: "Le développement me permet de relier curiosité et concret. Chaque projet est une occasion d’apprendre et d’aller plus loin.",
-    image: "/media/editorial/188E0467-E3CD-4547-8DCD-CCD6A6751292_1_105_c.jpeg",
-    caption: "Perspective / collection personnelle",
+    code: "BCN",
+    place: "Barcelone",
+    country: "Espagne",
+    cities: "Barcelona",
+    title: "Changer de rythme.",
+    body: "À Barcelone, l’étude sort du cadre. La ville, son architecture et son énergie deviennent une manière plus spontanée d’observer, de collaborer et de créer.",
+    image: "/media/editorial/391665BB-CAC2-4720-998F-288B554439D3_1_105_c.jpeg",
+    caption: "Espagne / archive personnelle",
+    color: "#d17b68",
+  },
+  {
+    number: "04",
+    code: "YUL",
+    place: "Montréal",
+    country: "Canada",
+    cities: "Montréal",
+    title: "Changer de continent.",
+    body: "Montréal élargit l’horizon : un nouvel équilibre entre culture francophone, influences nord-américaines et apprentissage dans une métropole en mouvement.",
+    image: "/media/editorial/5697E241-CEB6-4301-90A5-D370B221FD6C_1_105_c.jpeg",
+    caption: "Montréal / archive personnelle",
+    color: "#568ca8",
+  },
+  {
+    number: "05",
+    code: "BOS",
+    place: "Boston",
+    country: "États-Unis",
+    cities: "Boston",
+    title: "Aller plus loin.",
+    body: "Boston clôt cette traversée comme une nouvelle ouverture : étudier dans un environnement international, confronter les idées et revenir avec une vision plus large.",
+    image: "/media/editorial/193943EB-7EDC-4981-AD66-94F79AE8B6F7_1_105_c.jpeg",
+    caption: "Boston / archive personnelle",
+    color: "#75344f",
   },
 ];
 
@@ -220,39 +256,74 @@ export default function Home() {
 
       <section id="recit" className="story" aria-labelledby="story-title">
         <div className="story-intro">
-          <span className="eyebrow" data-reveal>02 / Un chemin en trois temps</span>
-          <h2 id="story-title" data-reveal>Rien n&apos;est figé.<br /><em>Tout se construit.</em></h2>
-          <p data-reveal>Quelques fragments de ce qui me fait avancer. Faites défiler pour suivre le fil.</p>
+          <span className="eyebrow" data-reveal>02 / Voyages d&apos;études</span>
+          <h2 id="story-title" data-reveal>Apprendre n&apos;a pas<br /><em>de frontières.</em></h2>
+          <p data-reveal>De Paris à Boston, cinq étapes et autant de façons d’apprendre. Faites défiler pour suivre le trajet.</p>
+          <div className="travel-intro-pass" data-reveal aria-hidden="true">
+            <span>Study trip</span><strong>05 escales</strong><i>MT / WORLD</i>
+          </div>
         </div>
 
         <div className="story-journey" data-story-journey>
           <div className="story-sticky" data-active-chapter="0">
+            <div className="travel-route" aria-hidden="true">
+              <div className="travel-route-heading"><span>Itinéraire académique</span><b>PAR / BOS</b></div>
+              <svg viewBox="0 0 1000 220" preserveAspectRatio="none">
+                <path className="travel-route-shadow" d="M70 135 C160 34 230 43 302 91 S430 203 520 130 S682 21 750 87 S866 191 930 76" />
+                <path className="travel-route-line" pathLength="1" d="M70 135 C160 34 230 43 302 91 S430 203 520 130 S682 21 750 87 S866 191 930 76" />
+              </svg>
+              <span className="travel-plane">✈</span>
+              <div className="travel-stops">
+                {studyTrips.map((trip, index) => (
+                  <span className="travel-stop" data-travel-stop={index} key={trip.code}>
+                    <i /><b>{trip.code}</b>
+                  </span>
+                ))}
+              </div>
+            </div>
             <div className="story-track">
-              {chapters.map((chapter, index) => (
-                <article id={`chapitre-${chapter.number}`} className={`story-panel story-panel-${index}${index === 0 ? " is-current" : ""}`} data-chapter={index} key={chapter.number}>
-                  <span className="chapter-giant-number" aria-hidden="true">{chapter.number}</span>
-                  <div className="story-panel-copy">
-                    <span className="chapter-number">Chapitre {chapter.number} — {chapter.word}</span>
-                    <h3>{chapter.title}</h3>
-                    <p>{chapter.body}</p>
-                    <span className="chapter-end" aria-hidden="true">{chapter.number} / 03 <span>→</span></span>
+              {studyTrips.map((trip, index) => (
+                <article
+                  id={`escale-${trip.number}`}
+                  className={`story-panel travel-panel story-panel-${index}${index === 0 ? " is-current" : ""}`}
+                  data-chapter={index}
+                  key={trip.number}
+                  style={{ "--trip-accent": trip.color } as CSSProperties}
+                >
+                  <span className="chapter-giant-number" aria-hidden="true">{trip.code}</span>
+                  <div className="story-panel-copy travel-ticket">
+                    <div className="travel-ticket-head">
+                      <span>Study boarding pass</span><b>MT—{trip.number}</b>
+                    </div>
+                    <span className="chapter-number">Étape {trip.number} — {trip.country}</span>
+                    <h3>{trip.place}</h3>
+                    <div className="travel-city-line"><span>{trip.cities}</span><i aria-hidden="true">→</i></div>
+                    <p>{trip.body}</p>
+                    <div className="travel-ticket-meta">
+                      <span><small>Motif</small>Voyage d&apos;études</span>
+                      <span><small>Destination</small>{trip.code}</span>
+                      <span><small>Statut</small>Exploré</span>
+                    </div>
+                    <span className="chapter-end" aria-hidden="true">Escale {trip.number} / 05 <span>→</span></span>
                   </div>
                   <figure className="story-panel-image">
-                    <Image src={chapter.image} alt={`Photographie personnelle illustrant ${chapter.word.toLowerCase()}`} fill loading="eager" sizes="(max-width: 760px) 100vw, 52vw" />
-                    <figcaption>{chapter.caption}</figcaption>
+                    <Image src={trip.image} alt={`Photographie personnelle associée à l’étape ${trip.place}`} fill loading="eager" unoptimized={trip.number === "01"} sizes="(max-width: 760px) 100vw, 52vw" />
+                    <figcaption>{trip.caption}</figcaption>
                     <span className="story-corner story-corner-top" />
                     <span className="story-corner story-corner-bottom" />
+                    <span className="travel-stamp" aria-hidden="true"><b>{trip.code}</b><i>Études · {trip.number}</i></span>
+                    <span className="travel-photo-tape" aria-hidden="true" />
                   </figure>
-                  <span className="story-panel-word" aria-hidden="true">{chapter.word}</span>
+                  <span className="story-panel-word" aria-hidden="true">{trip.place}</span>
                 </article>
               ))}
             </div>
             <div className="story-rail" aria-hidden="true">
-              <span>Le récit avance horizontalement</span>
+              <span>Faire défiler pour voyager</span>
               <i><b /></i>
-              <span className="story-rail-count"><b>01</b><b>02</b><b>03</b> / 03</span>
+              <span className="story-rail-count"><b>FR</b><b>DUB</b><b>BCN</b><b>YUL</b><b>BOS</b> / 05</span>
             </div>
-            <div className="story-transition-mark" aria-hidden="true"><span /><span /></div>
+            <div className="story-transition-mark travel-compass" aria-hidden="true"><span /><span /><i>N</i></div>
           </div>
         </div>
       </section>
