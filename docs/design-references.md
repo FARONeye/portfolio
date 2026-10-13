@@ -77,6 +77,8 @@ La section 03 s’annonce explicitement comme une galerie de projets. Le scroll 
 
 Le deuxième acte raconte désormais cinq étapes académiques : France (Paris et Lyon), Dublin, Barcelone, Montréal et Boston. La métaphore n’est pas décorative : la progression du scroll dessine l’itinéraire, déplace un avion entre les codes de destination, tourne les scènes comme des pages de passeport et fait apparaître chaque photo comme une carte postale tamponnée. Une carte d’embarquement rassemble le pays, la ville et le sens de l’étape sans inventer d’établissement ni de date. Sur mobile, la route devient un carnet vertical lisible et chaque escale reste une section autonome.
 
+L’expérience desktop adopte ensuite un point de vue de vol : chaque paysage occupe l’espace entier, la destination suivante apparaît dans la profondeur de l’horizon, puis s’ouvre jusqu’à remplacer la scène précédente. L’inclinaison, les lignes de vitesse, les anneaux d’approche et la silhouette abstraite de l’appareil réagissent au scroll pour produire une sensation de déplacement sans sacrifier la carte d’information. Le carnet vertical reste volontairement plus calme sur mobile.
+
 ## Familles explorées
 
 Choisir une seule famille visuelle dominante pour la V2 :

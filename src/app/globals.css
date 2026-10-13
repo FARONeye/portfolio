@@ -470,6 +470,7 @@ html:not(.motion-enhanced) .story-layout:has(#chapitre-03:target) .story-visual-
 .travel-compass { border: 1px solid #ffffff45; border-radius: 50%; }
 .travel-compass::before { content: ""; position: absolute; inset: 11px; border: 1px dashed #ffffff36; border-radius: 50%; }
 .travel-compass i { position: absolute; top: -16px; left: 50%; color: white; font-size: 8px; font-style: normal; transform: translateX(-50%); }
+.travel-flight-deck, .travel-arrival { display: none; }
 .story-rail-count b:nth-child(n) { display: none; }
 .story-sticky[data-active-chapter="0"] .story-rail-count b:nth-child(1),
 .story-sticky[data-active-chapter="1"] .story-rail-count b:nth-child(2),
@@ -479,9 +480,137 @@ html:not(.motion-enhanced) .story-layout:has(#chapitre-03:target) .story-visual-
 
 @media (min-width: 761px) and (prefers-reduced-motion: no-preference) {
   .motion-enhanced .story-journey { height: 650svh; }
-  .motion-enhanced .travel-panel { transform-origin: 50% 100%; }
-  .motion-enhanced .travel-ticket { transform: translate3d(var(--panel-copy-x, 0), var(--panel-copy-y, 0), 60px) rotate(var(--travel-ticket-rotate, 0deg)); }
-  .motion-enhanced .travel-panel .story-panel-image { transform: translate3d(var(--panel-image-x, 0), var(--panel-image-y, 0), 80px) rotate(var(--panel-image-rotate, 0deg)) scale(var(--panel-image-scale, 1)); }
+  .motion-enhanced .story-track { overflow: hidden; perspective: 1800px; perspective-origin: 50% 46%; transform-style: preserve-3d; }
+  .motion-enhanced .travel-panel {
+    display: block;
+    padding: 0;
+    background: #080a0f;
+    clip-path: circle(var(--travel-reveal, 155%) at var(--travel-reveal-x, 50%) var(--travel-reveal-y, 48%));
+    transform: translate3d(var(--scene-x, 0), var(--scene-y, 0), var(--scene-z, 0)) rotateX(var(--scene-rotate-x, 0deg)) rotateY(var(--scene-rotate-y, 0deg)) rotateZ(var(--scene-rotate-z, 0deg)) scale(var(--scene-scale, 1));
+    transform-origin: 50% var(--travel-reveal-y, 48%);
+    transform-style: preserve-3d;
+  }
+  .motion-enhanced .travel-panel::before {
+    inset: 0;
+    z-index: 2;
+    opacity: .88;
+    background: linear-gradient(90deg, #080a0fe6 0, #080a0f9c 27%, transparent 60%), linear-gradient(0deg, #080a0fd9 0, transparent 34%), radial-gradient(circle at 50% 46%, transparent 8%, color-mix(in srgb, var(--trip-accent) 22%, transparent) 56%, #080a0fa8 100%);
+  }
+  .motion-enhanced .travel-panel::after {
+    z-index: 3;
+    opacity: var(--flight-grid-opacity, .12);
+    background-image: linear-gradient(#ffffff12 1px, transparent 1px), linear-gradient(90deg, #ffffff12 1px, transparent 1px);
+    background-size: 7vw 7vw;
+    mask-image: radial-gradient(circle at 50% 48%, transparent 0 15%, black 74%, transparent 100%);
+    transform: perspective(700px) rotateX(64deg) translateY(36vh) scale(1.6);
+  }
+  .motion-enhanced .travel-panel .story-panel-image,
+  .motion-enhanced .travel-panel.story-panel-1 .story-panel-image,
+  .motion-enhanced .travel-panel.story-panel-2 .story-panel-image {
+    position: absolute;
+    inset: -8%;
+    z-index: 0;
+    width: 116%;
+    height: 116%;
+    min-height: 0;
+    margin: 0;
+    border: 0;
+    background: #12151c;
+    box-shadow: none;
+    clip-path: none;
+    filter: blur(var(--panel-blur, 0px));
+    transform: translate3d(var(--panel-image-x, 0), var(--panel-image-y, 0), -40px) rotate(var(--panel-image-rotate, 0deg)) scale(var(--panel-image-scale, 1));
+  }
+  .motion-enhanced .travel-panel .story-panel-image::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background: linear-gradient(180deg, #080b14aa 0, transparent 32%, transparent 63%, #06070ce8 100%), radial-gradient(circle at 50% 45%, transparent 8%, #07081052 72%, #070810b8 100%);
+    pointer-events: none;
+  }
+  .motion-enhanced .travel-panel .story-panel-image img { object-fit: cover; transform: scale(var(--panel-photo-scale, 1.12)); filter: saturate(.92) contrast(1.08) brightness(.85); }
+  .motion-enhanced .travel-panel .story-panel-image figcaption { right: 5vw; bottom: 5vh; left: auto; z-index: 4; color: #e7e5dfb0; font-size: 8px; text-shadow: 0 1px 12px #000; }
+  .motion-enhanced .travel-photo-tape { display: none; }
+  .motion-enhanced .travel-stamp { right: 5vw; bottom: 8vh; z-index: 5; border-color: color-mix(in srgb, var(--trip-accent) 80%, white); color: color-mix(in srgb, var(--trip-accent) 80%, white); }
+  .motion-enhanced .travel-ticket {
+    position: absolute;
+    z-index: 12;
+    left: clamp(48px, 6vw, 110px);
+    bottom: clamp(76px, 10vh, 120px);
+    width: min(500px, 35vw);
+    max-width: none;
+    padding: clamp(24px, 2.6vw, 42px);
+    border-color: #ffffff3d;
+    background: #080a10b8;
+    box-shadow: 0 38px 110px #0009, inset 0 0 70px color-mix(in srgb, var(--trip-accent) 9%, transparent);
+    backdrop-filter: blur(20px) saturate(1.2);
+    transform: translate3d(var(--panel-copy-x, 0), var(--panel-copy-y, 0), 120px) rotate(var(--travel-ticket-rotate, 0deg));
+  }
+  .motion-enhanced .travel-ticket-head { margin: calc(clamp(24px, 2.6vw, 42px) * -1) calc(clamp(24px, 2.6vw, 42px) * -1) 22px; padding: 14px clamp(24px, 2.6vw, 42px); }
+  .motion-enhanced .travel-panel h3 { margin: 18px 0 8px; font-size: clamp(58px, 6vw, 102px); }
+  .motion-enhanced .travel-city-line { margin-bottom: 18px; padding-bottom: 13px; }
+  .motion-enhanced .travel-panel p { font-size: clamp(13px, 1vw, 16px); line-height: 1.48; }
+  .motion-enhanced .travel-ticket-meta { margin-top: 18px; padding-top: 16px; }
+  .motion-enhanced .travel-panel .chapter-end { margin-top: 19px; }
+  .motion-enhanced .travel-panel .chapter-giant-number { top: 22vh; right: 3vw; left: auto; z-index: 5; opacity: var(--travel-code-opacity, .5); font-size: clamp(180px, 25vw, 430px); transform: translate3d(var(--panel-number-x, 0), 0, 40px); }
+  .motion-enhanced .travel-panel .story-panel-word { right: -2vw; bottom: -.06em; z-index: 4; color: #ffffff09; font-size: clamp(130px, 18vw, 320px); opacity: var(--travel-word-opacity, 1); transform: translate3d(var(--panel-word-x, 0), 0, 20px); }
+  .motion-enhanced .travel-arrival {
+    position: absolute;
+    z-index: 9;
+    top: 22vh;
+    right: 5vw;
+    display: grid;
+    justify-items: end;
+    color: white;
+    text-align: right;
+    opacity: var(--travel-arrival-opacity, 1);
+    transform: translate3d(0, var(--travel-arrival-y, 0), 90px);
+  }
+  .motion-enhanced .travel-arrival span, .motion-enhanced .travel-arrival i { font-size: 8px; font-style: normal; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; }
+  .motion-enhanced .travel-arrival span { color: var(--turquoise); }
+  .motion-enhanced .travel-arrival b { font-size: clamp(58px, 7vw, 112px); line-height: .85; letter-spacing: -.08em; text-shadow: 0 18px 60px #000; }
+  .motion-enhanced .travel-arrival i { margin-top: 13px; color: #d9d8d1; }
+
+  .motion-enhanced .travel-flight-deck { position: absolute; inset: 0; z-index: 36; display: block; overflow: hidden; perspective: 1100px; pointer-events: none; }
+  .travel-speed-field { position: absolute; inset: -20%; opacity: var(--flight-stream-opacity, 0); transform: rotate(var(--flight-bank, 0deg)) scale(var(--flight-speed-scale, 1)); transform-origin: 50% 48%; }
+  .travel-speed-field i { --ray-angle: 0deg; position: absolute; top: 48%; left: 50%; width: clamp(110px, 18vw, 320px); height: 1px; background: linear-gradient(90deg, transparent, #ffffffa6); transform: rotate(var(--ray-angle)) translateX(11vw) scaleX(var(--flight-ray-scale, .25)); transform-origin: left center; }
+  .travel-speed-field i:nth-child(2) { --ray-angle: 30deg; }
+  .travel-speed-field i:nth-child(3) { --ray-angle: 60deg; }
+  .travel-speed-field i:nth-child(4) { --ray-angle: 90deg; }
+  .travel-speed-field i:nth-child(5) { --ray-angle: 120deg; }
+  .travel-speed-field i:nth-child(6) { --ray-angle: 150deg; }
+  .travel-speed-field i:nth-child(7) { --ray-angle: 180deg; }
+  .travel-speed-field i:nth-child(8) { --ray-angle: 210deg; }
+  .travel-speed-field i:nth-child(9) { --ray-angle: 240deg; }
+  .travel-speed-field i:nth-child(10) { --ray-angle: 270deg; }
+  .travel-speed-field i:nth-child(11) { --ray-angle: 300deg; }
+  .travel-speed-field i:nth-child(12) { --ray-angle: 330deg; }
+  .travel-flight-rings { position: absolute; inset: 0; opacity: var(--flight-tunnel-opacity, 0); transform: rotate(var(--flight-bank, 0deg)); transform-origin: 50% var(--flight-horizon-y, 50%); }
+  .travel-flight-rings i { position: absolute; left: 50%; top: var(--flight-horizon-y, 50%); width: min(34vw, 520px); aspect-ratio: 1; border: 1px solid #ffffff52; border-radius: 50%; box-shadow: 0 0 45px color-mix(in srgb, var(--turquoise) 30%, transparent), inset 0 0 35px #ffffff0d; transform: translate(-50%, -50%) scale(var(--flight-tunnel-scale, .72)); }
+  .travel-flight-rings i:nth-child(2) { border-style: dashed; transform: translate(-50%, -50%) rotate(27deg) scale(calc(var(--flight-tunnel-scale, .72) + .33)); }
+  .travel-flight-rings i:nth-child(3) { opacity: .42; transform: translate(-50%, -50%) rotate(-18deg) scale(calc(var(--flight-tunnel-scale, .72) + .68)); }
+  .travel-horizon { position: absolute; top: var(--flight-horizon-y, 50%); right: -12%; left: -12%; height: 56px; transform: translateY(-50%) rotate(var(--flight-bank, 0deg)); transform-origin: center; }
+  .travel-horizon::before, .travel-horizon::after { content: ""; position: absolute; top: 50%; width: 42%; height: 1px; background: linear-gradient(90deg, transparent, #ffffff8c); }
+  .travel-horizon::before { left: 0; }
+  .travel-horizon::after { right: 0; transform: scaleX(-1); }
+  .travel-horizon span { position: absolute; top: 0; bottom: 0; left: 50%; width: 1px; background: #ffffff55; }
+  .travel-horizon b { position: absolute; top: 50%; left: 50%; width: 56px; height: 14px; border-right: 1px solid #fff9; border-bottom: 1px solid #fff9; border-left: 1px solid #fff9; transform: translate(-50%, -7px); }
+  .travel-flight-status { position: absolute; z-index: 3; top: clamp(132px, 18vh, 180px); right: 4vw; left: 4vw; display: flex; justify-content: space-between; color: #ffffff87; font-size: 8px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; transform: rotate(var(--flight-bank, 0deg)); }
+  .travel-flight-status b { color: var(--turquoise); font-weight: inherit; }
+  .travel-airframe { position: absolute; inset: 0; transform: translateY(var(--flight-airframe-y, 0)) rotate(var(--flight-bank, 0deg)); transform-origin: 50% 110%; }
+  .travel-airframe i, .travel-airframe b { position: absolute; bottom: -2vh; width: 44vw; height: 18vh; background: linear-gradient(180deg, #b9bec533, #121722d9 44%, #05070bef); border-top: 1px solid #ffffff40; box-shadow: 0 -20px 70px #0007; }
+  .travel-airframe i { left: -3vw; clip-path: polygon(0 52%, 100% 0, 85% 42%, 18% 100%, 0 100%); transform: rotate(2deg); }
+  .travel-airframe b { right: -3vw; clip-path: polygon(0 0, 100% 52%, 100% 100%, 82% 100%, 15% 42%); transform: rotate(-2deg); }
+  .travel-airframe span { position: absolute; bottom: -4vh; left: 50%; width: min(22vw, 330px); height: 19vh; border-radius: 50% 50% 0 0; background: linear-gradient(180deg, #252b3766, #05070bf2 58%); border-top: 1px solid #ffffff42; transform: translateX(-50%); box-shadow: 0 -20px 70px #0008; }
+}
+
+@media (min-width: 761px) and (max-width: 1000px) and (prefers-reduced-motion: no-preference) {
+  .motion-enhanced .travel-ticket { left: 4vw; width: 42vw; padding: 24px; }
+  .motion-enhanced .travel-ticket-head { margin: -24px -24px 22px; padding: 14px 24px; }
+  .motion-enhanced .travel-panel h3 { font-size: clamp(42px, 5.4vw, 54px); }
+  .motion-enhanced .travel-panel p { font-size: 13px; }
+  .motion-enhanced .travel-arrival b { font-size: clamp(48px, 7vw, 70px); }
 }
 
 @media (max-width: 760px) {

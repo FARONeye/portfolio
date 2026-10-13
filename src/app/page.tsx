@@ -258,7 +258,7 @@ export default function Home() {
         <div className="story-intro">
           <span className="eyebrow" data-reveal>02 / Voyages d&apos;études</span>
           <h2 id="story-title" data-reveal>Apprendre n&apos;a pas<br /><em>de frontières.</em></h2>
-          <p data-reveal>De Paris à Boston, cinq étapes et autant de façons d’apprendre. Faites défiler pour suivre le trajet.</p>
+          <p data-reveal>De Paris à Boston, cinq étapes et autant de façons d’apprendre. Montez à bord : le scroll devient votre trajectoire.</p>
           <div className="travel-intro-pass" data-reveal aria-hidden="true">
             <span>Study trip</span><strong>05 escales</strong><i>MT / WORLD</i>
           </div>
@@ -280,6 +280,18 @@ export default function Home() {
                   </span>
                 ))}
               </div>
+            </div>
+            <div className="travel-flight-deck" aria-hidden="true">
+              <div className="travel-speed-field">
+                {Array.from({ length: 12 }, (_, index) => <i key={index} />)}
+              </div>
+              <div className="travel-flight-rings"><i /><i /><i /></div>
+              <div className="travel-horizon"><span /><b /></div>
+              <div className="travel-flight-status">
+                <span>Vol académique · MT—05</span>
+                <b>Scroll / propulsion</b>
+              </div>
+              <div className="travel-airframe"><i /><b /><span /></div>
             </div>
             <div className="story-track">
               {studyTrips.map((trip, index) => (
@@ -314,6 +326,9 @@ export default function Home() {
                     <span className="travel-stamp" aria-hidden="true"><b>{trip.code}</b><i>Études · {trip.number}</i></span>
                     <span className="travel-photo-tape" aria-hidden="true" />
                   </figure>
+                  <div className="travel-arrival" aria-hidden="true">
+                    <span>Approche {trip.number}</span><b>{trip.code}</b><i>{trip.cities}</i>
+                  </div>
                   <span className="story-panel-word" aria-hidden="true">{trip.place}</span>
                 </article>
               ))}

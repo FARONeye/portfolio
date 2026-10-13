@@ -12,7 +12,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="fr">
       <body>
         {children}
-        <Script src="/motion.js?v=15" strategy="afterInteractive" />
+        <Script src="/motion.js?v=16" strategy="afterInteractive" />
       </body>
     </html>
   );
