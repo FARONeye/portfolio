@@ -285,6 +285,13 @@ export default function Home() {
               <div className="travel-speed-field">
                 {Array.from({ length: 12 }, (_, index) => <i key={index} />)}
               </div>
+              <div className="travel-geometry">
+                {Array.from({ length: 8 }, (_, objectIndex) => (
+                  <span className="travel-cube" data-travel-object={objectIndex} key={objectIndex}>
+                    {Array.from({ length: 6 }, (_, faceIndex) => <i key={faceIndex} />)}
+                  </span>
+                ))}
+              </div>
               <div className="travel-flight-rings"><i /><i /><i /></div>
               <div className="travel-horizon"><span /><b /></div>
               <div className="travel-flight-status">

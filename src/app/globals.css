@@ -485,9 +485,9 @@ html:not(.motion-enhanced) .story-layout:has(#chapitre-03:target) .story-visual-
     display: block;
     padding: 0;
     background: #080a0f;
-    clip-path: circle(var(--travel-reveal, 155%) at var(--travel-reveal-x, 50%) var(--travel-reveal-y, 48%));
+    clip-path: inset(var(--travel-inset, 0%) round var(--travel-radius, 0px));
     transform: translate3d(var(--scene-x, 0), var(--scene-y, 0), var(--scene-z, 0)) rotateX(var(--scene-rotate-x, 0deg)) rotateY(var(--scene-rotate-y, 0deg)) rotateZ(var(--scene-rotate-z, 0deg)) scale(var(--scene-scale, 1));
-    transform-origin: 50% var(--travel-reveal-y, 48%);
+    transform-origin: 50% 50%;
     transform-style: preserve-3d;
   }
   .motion-enhanced .travel-panel::before {
@@ -572,8 +572,9 @@ html:not(.motion-enhanced) .story-layout:has(#chapitre-03:target) .story-visual-
   .motion-enhanced .travel-arrival b { font-size: clamp(58px, 7vw, 112px); line-height: .85; letter-spacing: -.08em; text-shadow: 0 18px 60px #000; }
   .motion-enhanced .travel-arrival i { margin-top: 13px; color: #d9d8d1; }
 
-  .motion-enhanced .travel-flight-deck { position: absolute; inset: 0; z-index: 36; display: block; overflow: hidden; perspective: 1100px; pointer-events: none; }
-  .travel-speed-field { position: absolute; inset: -20%; opacity: var(--flight-stream-opacity, 0); transform: rotate(var(--flight-bank, 0deg)) scale(var(--flight-speed-scale, 1)); transform-origin: 50% 48%; }
+  .motion-enhanced .travel-flight-deck { position: absolute; inset: 0; z-index: 36; display: block; overflow: hidden; perspective: 1150px; perspective-origin: 50% var(--flight-horizon-y, 50%); pointer-events: none; transform-style: preserve-3d; }
+  .motion-enhanced .travel-flight-deck::before { content: ""; position: absolute; inset: -80% -40%; opacity: var(--flight-grid-opacity, 0); background-image: linear-gradient(#ffffff26 1px, transparent 1px), linear-gradient(90deg, #ffffff26 1px, transparent 1px); background-size: 82px 82px; mask-image: radial-gradient(circle at 50% 50%, black 0 24%, transparent 72%); transform: translate3d(0, 52vh, -520px) rotateX(68deg) rotateZ(var(--flight-bank, 0deg)) scale(2.2); transform-origin: 50% 50%; }
+  .travel-speed-field { position: absolute; inset: -20%; opacity: var(--flight-stream-opacity, 0); transform: rotateZ(var(--flight-bank, 0deg)) rotateX(var(--flight-pitch, 0deg)) rotateY(var(--flight-yaw, 0deg)) scale(var(--flight-speed-scale, 1)); transform-origin: 50% 48%; }
   .travel-speed-field i { --ray-angle: 0deg; position: absolute; top: 48%; left: 50%; width: clamp(110px, 18vw, 320px); height: 1px; background: linear-gradient(90deg, transparent, #ffffffa6); transform: rotate(var(--ray-angle)) translateX(11vw) scaleX(var(--flight-ray-scale, .25)); transform-origin: left center; }
   .travel-speed-field i:nth-child(2) { --ray-angle: 30deg; }
   .travel-speed-field i:nth-child(3) { --ray-angle: 60deg; }
@@ -586,19 +587,38 @@ html:not(.motion-enhanced) .story-layout:has(#chapitre-03:target) .story-visual-
   .travel-speed-field i:nth-child(10) { --ray-angle: 270deg; }
   .travel-speed-field i:nth-child(11) { --ray-angle: 300deg; }
   .travel-speed-field i:nth-child(12) { --ray-angle: 330deg; }
-  .travel-flight-rings { position: absolute; inset: 0; opacity: var(--flight-tunnel-opacity, 0); transform: rotate(var(--flight-bank, 0deg)); transform-origin: 50% var(--flight-horizon-y, 50%); }
+  .travel-geometry { position: absolute; inset: 0; transform-style: preserve-3d; }
+  .travel-cube { --cube-size: 72px; --cube-depth: 36px; --cube-color: var(--amethyst); --shape-x: 1; --shape-y: 1; --shape-z: 1; position: absolute; top: 50%; left: 50%; width: var(--cube-size); height: var(--cube-size); transform: translate3d(var(--object-x, 0), var(--object-y, 0), var(--object-z, -1200px)) rotateX(var(--object-rotate-x, 0deg)) rotateY(var(--object-rotate-y, 0deg)) rotateZ(var(--object-rotate-z, 0deg)) scale3d(var(--shape-x), var(--shape-y), var(--shape-z)) scale(var(--object-scale, 1)); transform-style: preserve-3d; will-change: transform; }
+  .travel-cube i { position: absolute; inset: 0; opacity: var(--object-opacity, 0); border: 1px solid color-mix(in srgb, var(--cube-color) 78%, white); background: linear-gradient(135deg, color-mix(in srgb, var(--cube-color) 68%, #ffffff22), color-mix(in srgb, var(--cube-color) 30%, #05070bd9)); box-shadow: inset 0 0 32px color-mix(in srgb, var(--cube-color) 34%, transparent), 0 18px 28px #0008; backface-visibility: hidden; will-change: opacity; }
+  .travel-cube i:nth-child(1) { transform: translateZ(var(--cube-depth)); }
+  .travel-cube i:nth-child(2) { transform: rotateY(180deg) translateZ(var(--cube-depth)); }
+  .travel-cube i:nth-child(3) { transform: rotateY(90deg) translateZ(var(--cube-depth)); }
+  .travel-cube i:nth-child(4) { transform: rotateY(-90deg) translateZ(var(--cube-depth)); }
+  .travel-cube i:nth-child(5) { transform: rotateX(90deg) translateZ(var(--cube-depth)); }
+  .travel-cube i:nth-child(6) { transform: rotateX(-90deg) translateZ(var(--cube-depth)); }
+  .travel-cube i:nth-child(1) { filter: brightness(1.18); }
+  .travel-cube i:nth-child(3), .travel-cube i:nth-child(5) { filter: brightness(.72) saturate(1.25); }
+  .travel-cube i:nth-child(4), .travel-cube i:nth-child(6) { filter: brightness(.48) saturate(.9); }
+  .travel-cube:nth-child(2) { --cube-size: 104px; --cube-depth: 52px; --cube-color: var(--turquoise); --shape-x: 1.55; --shape-y: .72; --shape-z: 1.05; }
+  .travel-cube:nth-child(3) { --cube-size: 56px; --cube-depth: 28px; --cube-color: var(--sunset); --shape-x: .86; --shape-y: 1.75; --shape-z: 1.2; }
+  .travel-cube:nth-child(4) { --cube-size: 86px; --cube-depth: 43px; --cube-color: var(--burgundy); --shape-x: .72; --shape-y: 1.08; --shape-z: 1.65; }
+  .travel-cube:nth-child(5) { --cube-size: 126px; --cube-depth: 63px; --cube-color: #568ca8; --shape-x: 1.12; --shape-y: .68; --shape-z: .88; }
+  .travel-cube:nth-child(6) { --cube-size: 66px; --cube-depth: 33px; --cube-color: var(--paper); --shape-x: 1.4; --shape-y: .82; --shape-z: .78; }
+  .travel-cube:nth-child(7) { --cube-size: 92px; --cube-depth: 46px; --cube-color: var(--amethyst); --shape-x: .92; --shape-y: 1.45; --shape-z: .94; }
+  .travel-cube:nth-child(8) { --cube-size: 52px; --cube-depth: 26px; --cube-color: var(--turquoise); --shape-x: .82; --shape-y: .82; --shape-z: 2; }
+  .travel-flight-rings { position: absolute; inset: 0; opacity: var(--flight-tunnel-opacity, 0); transform: rotateZ(var(--flight-bank, 0deg)) rotateX(var(--flight-pitch, 0deg)) rotateY(var(--flight-yaw, 0deg)); transform-origin: 50% var(--flight-horizon-y, 50%); }
   .travel-flight-rings i { position: absolute; left: 50%; top: var(--flight-horizon-y, 50%); width: min(34vw, 520px); aspect-ratio: 1; border: 1px solid #ffffff52; border-radius: 50%; box-shadow: 0 0 45px color-mix(in srgb, var(--turquoise) 30%, transparent), inset 0 0 35px #ffffff0d; transform: translate(-50%, -50%) scale(var(--flight-tunnel-scale, .72)); }
   .travel-flight-rings i:nth-child(2) { border-style: dashed; transform: translate(-50%, -50%) rotate(27deg) scale(calc(var(--flight-tunnel-scale, .72) + .33)); }
   .travel-flight-rings i:nth-child(3) { opacity: .42; transform: translate(-50%, -50%) rotate(-18deg) scale(calc(var(--flight-tunnel-scale, .72) + .68)); }
-  .travel-horizon { position: absolute; top: var(--flight-horizon-y, 50%); right: -12%; left: -12%; height: 56px; transform: translateY(-50%) rotate(var(--flight-bank, 0deg)); transform-origin: center; }
+  .travel-horizon { position: absolute; top: var(--flight-horizon-y, 50%); right: -12%; left: -12%; height: 56px; transform: translateY(-50%) rotateZ(var(--flight-bank, 0deg)) rotateX(var(--flight-pitch, 0deg)); transform-origin: center; }
   .travel-horizon::before, .travel-horizon::after { content: ""; position: absolute; top: 50%; width: 42%; height: 1px; background: linear-gradient(90deg, transparent, #ffffff8c); }
   .travel-horizon::before { left: 0; }
   .travel-horizon::after { right: 0; transform: scaleX(-1); }
   .travel-horizon span { position: absolute; top: 0; bottom: 0; left: 50%; width: 1px; background: #ffffff55; }
   .travel-horizon b { position: absolute; top: 50%; left: 50%; width: 56px; height: 14px; border-right: 1px solid #fff9; border-bottom: 1px solid #fff9; border-left: 1px solid #fff9; transform: translate(-50%, -7px); }
-  .travel-flight-status { position: absolute; z-index: 3; top: clamp(132px, 18vh, 180px); right: 4vw; left: 4vw; display: flex; justify-content: space-between; color: #ffffff87; font-size: 8px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; transform: rotate(var(--flight-bank, 0deg)); }
+  .travel-flight-status { position: absolute; z-index: 3; top: clamp(132px, 18vh, 180px); right: 4vw; left: 4vw; display: flex; justify-content: space-between; color: #ffffff87; font-size: 8px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; transform: translateY(var(--flight-status-y, 0)) rotateZ(var(--flight-bank, 0deg)); }
   .travel-flight-status b { color: var(--turquoise); font-weight: inherit; }
-  .travel-airframe { position: absolute; inset: 0; transform: translateY(var(--flight-airframe-y, 0)) rotate(var(--flight-bank, 0deg)); transform-origin: 50% 110%; }
+  .travel-airframe { position: absolute; inset: 0; transform: translate3d(var(--flight-airframe-x, 0), var(--flight-airframe-y, 0), var(--flight-airframe-z, 0)) rotateX(var(--flight-pitch, 0deg)) rotateY(var(--flight-yaw, 0deg)) rotateZ(var(--flight-bank, 0deg)) scale(var(--flight-airframe-scale, 1)); transform-origin: 50% 110%; }
   .travel-airframe i, .travel-airframe b { position: absolute; bottom: -2vh; width: 44vw; height: 18vh; background: linear-gradient(180deg, #b9bec533, #121722d9 44%, #05070bef); border-top: 1px solid #ffffff40; box-shadow: 0 -20px 70px #0007; }
   .travel-airframe i { left: -3vw; clip-path: polygon(0 52%, 100% 0, 85% 42%, 18% 100%, 0 100%); transform: rotate(2deg); }
   .travel-airframe b { right: -3vw; clip-path: polygon(0 0, 100% 52%, 100% 100%, 82% 100%, 15% 42%); transform: rotate(-2deg); }

@@ -79,6 +79,8 @@ Le deuxième acte raconte désormais cinq étapes académiques : France (Paris e
 
 L’expérience desktop adopte ensuite un point de vue de vol : chaque paysage occupe l’espace entier, la destination suivante apparaît dans la profondeur de l’horizon, puis s’ouvre jusqu’à remplacer la scène précédente. L’inclinaison, les lignes de vitesse, les anneaux d’approche et la silhouette abstraite de l’appareil réagissent au scroll pour produire une sensation de déplacement sans sacrifier la carte d’information. Le carnet vertical reste volontairement plus calme sur mobile.
 
+La transition ne repose plus sur un simple masque : la scène de départ recule, monte et bascule comme un plan dans un véritable espace perspectif, la caméra traverse des prismes à six faces, puis plonge dans le plan de la destination suivante. Cette chorégraphie de zoom arrière, translation spatiale et zoom avant reprend le principe lisible d’un changement de point de vue aérien sans reproduire l’identité visuelle d’un jeu existant.
+
 ## Familles explorées
 
 Choisir une seule famille visuelle dominante pour la V2 :
