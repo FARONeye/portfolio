@@ -1,5 +1,6 @@
 import Image from "next/image";
 import type { CSSProperties } from "react";
+import TravelGlobe from "./TravelGlobe";
 
 const portrait = "/media/portraits/21C7AA17-2AB3-464F-9942-D4346396FAD9_1_102_o.jpeg";
 const landscape = "/media/editorial/179A20D3-83DA-4AD6-82FF-CDAB89055602_1_105_c.jpeg";
@@ -10,12 +11,16 @@ const studyTrips = [
   {
     number: "01",
     code: "FR",
-    place: "France",
+    place: "Paris",
     country: "France",
     cities: "Paris ↔ Lyon",
     title: "Le point de départ.",
     body: "De Paris à Lyon, cette première étape ouvre le parcours : changer de ville, découvrir d’autres méthodes et apprendre à regarder chaque environnement comme un nouveau terrain d’étude.",
-    image: "/media/editorial/7A7E0BCD-AB71-4BA1-A135-0D157678584A_1_105_c.jpeg",
+    gallery: [
+      "/media/editorial/7A7E0BCD-AB71-4BA1-A135-0D157678584A_1_105_c.jpeg",
+      "/media/editorial/179A20D3-83DA-4AD6-82FF-CDAB89055602_1_105_c.jpeg",
+      "/media/editorial/6B6CEFDE-8017-4ABB-9CEA-B0C063FFD69C_1_105_c.jpeg",
+    ],
     caption: "France / archive personnelle",
     color: "#9273b2",
   },
@@ -27,7 +32,11 @@ const studyTrips = [
     cities: "Dublin",
     title: "Apprendre en anglais.",
     body: "Dublin transforme le voyage en immersion : écouter autrement, prendre confiance, échanger et apprendre au contact d’une culture nouvelle.",
-    image: "/media/editorial/E6D07DB3-7C44-4319-BC7F-B20A524CA3DB_1_105_c.jpeg",
+    gallery: [
+      "/media/editorial/E6D07DB3-7C44-4319-BC7F-B20A524CA3DB_1_105_c.jpeg",
+      "/media/editorial/1488A6F5-5115-49EA-B944-8C700C5759AA_1_105_c.jpeg",
+      "/media/editorial/391665BB-CAC2-4720-998F-288B554439D3_1_105_c.jpeg",
+    ],
     caption: "Irlande / archive personnelle",
     color: "#3faaa5",
   },
@@ -39,7 +48,11 @@ const studyTrips = [
     cities: "Barcelona",
     title: "Changer de rythme.",
     body: "À Barcelone, l’étude sort du cadre. La ville, son architecture et son énergie deviennent une manière plus spontanée d’observer, de collaborer et de créer.",
-    image: "/media/editorial/391665BB-CAC2-4720-998F-288B554439D3_1_105_c.jpeg",
+    gallery: [
+      "/media/editorial/391665BB-CAC2-4720-998F-288B554439D3_1_105_c.jpeg",
+      "/media/editorial/AC28D49D-9D04-4929-A23A-DA9494540415_1_105_c.jpeg",
+      "/media/editorial/C5900B4D-CF48-4442-9C1D-A44E17BD2352_1_201_a.jpeg",
+    ],
     caption: "Espagne / archive personnelle",
     color: "#d17b68",
   },
@@ -51,7 +64,11 @@ const studyTrips = [
     cities: "Montréal",
     title: "Changer de continent.",
     body: "Montréal élargit l’horizon : un nouvel équilibre entre culture francophone, influences nord-américaines et apprentissage dans une métropole en mouvement.",
-    image: "/media/editorial/5697E241-CEB6-4301-90A5-D370B221FD6C_1_105_c.jpeg",
+    gallery: [
+      "/media/editorial/5697E241-CEB6-4301-90A5-D370B221FD6C_1_105_c.jpeg",
+      "/media/editorial/188E0467-E3CD-4547-8DCD-CCD6A6751292_1_105_c.jpeg",
+      "/media/editorial/95ADA646-F765-4F7D-92FF-0061B22DC9B2_1_105_c.jpeg",
+    ],
     caption: "Montréal / archive personnelle",
     color: "#568ca8",
   },
@@ -63,7 +80,11 @@ const studyTrips = [
     cities: "Boston",
     title: "Aller plus loin.",
     body: "Boston clôt cette traversée comme une nouvelle ouverture : étudier dans un environnement international, confronter les idées et revenir avec une vision plus large.",
-    image: "/media/editorial/193943EB-7EDC-4981-AD66-94F79AE8B6F7_1_105_c.jpeg",
+    gallery: [
+      "/media/editorial/193943EB-7EDC-4981-AD66-94F79AE8B6F7_1_105_c.jpeg",
+      "/media/editorial/A34DDE4B-24DD-4894-80AF-DBC037B986B0_1_105_c.jpeg",
+      "/media/editorial/1488A6F5-5115-49EA-B944-8C700C5759AA_1_105_c.jpeg",
+    ],
     caption: "Boston / archive personnelle",
     color: "#75344f",
   },
@@ -266,39 +287,10 @@ export default function Home() {
 
         <div className="story-journey" data-story-journey>
           <div className="story-sticky" data-active-chapter="0">
-            <div className="travel-route" aria-hidden="true">
-              <div className="travel-route-heading"><span>Itinéraire académique</span><b>PAR / BOS</b></div>
-              <svg viewBox="0 0 1000 220" preserveAspectRatio="none">
-                <path className="travel-route-shadow" d="M70 135 C160 34 230 43 302 91 S430 203 520 130 S682 21 750 87 S866 191 930 76" />
-                <path className="travel-route-line" pathLength="1" d="M70 135 C160 34 230 43 302 91 S430 203 520 130 S682 21 750 87 S866 191 930 76" />
-              </svg>
-              <span className="travel-plane">✈</span>
-              <div className="travel-stops">
-                {studyTrips.map((trip, index) => (
-                  <span className="travel-stop" data-travel-stop={index} key={trip.code}>
-                    <i /><b>{trip.code}</b>
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div className="travel-flight-deck" aria-hidden="true">
-              <div className="travel-speed-field">
-                {Array.from({ length: 12 }, (_, index) => <i key={index} />)}
-              </div>
-              <div className="travel-geometry">
-                {Array.from({ length: 8 }, (_, objectIndex) => (
-                  <span className="travel-cube" data-travel-object={objectIndex} key={objectIndex}>
-                    {Array.from({ length: 6 }, (_, faceIndex) => <i key={faceIndex} />)}
-                  </span>
-                ))}
-              </div>
-              <div className="travel-flight-rings"><i /><i /><i /></div>
-              <div className="travel-horizon"><span /><b /></div>
-              <div className="travel-flight-status">
-                <span>Vol académique · MT—05</span>
-                <b>Scroll / propulsion</b>
-              </div>
-              <div className="travel-airframe"><i /><b /><span /></div>
+            <TravelGlobe />
+            <div className="travel-cinema-heading" aria-hidden="true">
+              <span>02 / Journal de voyage</span>
+              <b>Paris — Boston</b>
             </div>
             <div className="story-track">
               {studyTrips.map((trip, index) => (
@@ -309,43 +301,40 @@ export default function Home() {
                   key={trip.number}
                   style={{ "--trip-accent": trip.color } as CSSProperties}
                 >
-                  <span className="chapter-giant-number" aria-hidden="true">{trip.code}</span>
-                  <div className="story-panel-copy travel-ticket">
-                    <div className="travel-ticket-head">
-                      <span>Study boarding pass</span><b>MT—{trip.number}</b>
-                    </div>
-                    <span className="chapter-number">Étape {trip.number} — {trip.country}</span>
+                  <div className="travel-memory-gallery">
+                    {trip.gallery.map((image, photoIndex) => (
+                      <figure className={`travel-memory-photo travel-memory-photo-${photoIndex + 1}`} data-travel-photo={photoIndex} key={image}>
+                        <Image
+                          src={image}
+                          alt={`Souvenir personnel de ${trip.place}, photographie ${photoIndex + 1}`}
+                          fill
+                          loading="eager"
+                          unoptimized={image.includes("7A7E0BCD")}
+                          sizes={photoIndex === 0 ? "(max-width: 760px) 100vw, 72vw" : "(max-width: 760px) 46vw, 28vw"}
+                        />
+                        <figcaption>{trip.caption} / {String(photoIndex + 1).padStart(2, "0")}</figcaption>
+                      </figure>
+                    ))}
+                  </div>
+                  <div className="story-panel-copy travel-memory-copy">
+                    <span className="chapter-number">Escale {trip.number} · {trip.country}</span>
                     <h3>{trip.place}</h3>
-                    <div className="travel-city-line"><span>{trip.cities}</span><i aria-hidden="true">→</i></div>
+                    <p className="travel-memory-title">{trip.title}</p>
                     <p>{trip.body}</p>
-                    <div className="travel-ticket-meta">
-                      <span><small>Motif</small>Voyage d&apos;études</span>
-                      <span><small>Destination</small>{trip.code}</span>
-                      <span><small>Statut</small>Exploré</span>
+                    <div className="travel-memory-meta">
+                      <span>{trip.cities}</span><b>{trip.code}</b><i>{trip.number} / 05</i>
                     </div>
-                    <span className="chapter-end" aria-hidden="true">Escale {trip.number} / 05 <span>→</span></span>
                   </div>
-                  <figure className="story-panel-image">
-                    <Image src={trip.image} alt={`Photographie personnelle associée à l’étape ${trip.place}`} fill loading="eager" unoptimized={trip.number === "01"} sizes="(max-width: 760px) 100vw, 52vw" />
-                    <figcaption>{trip.caption}</figcaption>
-                    <span className="story-corner story-corner-top" />
-                    <span className="story-corner story-corner-bottom" />
-                    <span className="travel-stamp" aria-hidden="true"><b>{trip.code}</b><i>Études · {trip.number}</i></span>
-                    <span className="travel-photo-tape" aria-hidden="true" />
-                  </figure>
-                  <div className="travel-arrival" aria-hidden="true">
-                    <span>Approche {trip.number}</span><b>{trip.code}</b><i>{trip.cities}</i>
-                  </div>
-                  <span className="story-panel-word" aria-hidden="true">{trip.place}</span>
+                  <span className="travel-memory-word" aria-hidden="true">{trip.place}</span>
                 </article>
               ))}
             </div>
-            <div className="story-rail" aria-hidden="true">
-              <span>Faire défiler pour voyager</span>
+            <div className="travel-film-burn" aria-hidden="true" />
+            <div className="story-rail travel-chapter-rail" aria-hidden="true">
+              <span>Défiler pour faire décoller l&apos;histoire</span>
               <i><b /></i>
-              <span className="story-rail-count"><b>FR</b><b>DUB</b><b>BCN</b><b>YUL</b><b>BOS</b> / 05</span>
+              <span className="story-rail-count"><b>PAR</b><b>DUB</b><b>BCN</b><b>YUL</b><b>BOS</b> / 05</span>
             </div>
-            <div className="story-transition-mark travel-compass" aria-hidden="true"><span /><span /><i>N</i></div>
           </div>
         </div>
       </section>

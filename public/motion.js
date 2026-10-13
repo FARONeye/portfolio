@@ -15,8 +15,7 @@
     const storyJourney = document.querySelector("[data-story-journey]");
     const storySticky = storyJourney?.querySelector(".story-sticky");
     const panels = Array.from(document.querySelectorAll("[data-chapter]"));
-    const travelStops = Array.from(storyJourney?.querySelectorAll("[data-travel-stop]") || []);
-    const travelObjects = Array.from(storyJourney?.querySelectorAll("[data-travel-object]") || []);
+    const travelPhotoSets = panels.map((panel) => Array.from(panel.querySelectorAll("[data-travel-photo]")));
     const capabilityJourney = document.querySelector("[data-capability-journey]");
     const capabilitySticky = capabilityJourney?.querySelector(".capability-sticky");
     const capabilityCards = Array.from(document.querySelectorAll("[data-capability-card]"));
@@ -226,128 +225,94 @@
       const travel = Math.max(1, storyJourney.offsetHeight - window.innerHeight);
       const progress = clamp(-rect.top / travel);
       const position = progress * (panels.length - 1);
-      const active = Math.min(panels.length - 1, Math.round(position));
-      const segmentProgress = position >= panels.length - 1 ? 0 : position % 1;
-      const flightSurge = Math.sin(segmentProgress * Math.PI);
-      const flightBank = Math.sin(position * Math.PI) * 9;
-      const flightPitch = mix(-18, 18, ease(segmentProgress)) * flightSurge;
-      const flightYaw = Math.sin(position * Math.PI * .5) * flightSurge * 7;
+      const lastIndex = panels.length - 1;
+      const atFinalDestination = position >= lastIndex - .0001;
+      const segmentIndex = Math.min(lastIndex - 1, Math.floor(position));
+      const segmentProgress = atFinalDestination ? 1 : position % 1;
+      const active = atFinalDestination ? lastIndex : Math.min(lastIndex, Math.floor(position + .78));
+      const departure = atFinalDestination ? 0 : ease(range(segmentProgress, .04, .23));
+      const arrival = atFinalDestination ? 1 : ease(range(segmentProgress, .72, .98));
+      const flightProgress = atFinalDestination ? 1 : range(segmentProgress, .17, .83);
+      const flightSurge = Math.sin(flightProgress * Math.PI);
+      const globeVisibility = atFinalDestination ? .22 : .18 + Math.sin(segmentProgress * Math.PI) * .82;
+      const globeScale = atFinalDestination
+        ? 3.25
+        : segmentProgress < .5
+          ? mix(3.25, 1, departure)
+          : mix(1, 3.25, arrival);
+      const globeTilt = Math.sin(segmentProgress * Math.PI * 2) * flightSurge * 4.5;
+      const burn = Math.max(
+        Math.sin(range(segmentProgress, .03, .25) * Math.PI) * (segmentProgress < .27 ? 1 : 0),
+        Math.sin(range(segmentProgress, .72, .98) * Math.PI) * (segmentProgress > .7 ? 1 : 0),
+      );
+
       set(storySticky, "--story-progress", progress.toFixed(4));
       set(storySticky, "--flight-surge", flightSurge.toFixed(4));
-      set(storySticky, "--flight-bank", `${flightBank}deg`);
-      set(storySticky, "--flight-pitch", `${flightPitch}deg`);
-      set(storySticky, "--flight-yaw", `${flightYaw}deg`);
-      set(storySticky, "--flight-horizon-y", `${50 + flightPitch * .62 + flightSurge * 5}%`);
-      set(storySticky, "--flight-tunnel-scale", (0.64 + flightSurge * 1.38).toFixed(3));
-      set(storySticky, "--flight-tunnel-opacity", (flightSurge * .38).toFixed(3));
-      set(storySticky, "--flight-stream-opacity", (flightSurge * .88).toFixed(3));
-      set(storySticky, "--flight-grid-opacity", (flightSurge * .48).toFixed(3));
-      set(storySticky, "--flight-speed-scale", (1 + flightSurge * .62).toFixed(3));
-      set(storySticky, "--flight-ray-scale", (.18 + flightSurge * 2.4).toFixed(3));
-      set(storySticky, "--flight-airframe-x", `${Math.sin(segmentProgress * Math.PI * 2) * flightSurge * 4.5}vw`);
-      set(storySticky, "--flight-airframe-y", `${flightSurge * 7.5 + Math.sin(segmentProgress * Math.PI * 2) * flightSurge * 2.4}vh`);
-      set(storySticky, "--flight-airframe-z", `${flightSurge * -190}px`);
-      set(storySticky, "--flight-airframe-scale", (1 - flightSurge * .2).toFixed(3));
-      set(storySticky, "--flight-world-opacity", flightSurge.toFixed(3));
-      set(storySticky, "--flight-status-y", `${flightPitch * .45}px`);
+      set(storySticky, "--earth-opacity", globeVisibility.toFixed(3));
+      set(storySticky, "--earth-scale", globeScale.toFixed(3));
+      set(storySticky, "--earth-rotate", `${globeTilt}deg`);
+      set(storySticky, "--earth-x", `${Math.sin(segmentProgress * Math.PI) * -2.5}vw`);
+      set(storySticky, "--earth-y", `${mix(7, 0, flightSurge)}vh`);
+      set(storySticky, "--travel-plane-opacity", (range(segmentProgress, .14, .24) * (1 - range(segmentProgress, .78, .9))).toFixed(3));
+      set(storySticky, "--travel-plane-scale", (0.82 + flightSurge * .28).toFixed(3));
+      set(storySticky, "--travel-route-opacity", (flightSurge * .95).toFixed(3));
+      set(storySticky, "--travel-stars-speed", `${position * -8}vh`);
+      set(storySticky, "--travel-film-burn", (burn * .52).toFixed(3));
+      set(storySticky, "--travel-space-vignette", (.48 + flightSurge * .3).toFixed(3));
       storySticky.dataset.activeChapter = String(active);
 
-      const objectLanes = [[-36, -27], [31, -23], [-22, 18], [38, 14], [-43, 4], [16, -7], [45, -10], [-8, 26]];
-      const objectAngles = [[22, -34, 8], [-18, 28, -12], [32, 24, 18], [-25, -31, -16], [18, 38, 7], [-31, 22, 14], [27, -25, -10], [-20, 34, 20]];
-      travelObjects.forEach((object, index) => {
-        const objectProgress = (segmentProgress * 1.24 + index * .139) % 1;
-        const depth = ease(objectProgress);
-        const lane = objectLanes[index % objectLanes.length];
-        const angles = objectAngles[index % objectAngles.length];
-        const objectOpacity = Math.min(1, flightSurge * 1.18) * range(objectProgress, .03, .15) * (1 - range(objectProgress, .8, .98));
-        set(object, "--object-x", `${lane[0] + Math.sin((position + index) * 1.7) * 5}vw`);
-        set(object, "--object-y", `${lane[1] + Math.cos((position + index) * 1.3) * 4}vh`);
-        set(object, "--object-z", `${mix(-1900, 680, depth)}px`);
-        set(object, "--object-rotate-x", `${angles[0] + Math.sin(position * 2.1 + index) * 13}deg`);
-        set(object, "--object-rotate-y", `${angles[1] + Math.cos(position * 1.7 + index) * 16}deg`);
-        set(object, "--object-rotate-z", `${angles[2] + flightBank * .7 + Math.sin(position + index) * 8}deg`);
-        set(object, "--object-scale", (0.52 + objectProgress * 1.24).toFixed(3));
-        set(object, "--object-opacity", objectOpacity.toFixed(3));
-      });
-
-      const routePoints = [[7, 61], [30, 41], [52, 59], [75, 40], [93, 35]];
-      const routeIndex = Math.min(routePoints.length - 2, Math.floor(position));
-      const routeAmount = Math.min(1, position - routeIndex);
-      const routeFrom = routePoints[routeIndex];
-      const routeTo = routePoints[routeIndex + 1];
-      const planeX = mix(routeFrom[0], routeTo[0], routeAmount);
-      const planeY = mix(routeFrom[1], routeTo[1], routeAmount) - Math.sin(routeAmount * Math.PI) * 13;
-      const planeAngle = Math.atan2((routeTo[1] - routeFrom[1]) * .58, routeTo[0] - routeFrom[0]) * 180 / Math.PI;
-      const landingPulse = 1 - Math.min(1, Math.min(routeAmount, 1 - routeAmount) * 8);
-      set(storySticky, "--travel-plane-x", `${planeX}%`);
-      set(storySticky, "--travel-plane-y", `${planeY}%`);
-      set(storySticky, "--travel-plane-rotate", `${planeAngle}deg`);
-      set(storySticky, "--travel-plane-scale", (1 + landingPulse * .22).toFixed(3));
-      travelStops.forEach((stop, index) => {
-        stop.classList.toggle("is-passed", index <= active);
-        stop.classList.toggle("is-current", index === active);
-      });
+      window.dispatchEvent(new CustomEvent("portfolio:travel", {
+        detail: {
+          position,
+          segment: segmentIndex,
+          flightProgress,
+          from: segmentIndex,
+          to: segmentIndex + 1,
+        },
+      }));
 
       panels.forEach((panel, index) => {
-        const delta = index - position;
-        const absoluteDelta = Math.abs(delta);
-        const distance = Math.min(1, absoluteDelta);
-        const direction = delta < 0 ? -1 : 1;
-        const incoming = delta >= 0;
-        const incomingProgress = incoming ? clamp(1 - delta) : 1;
-        const approach = incoming ? ease(range(incomingProgress, .28, 1)) : 1;
-        const exit = delta < 0 ? clamp(-delta) : 0;
-        const exitDepth = ease(range(exit, 0, .72));
-        const visible = absoluteDelta <= 1.05
-          ? incoming ? range(incomingProgress, .08, .44) : 1 - range(exit, .58, .9)
-          : 0;
-        set(panel, "--scene-x", `${incoming ? mix(direction * 13, 0, approach) : exitDepth * -11}vw`);
-        set(panel, "--scene-y", `${incoming ? mix(-38, 0, approach) : exitDepth * 26}vh`);
-        set(panel, "--scene-rotate-x", `${incoming ? mix(-56, 0, approach) : exitDepth * 52}deg`);
-        set(panel, "--scene-rotate-y", `${incoming ? mix(22, 0, approach) : exitDepth * -17 + flightYaw * .3}deg`);
-        set(panel, "--scene-rotate-z", `${incoming ? mix(flightBank * .75, 0, approach) : flightBank * .55 + exitDepth * -7}deg`);
-        set(panel, "--scene-z", `${incoming ? mix(-1700, 0, approach) : -1320 * exitDepth}px`);
-        set(panel, "--scene-scale", (incoming ? mix(.38, 1, approach) : mix(1, .52, exitDepth)).toFixed(3));
-        set(panel, "--scene-opacity", visible.toFixed(3));
-        set(panel, "--travel-inset", `${incoming ? mix(16, 0, approach) : exitDepth * 10}%`);
-        set(panel, "--travel-radius", `${incoming ? mix(90, 0, approach) : exitDepth * 70}px`);
-        set(panel, "--scene-clip-left", `${delta > 0 ? Math.min(100, delta * 100) : 0}%`);
-        set(panel, "--scene-clip-right", `${delta < 0 ? Math.min(100, -delta * 100) : 0}%`);
-        set(panel, "--panel-copy-x", `${delta * 150}px`);
-        set(panel, "--panel-copy-y", `${distance * 72}px`);
-        set(panel, "--panel-copy-opacity", clamp(1 - distance * 2.15).toFixed(3));
-        set(panel, "--travel-ticket-rotate", `${delta * -4 + flightBank * .15}deg`);
-        set(panel, "--panel-image-x", `${delta * -4}vw`);
-        set(panel, "--panel-image-y", `${flightPitch * -.12}vh`);
-        set(panel, "--panel-image-rotate", `${flightBank * .14 + direction * distance * 1.5}deg`);
-        set(panel, "--panel-image-scale", (1 + flightSurge * .05).toFixed(3));
-        set(panel, "--panel-photo-scale", (1.1 + flightSurge * .16).toFixed(3));
-        set(panel, "--panel-clip", `${distance * 15}%`);
-        set(panel, "--panel-radius", `${distance * 64}px`);
-        set(panel, "--panel-blur", `${incoming ? (1 - approach) * 5 : exitDepth * 2}px`);
-        set(panel, "--panel-glint-x", `${mix(-140, 140, 1 - distance)}%`);
-        set(panel, "--panel-word-x", `${delta * -20}vw`);
-        set(panel, "--panel-number-x", `${delta * 15}vw`);
-        set(panel, "--panel-light-x", `${68 - delta * 20}%`);
-        set(panel, "--title-mask", `${distance * 62}%`);
-        set(panel, "--title-x", `${delta * 2}vw`);
-        set(panel, "--travel-stamp-opacity", (1 - distance).toFixed(3));
-        set(panel, "--travel-stamp-scale", (1 + distance * 1.8).toFixed(3));
-        set(panel, "--travel-stamp-rotate", `${-12 + delta * 28}deg`);
-        set(panel, "--travel-arrival-opacity", clamp(1 - distance * 2.1).toFixed(3));
-        set(panel, "--travel-arrival-y", `${distance * -34}px`);
-        set(panel, "--travel-code-opacity", (clamp(1 - distance * 1.8) * .5).toFixed(3));
-        set(panel, "--travel-word-opacity", clamp(1 - distance * 1.8).toFixed(3));
-        panel.style.zIndex = String(10 + index);
+        const isDeparting = index === segmentIndex && !atFinalDestination;
+        const isArriving = index === segmentIndex + 1 && !atFinalDestination;
+        const isFinal = index === lastIndex && atFinalDestination;
+        const presence = isDeparting ? 1 - departure : isArriving ? arrival : isFinal ? 1 : 0;
+        const motion = isDeparting ? departure : isArriving ? 1 - arrival : 0;
+        const direction = isDeparting ? -1 : 1;
+
+        set(panel, "--scene-opacity", presence.toFixed(3));
+        set(panel, "--scene-scale", mix(1, .72, motion).toFixed(3));
+        set(panel, "--scene-z", `${motion * -720}px`);
+        set(panel, "--scene-y", `${direction * motion * 7}vh`);
+        set(panel, "--scene-rotate-x", `${direction * motion * 9}deg`);
+        set(panel, "--memory-copy-opacity", range(presence, .48, .82).toFixed(3));
+        set(panel, "--memory-copy-y", `${motion * 64}px`);
+        set(panel, "--memory-word-opacity", (presence * .22).toFixed(3));
+        set(panel, "--memory-word-scale", mix(.84, 1, presence).toFixed(3));
+
+        travelPhotoSets[index]?.forEach((photo, photoIndex) => {
+          const stagger = photoIndex * .1;
+          const photoPresence = isDeparting
+            ? 1 - range(departure, .35 + stagger, .8 + stagger * .35)
+            : isArriving
+              ? range(arrival, .04 + stagger, .58 + stagger)
+              : isFinal ? 1 : 0;
+          const photoMotion = 1 - photoPresence;
+          const scatterX = [-8, 24, -20][photoIndex] || 0;
+          const scatterY = [10, -18, 22][photoIndex] || 0;
+          const scatterRotate = [-4, 13, -11][photoIndex] || 0;
+          set(photo, "--memory-photo-opacity", photoPresence.toFixed(3));
+          set(photo, "--memory-photo-x", `${scatterX * photoMotion * direction}vw`);
+          set(photo, "--memory-photo-y", `${scatterY * photoMotion}vh`);
+          set(photo, "--memory-photo-z", `${photoMotion * -520}px`);
+          set(photo, "--memory-photo-rotate", `${scatterRotate * photoMotion * direction}deg`);
+          set(photo, "--memory-photo-scale", mix(1, .72, photoMotion).toFixed(3));
+          set(photo, "--memory-photo-clip", `${photoMotion * 48}%`);
+          set(photo, "--memory-image-scale", (1.04 + photoMotion * .28).toFixed(3));
+        });
+
+        panel.style.zIndex = presence > 0 ? String(20 + index) : String(index);
         panel.classList.toggle("is-current", index === active);
       });
-
-      const transitionAmount = Math.sin((position % 1) * Math.PI);
-      set(storySticky, "--transition-mark-opacity", transitionAmount.toFixed(3));
-      set(storySticky, "--transition-mark-x", `${50 + Math.sin(position * Math.PI) * 28}%`);
-      set(storySticky, "--transition-mark-y", `${50 + Math.cos(position * Math.PI) * 18}%`);
-      set(storySticky, "--transition-mark-rotate", `${position * 225}deg`);
-      set(storySticky, "--transition-mark-scale", (0.4 + transitionAmount * 1.2).toFixed(3));
     };
 
     const updateCapabilities = () => {

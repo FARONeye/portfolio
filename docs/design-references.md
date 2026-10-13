@@ -75,11 +75,9 @@ La section 03 s’annonce explicitement comme une galerie de projets. Le scroll 
 
 ### Acte 02 — carnet de voyages d’études
 
-Le deuxième acte raconte désormais cinq étapes académiques : France (Paris et Lyon), Dublin, Barcelone, Montréal et Boston. La métaphore n’est pas décorative : la progression du scroll dessine l’itinéraire, déplace un avion entre les codes de destination, tourne les scènes comme des pages de passeport et fait apparaître chaque photo comme une carte postale tamponnée. Une carte d’embarquement rassemble le pays, la ville et le sens de l’étape sans inventer d’établissement ni de date. Sur mobile, la route devient un carnet vertical lisible et chaque escale reste une section autonome.
+Le deuxième acte raconte cinq étapes académiques : Paris avec Lyon comme première expérience française, puis Dublin, Barcelone, Montréal et Boston. La métaphore n’est pas décorative : le scroll contrôle directement le décollage, la traversée du globe, l’approche de la destination et l’ouverture des souvenirs. Le texte reste volontairement générique tant que les établissements et les dates définitifs ne sont pas renseignés.
 
-L’expérience desktop adopte ensuite un point de vue de vol : chaque paysage occupe l’espace entier, la destination suivante apparaît dans la profondeur de l’horizon, puis s’ouvre jusqu’à remplacer la scène précédente. L’inclinaison, les lignes de vitesse, les anneaux d’approche et la silhouette abstraite de l’appareil réagissent au scroll pour produire une sensation de déplacement sans sacrifier la carte d’information. Le carnet vertical reste volontairement plus calme sur mobile.
-
-La transition ne repose plus sur un simple masque : la scène de départ recule, monte et bascule comme un plan dans un véritable espace perspectif, la caméra traverse des prismes à six faces, puis plonge dans le plan de la destination suivante. Cette chorégraphie de zoom arrière, translation spatiale et zoom avant reprend le principe lisible d’un changement de point de vue aérien sans reproduire l’identité visuelle d’un jeu existant.
+L’expérience desktop abandonne complètement le cockpit et son HUD. Une Terre orthographique fondée sur les données Natural Earth fait tourner les continents et les frontières réels sous un avion suivant Paris, Dublin, Barcelone, Montréal et Boston. Chaque arrivée déclenche un zoom terrestre puis un montage en profondeur de trois archives personnelles avant le prochain décollage. Les raccords suivent une logique de montage vidéo : dispersion des images, dézoom orbital, traversée, flash lumineux, plongée et recomposition des souvenirs. Le carnet vertical reste volontairement plus calme sur mobile.
 
 ## Familles explorées
 
