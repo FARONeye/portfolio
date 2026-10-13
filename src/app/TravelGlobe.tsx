@@ -1,37 +1,26 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { geoGraticule10, geoInterpolate, geoOrthographic, geoPath } from "d3-geo";
+import { geoEquirectangular, geoGraticule10, geoInterpolate, geoPath } from "d3-geo";
 import { feature, mesh } from "topojson-client";
 import type { GeometryCollection, Topology } from "topojson-specification";
 import worldAtlas from "world-atlas/countries-110m.json";
 
-type WorldObjects = {
-  countries: GeometryCollection;
-  land: GeometryCollection;
-};
-
-type TravelFrame = {
-  position: number;
-  segment: number;
-  flightProgress: number;
-  from: number;
-  to: number;
-};
+type WorldObjects = { countries: GeometryCollection; land: GeometryCollection };
+type TravelFrame = { position: number; segment: number; flightProgress: number; from: number; to: number };
 
 const destinations = [
-  { code: "PAR", name: "Paris", coordinates: [2.3522, 48.8566] as [number, number] },
-  { code: "DUB", name: "Dublin", coordinates: [-6.2603, 53.3498] as [number, number] },
-  { code: "BCN", name: "Barcelone", coordinates: [2.1734, 41.3851] as [number, number] },
-  { code: "YUL", name: "Montréal", coordinates: [-73.5673, 45.5019] as [number, number] },
-  { code: "BOS", name: "Boston", coordinates: [-71.0589, 42.3601] as [number, number] },
+  { code: "PAR", coordinates: [2.3522, 48.8566] as [number, number] },
+  { code: "DUB", coordinates: [-6.2603, 53.3498] as [number, number] },
+  { code: "BCN", coordinates: [2.1734, 41.3851] as [number, number] },
+  { code: "YUL", coordinates: [-73.5673, 45.5019] as [number, number] },
+  { code: "BOS", coordinates: [-71.0589, 42.3601] as [number, number] },
 ];
 
 const topology = worldAtlas as unknown as Topology<WorldObjects>;
 const land = feature(topology, topology.objects.land);
 const borders = mesh(topology, topology.objects.countries, (a, b) => a !== b);
 const graticule = geoGraticule10();
-
 const clamp = (value: number) => Math.max(0, Math.min(1, value));
 const ease = (value: number) => {
   const amount = clamp(value);
@@ -39,85 +28,126 @@ const ease = (value: number) => {
 };
 
 export default function TravelGlobe() {
-  const landRef = useRef<SVGPathElement>(null);
-  const borderRef = useRef<SVGPathElement>(null);
-  const graticuleRef = useRef<SVGPathElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const mapRef = useRef<HTMLDivElement>(null);
   const routeRef = useRef<SVGPathElement>(null);
   const routeGhostRef = useRef<SVGPathElement>(null);
-  const fromMarkerRef = useRef<SVGGElement>(null);
-  const toMarkerRef = useRef<SVGGElement>(null);
+  const fromMarkerRef = useRef<HTMLDivElement>(null);
+  const toMarkerRef = useRef<HTMLDivElement>(null);
   const planeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const projection = geoOrthographic()
-      .translate([360, 360])
-      .scale(300)
-      .clipAngle(90)
-      .precision(0.3);
-    const path = geoPath(projection);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const context = canvas.getContext("2d", { alpha: true });
+    if (!context) return;
 
-    const setMarker = (
-      marker: SVGGElement | null,
-      point: [number, number],
-      code: string,
-      visible: boolean,
-    ) => {
+    const drawMap = () => {
+      const pixelRatio = Math.min(1.25, window.devicePixelRatio || 1);
+      canvas.width = Math.round(1200 * pixelRatio);
+      canvas.height = Math.round(600 * pixelRatio);
+      context.setTransform(canvas.width / 1440, 0, 0, canvas.height / 720, 0, 0);
+      context.clearRect(0, 0, 1440, 720);
+      const projection = geoEquirectangular().translate([720, 360]).scale(229.18).precision(0.7);
+      const path = geoPath(projection, context);
+
+      const ocean = context.createLinearGradient(0, 0, 1440, 720);
+      ocean.addColorStop(0, "#193d57");
+      ocean.addColorStop(0.5, "#0b253d");
+      ocean.addColorStop(1, "#06101f");
+      context.fillStyle = ocean;
+      context.fillRect(0, 0, 1440, 720);
+      context.beginPath();
+      path(graticule);
+      context.strokeStyle = "#9fcfdc20";
+      context.lineWidth = 0.7;
+      context.stroke();
+      context.beginPath();
+      path(land);
+      context.fillStyle = "#9aa891";
+      context.fill();
+      context.strokeStyle = "#d5ddbd80";
+      context.lineWidth = 0.8;
+      context.stroke();
+      context.beginPath();
+      path(borders);
+      context.strokeStyle = "#0b1c288c";
+      context.lineWidth = 0.52;
+      context.stroke();
+    };
+
+    const screenPoint = (point: [number, number], focus: [number, number], altitude = 0) => ({
+      x: 360 + (point[0] - focus[0]) * 4.05,
+      y: 360 - (point[1] - focus[1]) * 4.05 - altitude,
+    });
+    const setMarker = (marker: HTMLDivElement | null, point: { x: number; y: number }, code: string, visible: boolean) => {
       if (!marker) return;
-      const projected = projection(point);
-      if (!projected) {
-        marker.style.opacity = "0";
-        return;
-      }
-      marker.style.opacity = visible ? "1" : "0";
-      marker.setAttribute("transform", `translate(${projected[0]} ${projected[1]})`);
-      const label = marker.querySelector("text");
+      const inside = point.x > 45 && point.x < 675 && point.y > 45 && point.y < 675;
+      marker.style.opacity = visible && inside ? "1" : "0";
+      marker.style.setProperty("--marker-x", `${(point.x / 720) * 100}%`);
+      marker.style.setProperty("--marker-y", `${(point.y / 720) * 100}%`);
+      const label = marker.querySelector("b");
       if (label) label.textContent = code;
     };
 
-    const draw = ({ segment, flightProgress, from, to }: TravelFrame) => {
+    let latestFrame: TravelFrame = { position: 0, segment: 0, flightProgress: 0, from: 0, to: 1 };
+    let animationFrame = 0;
+    let lastSignature = "";
+    const drawTravel = ({ segment, flightProgress, from, to }: TravelFrame, force = false) => {
+      const signature = `${segment}:${flightProgress.toFixed(3)}`;
+      if (!force && signature === lastSignature) return;
+      lastSignature = signature;
       const origin = destinations[Math.max(0, Math.min(destinations.length - 1, from))];
       const destination = destinations[Math.max(0, Math.min(destinations.length - 1, to))];
       const interpolate = geoInterpolate(origin.coordinates, destination.coordinates);
       const flight = ease(flightProgress);
-      const cameraProgress = ease(clamp((flightProgress - 0.07) / 0.93));
-      const focus = interpolate(cameraProgress);
-      const roll = Math.sin(flight * Math.PI) * (segment % 2 ? -5 : 5);
+      const cameraProgress = ease(clamp((flightProgress - 0.04) / 0.84));
+      const focus = interpolate(cameraProgress) as [number, number];
+      const originPoint = screenPoint(origin.coordinates, focus);
+      const destinationPoint = screenPoint(destination.coordinates, focus);
+      const planeCoordinates = interpolate(flight) as [number, number];
+      const nextCoordinates = interpolate(clamp(flight + 0.012)) as [number, number];
+      const planePoint = screenPoint(planeCoordinates, focus, Math.sin(flight * Math.PI) * 72);
+      const nextPlanePoint = screenPoint(nextCoordinates, focus, Math.sin(clamp(flight + 0.012) * Math.PI) * 72);
 
-      projection.rotate([-focus[0], -focus[1], roll]);
+      mapRef.current?.style.setProperty("--map-x", `${(-focus[0] / 360) * 100}%`);
+      mapRef.current?.style.setProperty("--map-y", `${(focus[1] / 180) * 100}%`);
+      const curve = Math.max(32, Math.abs(destinationPoint.x - originPoint.x) * 0.2);
+      const route = `M${originPoint.x.toFixed(1)},${originPoint.y.toFixed(1)} Q${((originPoint.x + destinationPoint.x) / 2).toFixed(1)},${(Math.min(originPoint.y, destinationPoint.y) - curve).toFixed(1)} ${destinationPoint.x.toFixed(1)},${destinationPoint.y.toFixed(1)}`;
+      routeGhostRef.current?.setAttribute("d", route);
+      routeRef.current?.setAttribute("d", route);
+      routeRef.current?.style.setProperty("--route-dash", String(1 - flight));
 
-      if (landRef.current) landRef.current.setAttribute("d", path(land) || "");
-      if (borderRef.current) borderRef.current.setAttribute("d", path(borders) || "");
-      if (graticuleRef.current) graticuleRef.current.setAttribute("d", path(graticule) || "");
-
-      const fullRoute = Array.from({ length: 65 }, (_, index) => interpolate(index / 64));
-      const traveledPointCount = Math.max(2, Math.ceil(flight * 64) + 1);
-      const traveledRoute = Array.from(
-        { length: traveledPointCount },
-        (_, index) => interpolate((index / Math.max(1, traveledPointCount - 1)) * flight),
-      );
-      const fullPath = path({ type: "LineString", coordinates: fullRoute });
-      const traveledPath = path({ type: "LineString", coordinates: traveledRoute });
-      if (routeGhostRef.current) routeGhostRef.current.setAttribute("d", fullPath || "");
-      if (routeRef.current) routeRef.current.setAttribute("d", traveledPath || "");
-
-      setMarker(fromMarkerRef.current, origin.coordinates, origin.code, flight < 0.93);
-      setMarker(toMarkerRef.current, destination.coordinates, destination.code, flight > 0.07);
-
-      const planePoint = projection(interpolate(flight));
-      const nextPlanePoint = projection(interpolate(clamp(flight + 0.012)));
-      if (planeRef.current && planePoint && nextPlanePoint) {
-        const angle = Math.atan2(nextPlanePoint[1] - planePoint[1], nextPlanePoint[0] - planePoint[0]) * 180 / Math.PI;
-        planeRef.current.style.setProperty("--plane-x", `${(planePoint[0] / 720) * 100}%`);
-        planeRef.current.style.setProperty("--plane-y", `${(planePoint[1] / 720) * 100}%`);
+      setMarker(fromMarkerRef.current, originPoint, origin.code, flight < 0.93);
+      setMarker(toMarkerRef.current, destinationPoint, destination.code, flight > 0.07);
+      if (planeRef.current) {
+        const angle = Math.atan2(nextPlanePoint.y - planePoint.y, nextPlanePoint.x - planePoint.x) * 180 / Math.PI;
+        planeRef.current.style.setProperty("--plane-x", `${(planePoint.x / 720) * 100}%`);
+        planeRef.current.style.setProperty("--plane-y", `${(planePoint.y / 720) * 100}%`);
         planeRef.current.style.setProperty("--plane-angle", `${angle}deg`);
       }
     };
 
-    const handleTravel = (event: Event) => draw((event as CustomEvent<TravelFrame>).detail);
+    const requestDraw = (frame: TravelFrame, force = false) => {
+      latestFrame = frame;
+      if (animationFrame) return;
+      animationFrame = window.requestAnimationFrame(() => {
+        animationFrame = 0;
+        drawTravel(latestFrame, force);
+      });
+    };
+    const handleTravel = (event: Event) => requestDraw((event as CustomEvent<TravelFrame>).detail);
+    const handleResize = () => drawMap();
+    drawMap();
     window.addEventListener("portfolio:travel", handleTravel);
-    draw({ position: 0, segment: 0, flightProgress: 0, from: 0, to: 1 });
+    window.addEventListener("resize", handleResize, { passive: true });
+    requestDraw(latestFrame, true);
 
-    return () => window.removeEventListener("portfolio:travel", handleTravel);
+    return () => {
+      window.removeEventListener("portfolio:travel", handleTravel);
+      window.removeEventListener("resize", handleResize);
+      if (animationFrame) window.cancelAnimationFrame(animationFrame);
+    };
   }, []);
 
   return (
@@ -127,41 +157,18 @@ export default function TravelGlobe() {
       <div className="travel-earth-shadow" />
       <div className="travel-earth-shell">
         <div className="travel-earth-atmosphere" />
-        <svg className="travel-earth-map" viewBox="0 0 720 720">
-          <defs>
-            <radialGradient id="earth-ocean" cx="35%" cy="28%" r="72%">
-              <stop offset="0" stopColor="#315f76" />
-              <stop offset="0.52" stopColor="#102c45" />
-              <stop offset="1" stopColor="#040914" />
-            </radialGradient>
-            <filter id="land-glow" x="-30%" y="-30%" width="160%" height="160%">
-              <feGaussianBlur stdDeviation="2.2" result="blur" />
-              <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
-            </filter>
-            <clipPath id="earth-disc"><circle cx="360" cy="360" r="300" /></clipPath>
-          </defs>
-          <circle className="travel-ocean" cx="360" cy="360" r="300" fill="url(#earth-ocean)" />
-          <g clipPath="url(#earth-disc)">
-            <path ref={graticuleRef} className="travel-graticule" />
-            <path ref={landRef} className="travel-land" filter="url(#land-glow)" />
-            <path ref={borderRef} className="travel-borders" />
-            <path ref={routeGhostRef} className="travel-globe-route-ghost" />
-            <path ref={routeRef} className="travel-globe-route" />
-            <g ref={fromMarkerRef} className="travel-world-marker travel-world-marker-from">
-              <circle r="6" /><circle r="17" /><text x="14" y="-11" />
-            </g>
-            <g ref={toMarkerRef} className="travel-world-marker travel-world-marker-to">
-              <circle r="7" /><circle r="22" /><text x="16" y="-13" />
-            </g>
-          </g>
-          <circle className="travel-earth-rim" cx="360" cy="360" r="300" />
-          <ellipse className="travel-earth-light" cx="278" cy="250" rx="208" ry="244" />
-        </svg>
-        <div ref={planeRef} className="travel-world-plane">
-          <span className="travel-world-plane-halo" />
-          <svg viewBox="0 0 64 64">
-            <path d="M57.6 30.2 37 20.7 33.8 5.8c-.4-2-3.1-2-3.6 0L27 20.7 6.4 30.2c-2.1 1-1.3 4.1 1 4l19-1.2-1.5 12.6-7.1 5c-1.5 1.1-.5 3.5 1.3 3.1l12.9-3 12.9 3c1.8.4 2.8-2 1.3-3.1l-7.1-5L37.6 33l19 1.2c2.3.1 3.1-3 1-4Z" />
+        <div className="travel-earth-clip">
+          <div ref={mapRef} className="travel-earth-map-wrap"><canvas ref={canvasRef} className="travel-earth-map" /></div>
+          <svg className="travel-route-layer" viewBox="0 0 720 720">
+            <path ref={routeGhostRef} className="travel-globe-route-ghost" pathLength="1" />
+            <path ref={routeRef} className="travel-globe-route" pathLength="1" />
           </svg>
+          <div ref={fromMarkerRef} className="travel-world-marker travel-world-marker-from"><i /><span /><b /></div>
+          <div ref={toMarkerRef} className="travel-world-marker travel-world-marker-to"><i /><span /><b /></div>
+          <div ref={planeRef} className="travel-world-plane">
+            <span className="travel-world-plane-halo" />
+            <svg viewBox="0 0 64 64"><path d="M57.6 30.2 37 20.7 33.8 5.8c-.4-2-3.1-2-3.6 0L27 20.7 6.4 30.2c-2.1 1-1.3 4.1 1 4l19-1.2-1.5 12.6-7.1 5c-1.5 1.1-.5 3.5 1.3 3.1l12.9-3 12.9 3c1.8.4 2.8-2 1.3-3.1l-7.1-5L37.6 33l19 1.2c2.3.1 3.1-3 1-4Z" /></svg>
+          </div>
         </div>
       </div>
       <div className="travel-orbit travel-orbit-one" />

@@ -20,7 +20,11 @@ const studyTrips = [
       "/media/editorial/7A7E0BCD-AB71-4BA1-A135-0D157678584A_1_105_c.jpeg",
       "/media/editorial/179A20D3-83DA-4AD6-82FF-CDAB89055602_1_105_c.jpeg",
       "/media/editorial/6B6CEFDE-8017-4ABB-9CEA-B0C063FFD69C_1_105_c.jpeg",
+      "/media/editorial/95ADA646-F765-4F7D-92FF-0061B22DC9B2_1_105_c.jpeg",
     ],
+    signature: "PARIS",
+    emblem: "◇",
+    motif: "Premiers départs · lignes urbaines",
     caption: "France / archive personnelle",
     color: "#9273b2",
   },
@@ -36,7 +40,11 @@ const studyTrips = [
       "/media/editorial/E6D07DB3-7C44-4319-BC7F-B20A524CA3DB_1_105_c.jpeg",
       "/media/editorial/1488A6F5-5115-49EA-B944-8C700C5759AA_1_105_c.jpeg",
       "/media/editorial/391665BB-CAC2-4720-998F-288B554439D3_1_105_c.jpeg",
+      "/media/editorial/DF9C0147-1911-46A3-8474-33F006E599EE_1_105_c.jpeg",
     ],
+    signature: "ÉIRE",
+    emblem: "☘",
+    motif: "Pluie fine · vert atlantique",
     caption: "Irlande / archive personnelle",
     color: "#3faaa5",
   },
@@ -52,7 +60,11 @@ const studyTrips = [
       "/media/editorial/391665BB-CAC2-4720-998F-288B554439D3_1_105_c.jpeg",
       "/media/editorial/AC28D49D-9D04-4929-A23A-DA9494540415_1_105_c.jpeg",
       "/media/editorial/C5900B4D-CF48-4442-9C1D-A44E17BD2352_1_201_a.jpeg",
+      "/media/editorial/DF9C0147-1911-46A3-8474-33F006E599EE_1_105_c.jpeg",
     ],
+    signature: "MEDITERRÀNIA",
+    emblem: "☀",
+    motif: "Soleil · rythme · architecture",
     caption: "Espagne / archive personnelle",
     color: "#d17b68",
   },
@@ -68,7 +80,11 @@ const studyTrips = [
       "/media/editorial/5697E241-CEB6-4301-90A5-D370B221FD6C_1_105_c.jpeg",
       "/media/editorial/188E0467-E3CD-4547-8DCD-CCD6A6751292_1_105_c.jpeg",
       "/media/editorial/95ADA646-F765-4F7D-92FF-0061B22DC9B2_1_105_c.jpeg",
+      "/media/editorial/A34DDE4B-24DD-4894-80AF-DBC037B986B0_1_105_c.jpeg",
     ],
+    signature: "MONTRÉAL",
+    emblem: "✦",
+    motif: "Deux cultures · une métropole",
     caption: "Montréal / archive personnelle",
     color: "#568ca8",
   },
@@ -84,7 +100,11 @@ const studyTrips = [
       "/media/editorial/193943EB-7EDC-4981-AD66-94F79AE8B6F7_1_105_c.jpeg",
       "/media/editorial/A34DDE4B-24DD-4894-80AF-DBC037B986B0_1_105_c.jpeg",
       "/media/editorial/1488A6F5-5115-49EA-B944-8C700C5759AA_1_105_c.jpeg",
+      "/media/editorial/188E0467-E3CD-4547-8DCD-CCD6A6751292_1_105_c.jpeg",
     ],
+    signature: "BOSTON",
+    emblem: "◎",
+    motif: "Campus · briques · nouvel horizon",
     caption: "Boston / archive personnelle",
     color: "#75344f",
   },
@@ -276,12 +296,17 @@ export default function Home() {
       </div>
 
       <section id="recit" className="story" aria-labelledby="story-title">
-        <div className="story-intro">
-          <span className="eyebrow" data-reveal>02 / Voyages d&apos;études</span>
-          <h2 id="story-title" data-reveal>Apprendre n&apos;a pas<br /><em>de frontières.</em></h2>
-          <p data-reveal>De Paris à Boston, cinq étapes et autant de façons d’apprendre. Montez à bord : le scroll devient votre trajectoire.</p>
-          <div className="travel-intro-pass" data-reveal aria-hidden="true">
-            <span>Study trip</span><strong>05 escales</strong><i>MT / WORLD</i>
+        <div className="story-intro" data-travel-intro>
+          <div className="travel-intro-stage">
+            <span className="eyebrow">02 / Voyages d&apos;études</span>
+            <h2 id="story-title"><span>Apprendre n&apos;a pas</span><em>de frontières.</em></h2>
+            <p>De Paris à Boston, cinq étapes et autant de façons d’apprendre. Montez à bord : le scroll devient votre trajectoire.</p>
+            <div className="travel-intro-pass" aria-hidden="true">
+              <span>Study trip</span><strong>05 escales</strong><i>MT / WORLD</i>
+            </div>
+            <div className="travel-intro-orbit" aria-hidden="true"><i /><i /><i /></div>
+            <div className="travel-intro-route" aria-hidden="true"><span>PAR</span><b /><span>BOS</span></div>
+            <div className="travel-intro-wipe" aria-hidden="true"><span>Embarquement</span></div>
           </div>
         </div>
 
@@ -296,11 +321,15 @@ export default function Home() {
               {studyTrips.map((trip, index) => (
                 <article
                   id={`escale-${trip.number}`}
-                  className={`story-panel travel-panel story-panel-${index}${index === 0 ? " is-current" : ""}`}
+                  className={`story-panel travel-panel story-panel-${index}${index === 0 ? " is-current is-present" : ""}`}
                   data-chapter={index}
                   key={trip.number}
                   style={{ "--trip-accent": trip.color } as CSSProperties}
                 >
+                  <div className="travel-country-sign" aria-hidden="true">
+                    <span>{trip.signature}</span><b>{trip.emblem}</b><small>{trip.motif}</small>
+                    <i /><i /><i />
+                  </div>
                   <div className="travel-memory-gallery">
                     {trip.gallery.map((image, photoIndex) => (
                       <figure className={`travel-memory-photo travel-memory-photo-${photoIndex + 1}`} data-travel-photo={photoIndex} key={image}>

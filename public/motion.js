@@ -12,6 +12,7 @@
     const introFilmFrames = Array.from(introJourney?.querySelectorAll(".film-frame") || []);
     const introVerbs = Array.from(introJourney?.querySelectorAll("[data-intro-verb]") || []);
     const storyIntro = document.querySelector(".story-intro");
+    const travelIntroStage = storyIntro?.querySelector(".travel-intro-stage");
     const storyJourney = document.querySelector("[data-story-journey]");
     const storySticky = storyJourney?.querySelector(".story-sticky");
     const panels = Array.from(document.querySelectorAll("[data-chapter]"));
@@ -219,6 +220,33 @@
       if (introCount) introCount.textContent = String(Math.round(progress * 100)).padStart(2, "0");
     };
 
+    const updateTravelIntro = () => {
+      if (!storyIntro || !travelIntroStage || reducedMotion.matches || window.innerWidth <= 760) return;
+      const rect = storyIntro.getBoundingClientRect();
+      const travel = Math.max(1, storyIntro.offsetHeight - window.innerHeight);
+      const progress = clamp(-rect.top / travel);
+      const arrival = ease(range(progress, .02, .28));
+      const route = ease(range(progress, .22, .62));
+      const departure = ease(range(progress, .62, .96));
+
+      set(travelIntroStage, "--travel-intro-progress", progress.toFixed(4));
+      set(travelIntroStage, "--travel-intro-eyebrow-opacity", (arrival * (1 - range(progress, .7, .88))).toFixed(3));
+      set(travelIntroStage, "--travel-intro-line-one-x", `${mix(-22, -departure * 10, arrival)}vw`);
+      set(travelIntroStage, "--travel-intro-line-two-x", `${mix(24, departure * 12, arrival)}vw`);
+      set(travelIntroStage, "--travel-intro-title-scale", mix(.8, 1 + departure * .58, arrival).toFixed(3));
+      set(travelIntroStage, "--travel-intro-title-opacity", (arrival * (1 - range(progress, .79, .96))).toFixed(3));
+      set(travelIntroStage, "--travel-intro-copy-opacity", (range(progress, .18, .38) * (1 - range(progress, .68, .86))).toFixed(3));
+      set(travelIntroStage, "--travel-intro-copy-y", `${mix(38, -26, route)}px`);
+      set(travelIntroStage, "--travel-intro-pass-opacity", (range(progress, .28, .46) * (1 - range(progress, .74, .9))).toFixed(3));
+      set(travelIntroStage, "--travel-intro-pass-x", `${mix(16, -8, route)}vw`);
+      set(travelIntroStage, "--travel-intro-pass-rotate", `${mix(-13, -3, route)}deg`);
+      set(travelIntroStage, "--travel-intro-route", route.toFixed(3));
+      set(travelIntroStage, "--travel-intro-orbit-scale", mix(.35, 1.25, route).toFixed(3));
+      set(travelIntroStage, "--travel-intro-orbit-rotate", `${mix(-38, 128, route)}deg`);
+      set(travelIntroStage, "--travel-intro-wipe", `${mix(0, 145, departure)}%`);
+      set(travelIntroStage, "--travel-intro-wipe-label", (range(progress, .7, .82) * (1 - range(progress, .9, .98))).toFixed(3));
+    };
+
     const updateStory = () => {
       if (!storyJourney || !storySticky || !panels.length || reducedMotion.matches || window.innerWidth <= 760) return;
       const rect = storyJourney.getBoundingClientRect();
@@ -229,21 +257,21 @@
       const atFinalDestination = position >= lastIndex - .0001;
       const segmentIndex = Math.min(lastIndex - 1, Math.floor(position));
       const segmentProgress = atFinalDestination ? 1 : position % 1;
-      const active = atFinalDestination ? lastIndex : Math.min(lastIndex, Math.floor(position + .78));
-      const departure = atFinalDestination ? 0 : ease(range(segmentProgress, .04, .23));
-      const arrival = atFinalDestination ? 1 : ease(range(segmentProgress, .72, .98));
-      const flightProgress = atFinalDestination ? 1 : range(segmentProgress, .17, .83);
+      const active = atFinalDestination ? lastIndex : Math.min(lastIndex, Math.floor(position + .6));
+      const departure = atFinalDestination ? 0 : ease(range(segmentProgress, .22, .4));
+      const arrival = atFinalDestination ? 1 : ease(range(segmentProgress, .54, .82));
+      const flightProgress = atFinalDestination ? 1 : range(segmentProgress, .32, .72);
       const flightSurge = Math.sin(flightProgress * Math.PI);
-      const globeVisibility = atFinalDestination ? .22 : .18 + Math.sin(segmentProgress * Math.PI) * .82;
+      const globeVisibility = atFinalDestination ? .16 : .14 + Math.sin(segmentProgress * Math.PI) * .86;
       const globeScale = atFinalDestination
-        ? 3.25
-        : segmentProgress < .5
-          ? mix(3.25, 1, departure)
-          : mix(1, 3.25, arrival);
+        ? 3.85
+        : segmentProgress < .54
+          ? mix(3.85, 1, departure)
+          : mix(1, 3.85, arrival);
       const globeTilt = Math.sin(segmentProgress * Math.PI * 2) * flightSurge * 4.5;
       const burn = Math.max(
-        Math.sin(range(segmentProgress, .03, .25) * Math.PI) * (segmentProgress < .27 ? 1 : 0),
-        Math.sin(range(segmentProgress, .72, .98) * Math.PI) * (segmentProgress > .7 ? 1 : 0),
+        Math.sin(range(segmentProgress, .2, .42) * Math.PI) * (segmentProgress < .44 ? 1 : 0),
+        Math.sin(range(segmentProgress, .54, .84) * Math.PI) * (segmentProgress > .52 ? 1 : 0),
       );
 
       set(storySticky, "--story-progress", progress.toFixed(4));
@@ -253,7 +281,7 @@
       set(storySticky, "--earth-rotate", `${globeTilt}deg`);
       set(storySticky, "--earth-x", `${Math.sin(segmentProgress * Math.PI) * -2.5}vw`);
       set(storySticky, "--earth-y", `${mix(7, 0, flightSurge)}vh`);
-      set(storySticky, "--travel-plane-opacity", (range(segmentProgress, .14, .24) * (1 - range(segmentProgress, .78, .9))).toFixed(3));
+      set(storySticky, "--travel-plane-opacity", (range(segmentProgress, .28, .38) * (1 - range(segmentProgress, .67, .77))).toFixed(3));
       set(storySticky, "--travel-plane-scale", (0.82 + flightSurge * .28).toFixed(3));
       set(storySticky, "--travel-route-opacity", (flightSurge * .95).toFixed(3));
       set(storySticky, "--travel-stars-speed", `${position * -8}vh`);
@@ -288,6 +316,10 @@
         set(panel, "--memory-copy-y", `${motion * 64}px`);
         set(panel, "--memory-word-opacity", (presence * .22).toFixed(3));
         set(panel, "--memory-word-scale", mix(.84, 1, presence).toFixed(3));
+        set(panel, "--country-sign-opacity", (range(presence, .22, .72) * .82).toFixed(3));
+        set(panel, "--country-sign-scale", mix(.62, 1, presence).toFixed(3));
+        set(panel, "--country-sign-rotate", `${mix(direction * -18, 0, presence)}deg`);
+        set(panel, "--country-sign-progress", presence.toFixed(3));
 
         travelPhotoSets[index]?.forEach((photo, photoIndex) => {
           const stagger = photoIndex * .1;
@@ -297,9 +329,9 @@
               ? range(arrival, .04 + stagger, .58 + stagger)
               : isFinal ? 1 : 0;
           const photoMotion = 1 - photoPresence;
-          const scatterX = [-8, 24, -20][photoIndex] || 0;
-          const scatterY = [10, -18, 22][photoIndex] || 0;
-          const scatterRotate = [-4, 13, -11][photoIndex] || 0;
+          const scatterX = [-8, 24, -20, 28][photoIndex] || 0;
+          const scatterY = [10, -18, 22, 13][photoIndex] || 0;
+          const scatterRotate = [-4, 13, -11, 9][photoIndex] || 0;
           set(photo, "--memory-photo-opacity", photoPresence.toFixed(3));
           set(photo, "--memory-photo-x", `${scatterX * photoMotion * direction}vw`);
           set(photo, "--memory-photo-y", `${scatterY * photoMotion}vh`);
@@ -312,6 +344,7 @@
 
         panel.style.zIndex = presence > 0 ? String(20 + index) : String(index);
         panel.classList.toggle("is-current", index === active);
+        panel.classList.toggle("is-present", presence > .01);
       });
     };
 
@@ -394,15 +427,9 @@
       const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
       set(root, "--page-progress", Math.min(1, window.scrollY / maxScroll).toFixed(4));
       updateIntro();
+      updateTravelIntro();
       updateStory();
       updateCapabilities();
-
-      if (!reducedMotion.matches && storyIntro) {
-        const rect = storyIntro.getBoundingClientRect();
-        const progress = clamp(1 - rect.bottom / (window.innerHeight + rect.height));
-        set(storyIntro, "--intro-x", `${progress * -7}vw`);
-        set(storyIntro, "--intro-scale", (1 + progress * .08).toFixed(3));
-      }
 
       if (!reducedMotion.matches && about) {
         const rect = about.getBoundingClientRect();
