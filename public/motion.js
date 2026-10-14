@@ -98,7 +98,8 @@
       if (!introJourney || !introSticky || reducedMotion.matches || window.innerWidth <= 760) return;
       const rect = introJourney.getBoundingClientRect();
       const travel = Math.max(1, introJourney.offsetHeight - window.innerHeight);
-      const progress = clamp(-rect.top / travel);
+      const openingProgress = clamp(-rect.top / travel);
+      const progress = clamp(openingProgress / .895);
       const heroDepart = ease(range(progress, .055, .16));
       const portraitExpand = ease(range(progress, .07, .18));
       const shutterReveal = ease(range(progress, .095, .175));
@@ -109,6 +110,7 @@
       const foldVisibility = range(progress, .57, .63) * (1 - range(progress, .74, .8));
       const finale = ease(range(progress, .61, .9));
       const handoff = ease(range(progress, .84, .99));
+      const handoffExit = ease(range(openingProgress, .88, .925));
       const grain = range(progress, .08, .16) * (1 - range(progress, .95, 1));
 
       set(introSticky, "--intro-progress", progress.toFixed(4));
@@ -214,7 +216,7 @@
       set(introSticky, "--beat-3-scale", mix(.72, 1, range(progress, .77, .9)).toFixed(3));
       set(introSticky, "--curtain-radius", `${mix(0, 160, finale)}%`);
       set(introSticky, "--curtain-rotate", `${mix(-18, 0, finale)}deg`);
-      set(introSticky, "--handoff-opacity", handoff.toFixed(3));
+      set(introSticky, "--handoff-opacity", (handoff * (1 - handoffExit)).toFixed(3));
       set(introSticky, "--handoff-title-y", `${mix(90, 0, handoff)}px`);
       set(introSticky, "--handoff-title-scale", mix(.76, 1, handoff).toFixed(3));
       set(introSticky, "--handoff-route", mix(0, .32, handoff).toFixed(3));
@@ -227,15 +229,17 @@
     };
 
     const updateTravelIntro = () => {
-      if (!storyIntro || !travelIntroStage || reducedMotion.matches || window.innerWidth <= 760) return;
-      const rect = storyIntro.getBoundingClientRect();
-      const travel = Math.max(1, storyIntro.offsetHeight - window.innerHeight);
-      const progress = clamp(-rect.top / travel);
+      if (!introJourney || !storyIntro || !travelIntroStage || reducedMotion.matches || window.innerWidth <= 760) return;
+      const rect = introJourney.getBoundingClientRect();
+      const travel = Math.max(1, introJourney.offsetHeight - window.innerHeight);
+      const openingProgress = clamp(-rect.top / travel);
+      const progress = range(openingProgress, .86, 1);
       const arrival = ease(range(progress, 0, .22));
       const route = mix(.32, 1, ease(range(progress, .12, .6)));
       const departure = ease(range(progress, .57, .96));
 
       set(travelIntroStage, "--travel-intro-progress", progress.toFixed(4));
+      set(storyIntro, "--travel-intro-stage-opacity", ease(range(openingProgress, .865, .905)).toFixed(3));
       set(travelIntroStage, "--travel-intro-eyebrow-opacity", (arrival * (1 - range(progress, .7, .88))).toFixed(3));
       set(travelIntroStage, "--travel-intro-line-one-x", `${mix(-8, -departure * 10, arrival)}vw`);
       set(travelIntroStage, "--travel-intro-line-two-x", `${mix(10, departure * 12, arrival)}vw`);
@@ -266,11 +270,8 @@
       const active = atFinalDestination ? lastIndex : Math.min(lastIndex, Math.floor(position + .55));
       const departure = atFinalDestination ? 0 : ease(range(segmentProgress, .12, .28));
       const approach = atFinalDestination ? 1 : ease(range(segmentProgress, .3, .58));
-      const landing = atFinalDestination ? 0 : ease(range(segmentProgress, .4, .68));
-      const landingExit = atFinalDestination ? 1 : ease(range(segmentProgress, .72, .88));
-      const landingVisibility = landing * (1 - landingExit);
-      const arrival = atFinalDestination ? 1 : ease(range(segmentProgress, .66, .91));
-      const flightProgress = atFinalDestination ? 1 : range(segmentProgress, .2, .62);
+      const arrival = atFinalDestination ? 1 : ease(range(segmentProgress, .48, .82));
+      const flightProgress = atFinalDestination ? 1 : range(segmentProgress, .18, .6);
       const flightSurge = Math.sin(flightProgress * Math.PI);
       const globeFade = atFinalDestination ? 1 : ease(range(segmentProgress, .4, .58));
       const globeVisibility = atFinalDestination ? 0 : Math.sin(segmentProgress * Math.PI) * (1 - globeFade * .98);
@@ -283,6 +284,7 @@
       const atmosphere = Math.sin(range(segmentProgress, .39, .68) * Math.PI) * (segmentProgress < .68 ? 1 : 0);
 
       set(storySticky, "--story-progress", progress.toFixed(4));
+      set(storySticky, "--story-stage-opacity", rect.top <= 1 ? "1" : "0");
       set(storySticky, "--flight-surge", flightSurge.toFixed(4));
       set(storySticky, "--earth-opacity", globeVisibility.toFixed(3));
       set(storySticky, "--earth-scale", globeScale.toFixed(3));
@@ -295,7 +297,7 @@
       set(storySticky, "--travel-route-opacity", (flightSurge * .95).toFixed(3));
       set(storySticky, "--travel-stars-speed", `${position * -8}vh`);
       set(storySticky, "--travel-atmosphere", (atmosphere * .7).toFixed(3));
-      set(storySticky, "--travel-atmosphere-scale", mix(.72, 1.36, landing).toFixed(3));
+      set(storySticky, "--travel-atmosphere-scale", mix(.72, 1.28, approach).toFixed(3));
       set(storySticky, "--travel-space-vignette", (.48 + flightSurge * .3).toFixed(3));
       storySticky.dataset.activeChapter = String(active);
 
@@ -314,9 +316,8 @@
         const isArriving = index === segmentIndex + 1 && !atFinalDestination;
         const isFinal = index === lastIndex && atFinalDestination;
         const memoryPresence = isDeparting ? 1 - departure : isArriving ? arrival : isFinal ? 1 : 0;
-        const destinationLanding = isArriving ? landingVisibility : 0;
-        const presence = Math.max(memoryPresence, destinationLanding);
-        const motion = isDeparting ? departure : isArriving ? 1 - Math.max(arrival, landing) : 0;
+        const presence = memoryPresence;
+        const motion = isDeparting ? departure : isArriving ? 1 - arrival : 0;
         const direction = isDeparting ? -1 : 1;
 
         set(panel, "--scene-opacity", presence.toFixed(3));
@@ -332,14 +333,6 @@
         set(panel, "--country-sign-scale", mix(.62, 1, memoryPresence).toFixed(3));
         set(panel, "--country-sign-rotate", `${mix(direction * -18, 0, memoryPresence)}deg`);
         set(panel, "--country-sign-progress", memoryPresence.toFixed(3));
-        set(panel, "--landing-opacity", destinationLanding.toFixed(3));
-        set(panel, "--landing-camera-scale", mix(.96, 1, landing).toFixed(3));
-        set(panel, "--landing-horizon-y", `${mix(10, -3, landing)}vh`);
-        set(panel, "--landing-city-scale", mix(.68, 1.3, landing).toFixed(3));
-        set(panel, "--landing-city-y", `${mix(11, 2, landing)}vh`);
-        set(panel, "--landing-runway-scale", mix(.24, 1.28, landing).toFixed(3));
-        set(panel, "--landing-cloud-spread", `${mix(0, 36, landing)}vw`);
-        set(panel, "--landing-copy-opacity", (range(landing, .32, .62) * (1 - landingExit)).toFixed(3));
 
         travelPhotoSets[index]?.forEach((photo, photoIndex) => {
           const stagger = photoIndex * .1;

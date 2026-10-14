@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { geoGraticule10, geoOrthographic, geoPath } from "d3-geo";
+import { geoGraticule10, geoInterpolate, geoOrthographic, geoPath } from "d3-geo";
 import { feature, mesh } from "topojson-client";
 import type { GeometryCollection, Topology } from "topojson-specification";
 import worldAtlas from "world-atlas/countries-110m.json";
@@ -45,6 +45,12 @@ export default function TravelGlobe() {
     const pixelRatio = Math.min(1.25, window.devicePixelRatio || 1);
     const bitmapSize = Math.round(520 * pixelRatio);
     const snapshots = new Map<number, HTMLCanvasElement>();
+    const projections = destinations.map((destination) => geoOrthographic()
+      .translate([360, 360])
+      .scale(300)
+      .clipAngle(90)
+      .precision(0.7)
+      .rotate([-destination.coordinates[0], -destination.coordinates[1], 0]));
     const idleHandles: Array<
       { kind: "idle"; handle: number } |
       { kind: "timer"; handle: ReturnType<typeof setTimeout> }
@@ -59,13 +65,7 @@ export default function TravelGlobe() {
       const context = snapshot.getContext("2d", { alpha: true });
       if (!context) return snapshot;
       context.setTransform(bitmapSize / 720, 0, 0, bitmapSize / 720, 0, 0);
-      const destination = destinations[index];
-      const projection = geoOrthographic()
-        .translate([360, 360])
-        .scale(300)
-        .clipAngle(90)
-        .precision(0.7)
-        .rotate([-destination.coordinates[0], -destination.coordinates[1], 0]);
+      const projection = projections[index];
       const path = geoPath(projection, context);
       const ocean = context.createRadialGradient(270, 226, 12, 360, 360, 315);
       ocean.addColorStop(0, "#315f76");
@@ -151,19 +151,27 @@ export default function TravelGlobe() {
       const flight = ease(flightProgress);
       const globeMorph = ease(clamp((flight - 0.38) / 0.24));
       const direction = segment % 2 ? -1 : 1;
-      const originX = 360 - flight * 118 * direction;
-      const originY = 374 + flight * 22;
-      const destinationX = 360 + (1 - flight) * 118 * direction;
-      const destinationY = 344 - (1 - flight) * 18;
-      const planeX = originX + (destinationX - originX) * flight;
-      const planeY = originY + (destinationY - originY) * flight - Math.sin(flight * Math.PI) * 92;
+      const fromProjection = projections[Math.max(0, Math.min(destinations.length - 1, from))];
+      const toProjection = projections[Math.max(0, Math.min(destinations.length - 1, to))];
+      const interpolateRoute = geoInterpolate(origin.coordinates, destination.coordinates);
+      const project = (routeProgress: number) => {
+        const coordinate = interpolateRoute(clamp(routeProgress));
+        const fromPoint = fromProjection(coordinate) ?? [360, 360];
+        const toPoint = toProjection(coordinate) ?? [360, 360];
+        return [
+          fromPoint[0] + (toPoint[0] - fromPoint[0]) * globeMorph,
+          fromPoint[1] + (toPoint[1] - fromPoint[1]) * globeMorph,
+        ] as const;
+      };
+      const routePoints = Array.from({ length: 33 }, (_, index) => project(index / 32));
+      const [originX, originY] = routePoints[0];
+      const [destinationX, destinationY] = routePoints[routePoints.length - 1];
+      const [planeX, planeY] = project(flight);
       const nextFlight = clamp(flight + 0.012);
-      const nextOriginX = 360 - nextFlight * 118 * direction;
-      const nextDestinationX = 360 + (1 - nextFlight) * 118 * direction;
-      const nextPlaneX = nextOriginX + (nextDestinationX - nextOriginX) * nextFlight;
-      const nextPlaneY = (374 + nextFlight * 22) + ((344 - (1 - nextFlight) * 18) - (374 + nextFlight * 22)) * nextFlight - Math.sin(nextFlight * Math.PI) * 92;
-      const curveY = Math.min(originY, destinationY) - 104;
-      const route = `M${originX.toFixed(1)},${originY.toFixed(1)} Q360,${curveY.toFixed(1)} ${destinationX.toFixed(1)},${destinationY.toFixed(1)}`;
+      const [nextPlaneX, nextPlaneY] = project(nextFlight);
+      const route = routePoints
+        .map(([x, y], index) => `${index === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`)
+        .join(" ");
 
       shellRef.current?.style.setProperty("--globe-morph", globeMorph.toFixed(4));
       shellRef.current?.style.setProperty("--globe-from-opacity", (1 - globeMorph).toFixed(4));

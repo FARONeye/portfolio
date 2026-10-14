@@ -287,24 +287,23 @@ export default function Home() {
             </div>
             <div className="intro-handoff-route"><span>Moi</span><b /><span>Le monde</span></div>
           </div>
+          <div id="recit" className="story-intro story-intro-overlay" data-travel-intro>
+            <div className="travel-intro-stage">
+              <span className="eyebrow">02 / Voyages d&apos;études</span>
+              <h2 id="story-title"><span>Apprendre n&apos;a pas</span><em>de frontières.</em></h2>
+              <p>De Paris à Boston, cinq étapes et autant de façons d’apprendre. Montez à bord : le scroll devient votre trajectoire.</p>
+              <div className="travel-intro-pass" aria-hidden="true">
+                <span>Study trip</span><strong>05 escales</strong><i>MT / WORLD</i>
+              </div>
+              <div className="travel-intro-orbit" aria-hidden="true"><i /><i /><i /></div>
+              <div className="travel-intro-route" aria-hidden="true"><span>PAR</span><b /><span>BOS</span></div>
+              <div className="travel-intro-wipe" aria-hidden="true"><span>Embarquement</span></div>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section id="recit" className="story" aria-labelledby="story-title">
-        <div className="story-intro" data-travel-intro>
-          <div className="travel-intro-stage">
-            <span className="eyebrow">02 / Voyages d&apos;études</span>
-            <h2 id="story-title"><span>Apprendre n&apos;a pas</span><em>de frontières.</em></h2>
-            <p>De Paris à Boston, cinq étapes et autant de façons d’apprendre. Montez à bord : le scroll devient votre trajectoire.</p>
-            <div className="travel-intro-pass" aria-hidden="true">
-              <span>Study trip</span><strong>05 escales</strong><i>MT / WORLD</i>
-            </div>
-            <div className="travel-intro-orbit" aria-hidden="true"><i /><i /><i /></div>
-            <div className="travel-intro-route" aria-hidden="true"><span>PAR</span><b /><span>BOS</span></div>
-            <div className="travel-intro-wipe" aria-hidden="true"><span>Embarquement</span></div>
-          </div>
-        </div>
-
+      <section className="story" aria-labelledby="story-title">
         <div className="story-journey" data-story-journey>
           <div className="story-sticky" data-active-chapter="0">
             <TravelGlobe />
@@ -319,32 +318,8 @@ export default function Home() {
                   className={`story-panel travel-panel story-panel-${index}${index === 0 ? " is-current is-present" : ""}`}
                   data-chapter={index}
                   key={trip.number}
-                  style={{ "--trip-accent": trip.color } as CSSProperties}
+                  style={{ "--trip-accent": trip.color, "--place-chars": trip.place.length } as CSSProperties}
                 >
-                  <div className="travel-landing-scene" data-travel-landing aria-hidden="true">
-                    <div className="landing-sky"><i /><i /><i /></div>
-                    <div className="landing-clouds"><span /><span /><span /><span /></div>
-                    <div className="landing-city">
-                      {Array.from({ length: 13 }, (_, buildingIndex) => {
-                        const isLeft = buildingIndex < 6;
-                        const laneIndex = isLeft ? buildingIndex : buildingIndex - 6;
-                        return (
-                          <i
-                            key={buildingIndex}
-                            style={{
-                              "--building-x": `${isLeft ? 1 + laneIndex * 5.7 : 68 + laneIndex * 5}%`,
-                              "--building-width": `${3.2 + (buildingIndex % 4) * 0.72}vw`,
-                              "--building-height": `${14 + ((buildingIndex * 17 + index * 11) % 33)}vh`,
-                              "--building-depth": `${18 + (buildingIndex % 3) * 9}px`,
-                            } as CSSProperties}
-                          />
-                        );
-                      })}
-                    </div>
-                    <div className="landing-ground" />
-                    <div className="landing-runway"><i /><i /><i /><span /><span /></div>
-                    <div className="landing-location"><span>Approche finale</span><b>{trip.code}</b><small>{trip.place} · {trip.country}</small></div>
-                  </div>
                   <div className="travel-country-sign" aria-hidden="true">
                     <span>{trip.signature}</span><b>{trip.emblem}</b><small>{trip.motif}</small>
                     <i /><i /><i />
