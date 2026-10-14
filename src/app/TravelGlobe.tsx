@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { geoEquirectangular, geoGraticule10, geoInterpolate, geoPath } from "d3-geo";
+import { geoGraticule10, geoOrthographic, geoPath } from "d3-geo";
 import { feature, mesh } from "topojson-client";
 import type { GeometryCollection, Topology } from "topojson-specification";
 import worldAtlas from "world-atlas/countries-110m.json";
@@ -28,8 +28,9 @@ const ease = (value: number) => {
 };
 
 export default function TravelGlobe() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const mapRef = useRef<HTMLDivElement>(null);
+  const shellRef = useRef<HTMLDivElement>(null);
+  const fromCanvasRef = useRef<HTMLCanvasElement>(null);
+  const toCanvasRef = useRef<HTMLCanvasElement>(null);
   const routeRef = useRef<SVGPathElement>(null);
   const routeGhostRef = useRef<SVGPathElement>(null);
   const fromMarkerRef = useRef<HTMLDivElement>(null);
@@ -37,55 +38,101 @@ export default function TravelGlobe() {
   const planeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const context = canvas.getContext("2d", { alpha: true });
-    if (!context) return;
+    const fromCanvas = fromCanvasRef.current;
+    const toCanvas = toCanvasRef.current;
+    if (!fromCanvas || !toCanvas) return;
 
-    const drawMap = () => {
-      const pixelRatio = Math.min(1.25, window.devicePixelRatio || 1);
-      canvas.width = Math.round(1200 * pixelRatio);
-      canvas.height = Math.round(600 * pixelRatio);
-      context.setTransform(canvas.width / 1440, 0, 0, canvas.height / 720, 0, 0);
-      context.clearRect(0, 0, 1440, 720);
-      const projection = geoEquirectangular().translate([720, 360]).scale(229.18).precision(0.7);
+    const pixelRatio = Math.min(1.25, window.devicePixelRatio || 1);
+    const bitmapSize = Math.round(520 * pixelRatio);
+    const snapshots = new Map<number, HTMLCanvasElement>();
+    const idleHandles: Array<
+      { kind: "idle"; handle: number } |
+      { kind: "timer"; handle: ReturnType<typeof setTimeout> }
+    > = [];
+
+    const renderSnapshot = (index: number) => {
+      const cached = snapshots.get(index);
+      if (cached) return cached;
+      const snapshot = document.createElement("canvas");
+      snapshot.width = bitmapSize;
+      snapshot.height = bitmapSize;
+      const context = snapshot.getContext("2d", { alpha: true });
+      if (!context) return snapshot;
+      context.setTransform(bitmapSize / 720, 0, 0, bitmapSize / 720, 0, 0);
+      const destination = destinations[index];
+      const projection = geoOrthographic()
+        .translate([360, 360])
+        .scale(300)
+        .clipAngle(90)
+        .precision(0.7)
+        .rotate([-destination.coordinates[0], -destination.coordinates[1], 0]);
       const path = geoPath(projection, context);
-
-      const ocean = context.createLinearGradient(0, 0, 1440, 720);
-      ocean.addColorStop(0, "#193d57");
-      ocean.addColorStop(0.5, "#0b253d");
-      ocean.addColorStop(1, "#06101f");
+      const ocean = context.createRadialGradient(270, 226, 12, 360, 360, 315);
+      ocean.addColorStop(0, "#315f76");
+      ocean.addColorStop(0.52, "#102c45");
+      ocean.addColorStop(1, "#040914");
+      context.beginPath();
+      context.arc(360, 360, 300, 0, Math.PI * 2);
       context.fillStyle = ocean;
-      context.fillRect(0, 0, 1440, 720);
+      context.fill();
+      context.save();
+      context.beginPath();
+      context.arc(360, 360, 300, 0, Math.PI * 2);
+      context.clip();
       context.beginPath();
       path(graticule);
-      context.strokeStyle = "#9fcfdc20";
+      context.strokeStyle = "#9fcfdc22";
       context.lineWidth = 0.7;
       context.stroke();
       context.beginPath();
       path(land);
       context.fillStyle = "#9aa891";
       context.fill();
-      context.strokeStyle = "#d5ddbd80";
-      context.lineWidth = 0.8;
+      context.strokeStyle = "#d5ddbd88";
+      context.lineWidth = 0.7;
       context.stroke();
       context.beginPath();
       path(borders);
-      context.strokeStyle = "#0b1c288c";
-      context.lineWidth = 0.52;
+      context.strokeStyle = "#0b1c2878";
+      context.lineWidth = 0.55;
       context.stroke();
+      context.restore();
+      context.beginPath();
+      context.arc(360, 360, 300, 0, Math.PI * 2);
+      context.strokeStyle = "#b9f5ff8c";
+      context.lineWidth = 1.7;
+      context.shadowColor = "#62d8e8";
+      context.shadowBlur = 9;
+      context.stroke();
+      snapshots.set(index, snapshot);
+      return snapshot;
     };
 
-    const screenPoint = (point: [number, number], focus: [number, number], altitude = 0) => ({
-      x: 360 + (point[0] - focus[0]) * 4.05,
-      y: 360 - (point[1] - focus[1]) * 4.05 - altitude,
-    });
-    const setMarker = (marker: HTMLDivElement | null, point: { x: number; y: number }, code: string, visible: boolean) => {
+    const paint = (target: HTMLCanvasElement, snapshot: HTMLCanvasElement) => {
+      if (target.width !== bitmapSize || target.height !== bitmapSize) {
+        target.width = bitmapSize;
+        target.height = bitmapSize;
+      }
+      const context = target.getContext("2d", { alpha: true });
+      if (!context) return;
+      context.clearRect(0, 0, bitmapSize, bitmapSize);
+      context.drawImage(snapshot, 0, 0, bitmapSize, bitmapSize);
+    };
+
+    let currentPair = "";
+    const paintPair = (from: number, to: number) => {
+      const pair = `${from}:${to}`;
+      if (pair === currentPair) return;
+      currentPair = pair;
+      paint(fromCanvas, renderSnapshot(from));
+      paint(toCanvas, renderSnapshot(to));
+    };
+
+    const setMarker = (marker: HTMLDivElement | null, x: number, y: number, code: string, visible: boolean) => {
       if (!marker) return;
-      const inside = point.x > 45 && point.x < 675 && point.y > 45 && point.y < 675;
-      marker.style.opacity = visible && inside ? "1" : "0";
-      marker.style.setProperty("--marker-x", `${(point.x / 720) * 100}%`);
-      marker.style.setProperty("--marker-y", `${(point.y / 720) * 100}%`);
+      marker.style.opacity = visible ? "1" : "0";
+      marker.style.setProperty("--marker-x", `${(x / 720) * 100}%`);
+      marker.style.setProperty("--marker-y", `${(y / 720) * 100}%`);
       const label = marker.querySelector("b");
       if (label) label.textContent = code;
     };
@@ -97,33 +144,42 @@ export default function TravelGlobe() {
       const signature = `${segment}:${flightProgress.toFixed(3)}`;
       if (!force && signature === lastSignature) return;
       lastSignature = signature;
+      paintPair(from, to);
+
       const origin = destinations[Math.max(0, Math.min(destinations.length - 1, from))];
       const destination = destinations[Math.max(0, Math.min(destinations.length - 1, to))];
-      const interpolate = geoInterpolate(origin.coordinates, destination.coordinates);
       const flight = ease(flightProgress);
-      const cameraProgress = ease(clamp((flightProgress - 0.04) / 0.84));
-      const focus = interpolate(cameraProgress) as [number, number];
-      const originPoint = screenPoint(origin.coordinates, focus);
-      const destinationPoint = screenPoint(destination.coordinates, focus);
-      const planeCoordinates = interpolate(flight) as [number, number];
-      const nextCoordinates = interpolate(clamp(flight + 0.012)) as [number, number];
-      const planePoint = screenPoint(planeCoordinates, focus, Math.sin(flight * Math.PI) * 72);
-      const nextPlanePoint = screenPoint(nextCoordinates, focus, Math.sin(clamp(flight + 0.012) * Math.PI) * 72);
+      const globeMorph = ease(clamp((flight - 0.38) / 0.24));
+      const direction = segment % 2 ? -1 : 1;
+      const originX = 360 - flight * 118 * direction;
+      const originY = 374 + flight * 22;
+      const destinationX = 360 + (1 - flight) * 118 * direction;
+      const destinationY = 344 - (1 - flight) * 18;
+      const planeX = originX + (destinationX - originX) * flight;
+      const planeY = originY + (destinationY - originY) * flight - Math.sin(flight * Math.PI) * 92;
+      const nextFlight = clamp(flight + 0.012);
+      const nextOriginX = 360 - nextFlight * 118 * direction;
+      const nextDestinationX = 360 + (1 - nextFlight) * 118 * direction;
+      const nextPlaneX = nextOriginX + (nextDestinationX - nextOriginX) * nextFlight;
+      const nextPlaneY = (374 + nextFlight * 22) + ((344 - (1 - nextFlight) * 18) - (374 + nextFlight * 22)) * nextFlight - Math.sin(nextFlight * Math.PI) * 92;
+      const curveY = Math.min(originY, destinationY) - 104;
+      const route = `M${originX.toFixed(1)},${originY.toFixed(1)} Q360,${curveY.toFixed(1)} ${destinationX.toFixed(1)},${destinationY.toFixed(1)}`;
 
-      mapRef.current?.style.setProperty("--map-x", `${(-focus[0] / 360) * 100}%`);
-      mapRef.current?.style.setProperty("--map-y", `${(focus[1] / 180) * 100}%`);
-      const curve = Math.max(32, Math.abs(destinationPoint.x - originPoint.x) * 0.2);
-      const route = `M${originPoint.x.toFixed(1)},${originPoint.y.toFixed(1)} Q${((originPoint.x + destinationPoint.x) / 2).toFixed(1)},${(Math.min(originPoint.y, destinationPoint.y) - curve).toFixed(1)} ${destinationPoint.x.toFixed(1)},${destinationPoint.y.toFixed(1)}`;
+      shellRef.current?.style.setProperty("--globe-morph", globeMorph.toFixed(4));
+      shellRef.current?.style.setProperty("--globe-from-opacity", (1 - globeMorph).toFixed(4));
+      shellRef.current?.style.setProperty("--globe-to-opacity", globeMorph.toFixed(4));
+      shellRef.current?.style.setProperty("--globe-from-shift", `${globeMorph * -3 * direction}%`);
+      shellRef.current?.style.setProperty("--globe-to-shift", `${(1 - globeMorph) * 3 * direction}%`);
       routeGhostRef.current?.setAttribute("d", route);
       routeRef.current?.setAttribute("d", route);
       routeRef.current?.style.setProperty("--route-dash", String(1 - flight));
+      setMarker(fromMarkerRef.current, originX, originY, origin.code, flight < 0.92);
+      setMarker(toMarkerRef.current, destinationX, destinationY, destination.code, flight > 0.08);
 
-      setMarker(fromMarkerRef.current, originPoint, origin.code, flight < 0.93);
-      setMarker(toMarkerRef.current, destinationPoint, destination.code, flight > 0.07);
       if (planeRef.current) {
-        const angle = Math.atan2(nextPlanePoint.y - planePoint.y, nextPlanePoint.x - planePoint.x) * 180 / Math.PI;
-        planeRef.current.style.setProperty("--plane-x", `${(planePoint.x / 720) * 100}%`);
-        planeRef.current.style.setProperty("--plane-y", `${(planePoint.y / 720) * 100}%`);
+        const angle = Math.atan2(nextPlaneY - planeY, nextPlaneX - planeX) * 180 / Math.PI;
+        planeRef.current.style.setProperty("--plane-x", `${(planeX / 720) * 100}%`);
+        planeRef.current.style.setProperty("--plane-y", `${(planeY / 720) * 100}%`);
         planeRef.current.style.setProperty("--plane-angle", `${angle}deg`);
       }
     };
@@ -137,16 +193,29 @@ export default function TravelGlobe() {
       });
     };
     const handleTravel = (event: Event) => requestDraw((event as CustomEvent<TravelFrame>).detail);
-    const handleResize = () => drawMap();
-    drawMap();
+    renderSnapshot(0);
+    renderSnapshot(1);
+    paintPair(0, 1);
+    const queue = (index: number) => {
+      if ("requestIdleCallback" in window) {
+        const handle = window.requestIdleCallback(() => renderSnapshot(index), { timeout: 1800 });
+        idleHandles.push({ kind: "idle", handle });
+      } else {
+        const handle = globalThis.setTimeout(() => renderSnapshot(index), index * 180);
+        idleHandles.push({ kind: "timer", handle });
+      }
+    };
+    [2, 3, 4].forEach(queue);
     window.addEventListener("portfolio:travel", handleTravel);
-    window.addEventListener("resize", handleResize, { passive: true });
     requestDraw(latestFrame, true);
 
     return () => {
       window.removeEventListener("portfolio:travel", handleTravel);
-      window.removeEventListener("resize", handleResize);
       if (animationFrame) window.cancelAnimationFrame(animationFrame);
+      idleHandles.forEach((job) => {
+        if (job.kind === "idle") window.cancelIdleCallback(job.handle);
+        else globalThis.clearTimeout(job.handle);
+      });
     };
   }, []);
 
@@ -155,10 +224,11 @@ export default function TravelGlobe() {
       <div className="travel-stars travel-stars-back" />
       <div className="travel-stars travel-stars-front" />
       <div className="travel-earth-shadow" />
-      <div className="travel-earth-shell">
+      <div ref={shellRef} className="travel-earth-shell">
         <div className="travel-earth-atmosphere" />
         <div className="travel-earth-clip">
-          <div ref={mapRef} className="travel-earth-map-wrap"><canvas ref={canvasRef} className="travel-earth-map" /></div>
+          <canvas ref={fromCanvasRef} className="travel-earth-map travel-earth-map-from" />
+          <canvas ref={toCanvasRef} className="travel-earth-map travel-earth-map-to" />
           <svg className="travel-route-layer" viewBox="0 0 720 720">
             <path ref={routeGhostRef} className="travel-globe-route-ghost" pathLength="1" />
             <path ref={routeRef} className="travel-globe-route" pathLength="1" />

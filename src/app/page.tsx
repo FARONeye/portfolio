@@ -278,22 +278,17 @@ export default function Home() {
             <i><b /></i>
             <span className="intro-meter-count">00</span>
           </div>
-          <div className="intro-curtain" aria-hidden="true"><span>Entrer dans le récit</span></div>
+          <div className="intro-curtain" aria-hidden="true">
+            <div className="intro-handoff-stars"><i /><i /><i /></div>
+            <div className="intro-handoff-orbit"><i /><i /></div>
+            <div className="intro-handoff-copy">
+              <span>Le récit continue</span>
+              <strong>L&apos;expérience<br /><em>change d&apos;échelle.</em></strong>
+            </div>
+            <div className="intro-handoff-route"><span>Moi</span><b /><span>Le monde</span></div>
+          </div>
         </div>
       </section>
-
-      <div className="ticker" aria-hidden="true">
-        <div className="ticker-track">
-          {[0, 1].map((copy) => (
-            <div className="ticker-group" key={copy}>
-              <span>Explorer</span><span className="ticker-star">✳</span>
-              <span>Créer</span><span className="ticker-star">✳</span>
-              <span>Apprendre</span><span className="ticker-star">✳</span>
-              <span>Recommencer</span><span className="ticker-star">✳</span>
-            </div>
-          ))}
-        </div>
-      </div>
 
       <section id="recit" className="story" aria-labelledby="story-title">
         <div className="story-intro" data-travel-intro>
@@ -326,6 +321,30 @@ export default function Home() {
                   key={trip.number}
                   style={{ "--trip-accent": trip.color } as CSSProperties}
                 >
+                  <div className="travel-landing-scene" data-travel-landing aria-hidden="true">
+                    <div className="landing-sky"><i /><i /><i /></div>
+                    <div className="landing-clouds"><span /><span /><span /><span /></div>
+                    <div className="landing-city">
+                      {Array.from({ length: 13 }, (_, buildingIndex) => {
+                        const isLeft = buildingIndex < 6;
+                        const laneIndex = isLeft ? buildingIndex : buildingIndex - 6;
+                        return (
+                          <i
+                            key={buildingIndex}
+                            style={{
+                              "--building-x": `${isLeft ? 1 + laneIndex * 5.7 : 68 + laneIndex * 5}%`,
+                              "--building-width": `${3.2 + (buildingIndex % 4) * 0.72}vw`,
+                              "--building-height": `${14 + ((buildingIndex * 17 + index * 11) % 33)}vh`,
+                              "--building-depth": `${18 + (buildingIndex % 3) * 9}px`,
+                            } as CSSProperties}
+                          />
+                        );
+                      })}
+                    </div>
+                    <div className="landing-ground" />
+                    <div className="landing-runway"><i /><i /><i /><span /><span /></div>
+                    <div className="landing-location"><span>Approche finale</span><b>{trip.code}</b><small>{trip.place} · {trip.country}</small></div>
+                  </div>
                   <div className="travel-country-sign" aria-hidden="true">
                     <span>{trip.signature}</span><b>{trip.emblem}</b><small>{trip.motif}</small>
                     <i /><i /><i />
@@ -358,7 +377,7 @@ export default function Home() {
                 </article>
               ))}
             </div>
-            <div className="travel-film-burn" aria-hidden="true" />
+            <div className="travel-atmosphere-wipe" aria-hidden="true"><i /><i /></div>
             <div className="story-rail travel-chapter-rail" aria-hidden="true">
               <span>Défiler pour faire décoller l&apos;histoire</span>
               <i><b /></i>
