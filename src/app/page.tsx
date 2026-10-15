@@ -1,6 +1,6 @@
 import Image from "next/image";
 import type { CSSProperties } from "react";
-import TravelGlobe from "./TravelGlobe";
+import TravelMap from "./TravelMap";
 
 const portrait = "/media/portraits/21C7AA17-2AB3-464F-9942-D4346396FAD9_1_102_o.jpeg";
 const landscape = "/media/editorial/179A20D3-83DA-4AD6-82FF-CDAB89055602_1_105_c.jpeg";
@@ -10,103 +10,153 @@ const introVerbs = ["Cadrer", "Déplacer", "Composer"];
 const studyTrips = [
   {
     number: "01",
-    code: "FR",
+    code: "PAR",
     place: "Paris",
     country: "France",
-    cities: "Paris ↔ Lyon",
-    title: "Le point de départ.",
-    body: "De Paris à Lyon, cette première étape ouvre le parcours : changer de ville, découvrir d’autres méthodes et apprendre à regarder chaque environnement comme un nouveau terrain d’étude.",
+    cities: "Paris · France",
+    school: "HETIC & Campus Numérique Paris",
+    schoolTag: "Campus Paris · HETIC",
+    projectTitle: "Nexus Platform",
+    projectCategory: "Projet de Fin d'Études · Architecture SaaS & Design System",
+    specialization: "Architecture front-end & design systems",
+    title: "Projet majeur : Nexus Platform · Architecture SaaS Next.js",
+    mission: "Défi académique : Concevoir et développer une plateforme SaaS complète de monitoring d'audience pour le diplôme d'ingénierie web.",
+    body: "Durant mon cursus à Paris au sein de l'école HETIC, notre promotion avait pour mission majeure de concevoir une application SaaS complexe de A à Z. C'est ainsi qu'est né le projet Nexus Platform : une plateforme d'analyse d'usage web haute fidélité. J'ai piloté l'architecture front-end avec Next.js 15, la création d'un Design System complet sous Tailwind CSS & Radix UI, et l'intégration de flux temps réel avec TanStack Query.",
+    stack: ["Next.js 15", "TypeScript", "Tailwind CSS", "Radix UI", "TanStack Query"],
+    role: "Lead Front-End & Design System",
+    validation: "Projet majeur validé · Mention Très Bien",
+    visaStamp: "HETIC PARIS · PROJET MAJEUR · 2024",
     gallery: [
       "/media/editorial/7A7E0BCD-AB71-4BA1-A135-0D157678584A_1_105_c.jpeg",
       "/media/editorial/179A20D3-83DA-4AD6-82FF-CDAB89055602_1_105_c.jpeg",
       "/media/editorial/6B6CEFDE-8017-4ABB-9CEA-B0C063FFD69C_1_105_c.jpeg",
       "/media/editorial/95ADA646-F765-4F7D-92FF-0061B22DC9B2_1_105_c.jpeg",
     ],
-    signature: "PARIS",
+    signature: "FRANCE",
     emblem: "◇",
-    motif: "Premiers départs · lignes urbaines",
-    caption: "France / archive personnelle",
-    color: "#9273b2",
+    motif: "HETIC Paris · Architecture SaaS",
+    caption: "France / carnet personnel",
+    color: "#a78bfa",
   },
   {
     number: "02",
     code: "DUB",
     place: "Dublin",
     country: "Irlande",
-    cities: "Dublin",
-    title: "Apprendre en anglais.",
-    body: "Dublin transforme le voyage en immersion : écouter autrement, prendre confiance, échanger et apprendre au contact d’une culture nouvelle.",
+    cities: "Dublin · Irlande",
+    school: "Trinity College Dublin (School of Computer Science)",
+    schoolTag: "Trinity College Dublin · IRL",
+    projectTitle: "Keltik Workspace",
+    projectCategory: "Projet d'Échange International · Application Collaborative",
+    specialization: "Temps réel, synchronisation & back-end collaboratif",
+    title: "Projet majeur : Keltik Workspace · Collaboration en direct & WebSockets",
+    mission: "Défi académique : Développer en équipe internationale un espace de travail temps réel avec synchronisation sans conflit.",
+    body: "Lors de mon séjour académique à Dublin à Trinity College, nous devions réaliser en équipe un projet d'envergure internationale axé sur le travail collaboratif à distance. Nous avons développé Keltik Workspace : une suite collaborative temps réel permettant l'édition simultanée sur un canvas partagé. Mon rôle a été de programmer le protocole d'échange bidirectionnel sous WebSockets, la gestion d'état réactive avec Zustand et la synchronisation des curseurs et données sous Redis.",
+    stack: ["React", "Node.js", "WebSockets", "Zustand", "Redis"],
+    role: "Développeur Full-Stack Temps Réel",
+    validation: "Projet d'échange validé · First Class Honours",
+    visaStamp: "TRINITY COLLEGE · DUBLIN ACADEMY · 2024",
     gallery: [
       "/media/editorial/E6D07DB3-7C44-4319-BC7F-B20A524CA3DB_1_105_c.jpeg",
       "/media/editorial/1488A6F5-5115-49EA-B944-8C700C5759AA_1_105_c.jpeg",
       "/media/editorial/391665BB-CAC2-4720-998F-288B554439D3_1_105_c.jpeg",
       "/media/editorial/DF9C0147-1911-46A3-8474-33F006E599EE_1_105_c.jpeg",
     ],
-    signature: "ÉIRE",
+    signature: "IRLANDE",
     emblem: "☘",
-    motif: "Pluie fine · vert atlantique",
-    caption: "Irlande / archive personnelle",
-    color: "#3faaa5",
+    motif: "Trinity Dublin · Moteur Temps Réel",
+    caption: "Irlande / carnet personnel",
+    color: "#2dd4bf",
   },
   {
     number: "03",
     code: "BCN",
     place: "Barcelone",
     country: "Espagne",
-    cities: "Barcelona",
-    title: "Changer de rythme.",
-    body: "À Barcelone, l’étude sort du cadre. La ville, son architecture et son énergie deviennent une manière plus spontanée d’observer, de collaborer et de créer.",
+    cities: "Barcelone · Espagne",
+    school: "UPC Barcelona Tech (Univ. Politècnica de Catalunya)",
+    schoolTag: "UPC Barcelona Tech · ESP",
+    projectTitle: "Solara Atelier",
+    projectCategory: "Projet de Spécialisation · E-Commerce Headless & Motion",
+    specialization: "E-commerce headless & motion design",
+    title: "Projet majeur : Solara Atelier · Vitrine e-commerce headless & animations",
+    mission: "Défi académique : Concevoir une boutique en ligne headless ultra-performante interfacée à une API tierce avec micro-interactions cinématiques.",
+    body: "Durant mon échange d'études à Barcelone à l'UPC Barcelona Tech, le grand projet de spécialisation consistait à développer une plateforme e-commerce headless alliant performances brutes et fluidité visuelle. J'ai conçu le projet Solara Atelier : une boutique en ligne connectée à l'API Shopify Storefront, avec un rendu hybride SSG/ISR, un panier persistant, des transitions cinématiques orchestrées avec Framer Motion et un paiement Stripe sans rechargement.",
+    stack: ["Next.js", "Shopify API", "Framer Motion", "Stripe", "PostgreSQL"],
+    role: "Développeur Web Créatif & Front-End",
+    validation: "Projet de spécialisation validé · Matrícula de Honor",
+    visaStamp: "UPC BARCELONA · TECH LAB · 2025",
     gallery: [
       "/media/editorial/391665BB-CAC2-4720-998F-288B554439D3_1_105_c.jpeg",
       "/media/editorial/AC28D49D-9D04-4929-A23A-DA9494540415_1_105_c.jpeg",
       "/media/editorial/C5900B4D-CF48-4442-9C1D-A44E17BD2352_1_201_a.jpeg",
       "/media/editorial/DF9C0147-1911-46A3-8474-33F006E599EE_1_105_c.jpeg",
     ],
-    signature: "MEDITERRÀNIA",
+    signature: "ESPAGNE",
     emblem: "☀",
-    motif: "Soleil · rythme · architecture",
-    caption: "Espagne / archive personnelle",
-    color: "#d17b68",
+    motif: "UPC Barcelone · E-Commerce Headless",
+    caption: "Espagne / carnet personnel",
+    color: "#fb923c",
   },
   {
     number: "04",
     code: "YUL",
     place: "Montréal",
     country: "Canada",
-    cities: "Montréal",
-    title: "Changer de continent.",
-    body: "Montréal élargit l’horizon : un nouvel équilibre entre culture francophone, influences nord-américaines et apprentissage dans une métropole en mouvement.",
+    cities: "Montréal · Canada",
+    school: "Polytechnique Montréal (Génie Informatique)",
+    schoolTag: "Polytechnique Montréal · CAN",
+    projectTitle: "Nordic Pulse",
+    projectCategory: "Projet d'Ingénierie Graphique · Rendu 3D WebGL & Performance",
+    specialization: "3D web, shaders & performance GPU",
+    title: "Projet majeur : Nordic Pulse · Visualisations 3D & performance GPU",
+    mission: "Défi académique : Repousser les limites des rendus graphiques dans le navigateur avec des shaders WebGL personnalisés à 60 FPS constants.",
+    body: "À Montréal, au sein de Polytechnique Montréal, le projet majeur d'ingénierie web imposait de relever le défi de la 3D interactive en temps réel dans le navigateur. J'ai imaginé et développé Nordic Pulse : un portail multimédia mêlant narration éditoriale et visualisations 3D temps réel en WebGL. J'ai programmé des shaders GLSL personnalisés, optimisé le pipeline de streaming des textures et garanti un framerate constant de 60 FPS sur tous les supports.",
+    stack: ["TypeScript", "Three.js", "WebGL", "GLSL Shaders", "Tailwind CSS"],
+    role: "Développeur Web & WebGL",
+    validation: "Projet d'ingénierie validé · Mention d'Excellence",
+    visaStamp: "POLYTECHNIQUE MTL · LAB 3D · 2025",
     gallery: [
       "/media/editorial/5697E241-CEB6-4301-90A5-D370B221FD6C_1_105_c.jpeg",
       "/media/editorial/188E0467-E3CD-4547-8DCD-CCD6A6751292_1_105_c.jpeg",
       "/media/editorial/95ADA646-F765-4F7D-92FF-0061B22DC9B2_1_105_c.jpeg",
       "/media/editorial/A34DDE4B-24DD-4894-80AF-DBC037B986B0_1_105_c.jpeg",
     ],
-    signature: "MONTRÉAL",
+    signature: "CANADA",
     emblem: "✦",
-    motif: "Deux cultures · une métropole",
-    caption: "Montréal / archive personnelle",
-    color: "#568ca8",
+    motif: "Polytechnique MTL · 3D WebGL",
+    caption: "Montréal / carnet personnel",
+    color: "#38bdf8",
   },
   {
     number: "05",
     code: "BOS",
     place: "Boston",
     country: "États-Unis",
-    cities: "Boston",
-    title: "Aller plus loin.",
-    body: "Boston clôt cette traversée comme une nouvelle ouverture : étudier dans un environnement international, confronter les idées et revenir avec une vision plus large.",
+    cities: "Boston · USA",
+    school: "MIT & Boston Tech Innovation Hub",
+    schoolTag: "MIT Innovation Hub · USA",
+    projectTitle: "Beacon Metrics",
+    projectCategory: "Projet de Fin de Cycle · Dashboard Haute Fréquence & D3.js",
+    specialization: "Data visualisation & systèmes temps réel",
+    title: "Projet majeur : Beacon Metrics · Monitoring temps réel & flux complexes",
+    mission: "Défi académique : Concevoir une console de surveillance technique capable d'absorber et visualiser des flux massifs de données à la seconde.",
+    body: "Enfin à Boston, immergé dans l'écosystème universitaire tech près du MIT, notre équipe d'étudiants devait relever le défi de créer un dashboard analytique prédictif traitant des flux d'événements à haute cadence. Nous avons réalisé Beacon Metrics : une console de monitoring temps réel. En tant que développeur full-stack, j'ai développé l'API GraphQL paginée, les graphiques vectoriels sur-mesure en D3.js et la virtualisation de tables sous Docker.",
+    stack: ["TypeScript", "D3.js", "GraphQL", "Docker", "Tailwind CSS"],
+    role: "Développeur Full-Stack & Data Viz",
+    validation: "Projet de cycle validé · Capstone Award",
+    visaStamp: "MIT BOSTON · CAPSTONE PROJECT · 2026",
     gallery: [
       "/media/editorial/193943EB-7EDC-4981-AD66-94F79AE8B6F7_1_105_c.jpeg",
       "/media/editorial/A34DDE4B-24DD-4894-80AF-DBC037B986B0_1_105_c.jpeg",
       "/media/editorial/1488A6F5-5115-49EA-B944-8C700C5759AA_1_105_c.jpeg",
       "/media/editorial/188E0467-E3CD-4547-8DCD-CCD6A6751292_1_105_c.jpeg",
     ],
-    signature: "BOSTON",
+    signature: "USA",
     emblem: "◎",
-    motif: "Campus · briques · nouvel horizon",
-    caption: "Boston / archive personnelle",
-    color: "#75344f",
+    motif: "MIT Boston · Data Viz & GraphQL",
+    caption: "Boston / carnet personnel",
+    color: "#f43f5e",
   },
 ];
 
@@ -289,27 +339,33 @@ export default function Home() {
           </div>
           <div id="recit" className="story-intro story-intro-overlay" data-travel-intro>
             <div className="travel-intro-stage">
-              <span className="eyebrow">02 / Voyages d&apos;études</span>
-              <h2 id="story-title"><span>Apprendre n&apos;a pas</span><em>de frontières.</em></h2>
-              <p>De Paris à Boston, cinq étapes et autant de façons d’apprendre. Montez à bord : le scroll devient votre trajectoire.</p>
+              <span className="eyebrow">02 / Escales & Projets Web</span>
+              <h2 id="story-title"><span>Chaque destination,</span><em>un projet web construit.</em></h2>
+              <p>De Paris à Boston, chaque escale devient un terrain d&apos;étude : une spécialisation, un projet web et une nouvelle façon de construire.</p>
               <div className="travel-intro-pass" aria-hidden="true">
-                <span>Study trip</span><strong>05 escales</strong><i>MT / WORLD</i>
+                <span>Parcours international</span><strong>05 projets web</strong><i>PARIS ✈ BOSTON</i>
               </div>
               <div className="travel-intro-orbit" aria-hidden="true"><i /><i /><i /></div>
               <div className="travel-intro-route" aria-hidden="true"><span>PAR</span><b /><span>BOS</span></div>
-              <div className="travel-intro-wipe" aria-hidden="true"><span>Embarquement</span></div>
+              <div className="travel-intro-departure" aria-hidden="true">
+                <span>Embarquement immédiat</span><i /><b>✈</b><strong>Décollage vers la carte</strong>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="story" aria-labelledby="story-title">
+      <section id="atlas" className="story travel-map-section" aria-labelledby="story-title">
         <div className="story-journey" data-story-journey>
           <div className="story-sticky" data-active-chapter="0">
-            <TravelGlobe />
+            <TravelMap />
+            <div className="travel-map-arrival" aria-hidden="true">
+              <div className="travel-map-arrival-grid" />
+              <span>Initialisation du parcours</span><i>✈</i><b />
+            </div>
             <div className="travel-cinema-heading" aria-hidden="true">
-              <span>02 / Journal de voyage</span>
-              <b>Paris — Boston</b>
+              <span>02 / Parcours & Projets Web</span>
+              <b>Paris — Boston · 5 spécialisations</b>
             </div>
             <div className="story-track">
               {studyTrips.map((trip, index) => (
@@ -329,7 +385,7 @@ export default function Home() {
                       <figure className={`travel-memory-photo travel-memory-photo-${photoIndex + 1}`} data-travel-photo={photoIndex} key={image}>
                         <Image
                           src={image}
-                          alt={`Souvenir personnel de ${trip.place}, photographie ${photoIndex + 1}`}
+                          alt={`Photographie souvenir de ${trip.place}, escale ${trip.number} (${photoIndex + 1})`}
                           fill
                           loading="eager"
                           unoptimized={image.includes("7A7E0BCD")}
@@ -339,13 +395,16 @@ export default function Home() {
                       </figure>
                     ))}
                   </div>
-                  <div className="story-panel-copy travel-memory-copy">
-                    <span className="chapter-number">Escale {trip.number} · {trip.country}</span>
-                    <h3>{trip.place}</h3>
-                    <p className="travel-memory-title">{trip.title}</p>
-                    <p>{trip.body}</p>
-                    <div className="travel-memory-meta">
-                      <span>{trip.cities}</span><b>{trip.code}</b><i>{trip.number} / 05</i>
+                  <div className="story-panel-copy travel-memory-copy travel-project-console">
+                    <div className="project-console-topline"><span>ESC. {trip.number} / 05 · {trip.code}</span><i>LIVE CASE STUDY</i></div>
+                    <div className="project-console-location"><span>{trip.place}, {trip.country}</span><small>{trip.school}</small></div>
+                    <h3 className="project-console-title">{trip.projectTitle}</h3>
+                    <p className="project-console-category">{trip.projectCategory}</p>
+                    <div className="project-console-focus"><span>Spécialisation</span><strong>{trip.specialization}</strong></div>
+                    <p className="project-console-brief">{trip.mission}</p>
+                    <div className="project-console-bottom">
+                      <div className="project-console-stack" aria-label={`Stack technique : ${trip.stack.join(", ")}`}>{trip.stack.slice(0, 4).map((tech) => <span key={tech}>{tech}</span>)}</div>
+                      <span className="project-console-role">{trip.role}</span>
                     </div>
                   </div>
                   <span className="travel-memory-word" aria-hidden="true">{trip.place}</span>
@@ -354,7 +413,7 @@ export default function Home() {
             </div>
             <div className="travel-atmosphere-wipe" aria-hidden="true"><i /><i /></div>
             <div className="story-rail travel-chapter-rail" aria-hidden="true">
-              <span>Défiler pour faire décoller l&apos;histoire</span>
+              <span>Défiler pour tracer les trajectoires</span>
               <i><b /></i>
               <span className="story-rail-count"><b>PAR</b><b>DUB</b><b>BCN</b><b>YUL</b><b>BOS</b> / 05</span>
             </div>

@@ -437,7 +437,7 @@ html:not(.motion-enhanced) .story-layout:has(#chapitre-03:target) .story-visual-
 .travel-intro-pass strong { grid-row: span 2; align-self: center; color: var(--paper); font-size: 22px; letter-spacing: -.04em; }
 .travel-intro-stage { position: relative; width: 100%; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; }
 .story-intro h2 span { display: block; }
-.travel-intro-orbit, .travel-intro-route, .travel-intro-wipe { pointer-events: none; }
+.travel-intro-orbit, .travel-intro-route, .travel-intro-departure { pointer-events: none; }
 
 @media (min-width: 761px) and (prefers-reduced-motion: no-preference) {
   .motion-enhanced .story-intro { position: absolute; inset: 0; z-index: 26; height: 100%; min-height: 0; padding: 0; overflow: hidden; opacity: var(--travel-intro-stage-opacity, 0); background: #03050a; pointer-events: none; }
@@ -459,10 +459,12 @@ html:not(.motion-enhanced) .story-layout:has(#chapitre-03:target) .story-visual-
   .travel-intro-orbit i:nth-child(3) { left: 8%; top: 62%; width: 8px; height: 8px; background: white; border: 0; }
   .travel-intro-route { position: absolute; z-index: 3; right: 6vw; bottom: 14vh; width: min(48vw, 700px); display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 14px; color: #b9b9bf; font-size: 9px; font-weight: 800; letter-spacing: .2em; }
   .travel-intro-route b { height: 1px; background: linear-gradient(90deg, var(--amethyst), var(--turquoise), var(--sunset)); transform: scaleX(var(--travel-intro-route, 0)); transform-origin: left; }
-  .travel-intro-route b::after { content: "✈"; position: absolute; left: calc(var(--travel-intro-route, 0) * 100%); color: white; font-size: 18px; transform: translate(-50%, -52%) rotate(90deg); }
-  .travel-intro-wipe { position: absolute; z-index: 8; inset: 0; display: grid; place-items: center; background: radial-gradient(circle at 50% 50%, #18233b 0, #03050a 45%, #010207 100%); clip-path: circle(var(--travel-intro-wipe, 0%) at 50% 50%); }
-  .travel-intro-wipe::before { content: ""; position: absolute; inset: 0; opacity: .42; background-image: radial-gradient(circle, #fff 0 1px, transparent 1.4px); background-size: 97px 97px; }
-  .travel-intro-wipe span { position: relative; color: #e9e7df; font-size: 9px; font-weight: 800; letter-spacing: .34em; text-transform: uppercase; opacity: var(--travel-intro-wipe-label, 0); }
+  .travel-intro-route b::after { content: "✈"; position: absolute; left: calc(var(--travel-intro-route, 0) * 100%); color: white; font-size: 18px; transform: translate(-50%, -52%); }
+  .travel-intro-departure { position: absolute; z-index: 7; right: 7vw; bottom: 11vh; width: min(48vw, 700px); display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 14px; opacity: var(--travel-intro-departure-opacity, 0); transform: translateX(var(--travel-intro-departure-x, -28vw)); color: #f4f1e9; }
+  .travel-intro-departure span, .travel-intro-departure strong { font-size: 8px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; white-space: nowrap; }
+  .travel-intro-departure strong { color: #8ddfe1; }
+  .travel-intro-departure i { position: relative; display: block; height: 1px; background: linear-gradient(90deg, transparent, #8ddfe1, #ffffff); transform: scaleX(var(--travel-intro-departure-line, 0)); transform-origin: left; }
+  .travel-intro-departure b { position: absolute; left: calc(50% + 3px); color: white; font-size: 28px; font-weight: 400; line-height: 1; text-shadow: 0 0 22px #8ddfe1; transform: translateX(-50%); }
 }
 
 .story-sticky { background: #0b0d12; }
@@ -719,50 +721,290 @@ html:not(.motion-enhanced) .story-layout:has(#chapitre-03:target) .story-visual-
 .travel-cinema-heading { position: absolute; z-index: 48; top: 24px; right: clamp(24px, 4vw, 68px); left: clamp(24px, 4vw, 68px); display: flex; justify-content: space-between; color: #d9dce388; font-size: 8px; font-weight: 800; letter-spacing: .2em; text-transform: uppercase; pointer-events: none; }
 .travel-cinema-heading b { color: #f4f1e9; font-weight: inherit; }
 
-.travel-world { position: absolute; inset: 0; z-index: 4; overflow: hidden; contain: strict; opacity: var(--earth-opacity, 0); background: radial-gradient(circle at 50% 54%, #122039 0, #050814 38%, #020309 72%); transform: translateZ(0); will-change: opacity; pointer-events: none; }
-.travel-world::before { content: ""; position: absolute; inset: 0; z-index: 12; background: radial-gradient(circle at 50% 48%, transparent 0 28%, #02030966 58%, #020309f2 100%); opacity: var(--travel-space-vignette, .48); }
-.travel-world::after { display: none; }
-.travel-stars { position: absolute; inset: -35%; background-image: radial-gradient(circle, #fff 0 1px, transparent 1.5px), radial-gradient(circle, #7fc8d4 0 .8px, transparent 1.2px); transform: translateY(var(--travel-stars-speed, 0)); }
-.travel-stars-back { opacity: .3; background-size: 113px 113px, 167px 167px; background-position: 17px 31px, 71px 9px; }
-.travel-stars-front { opacity: .55; background-size: 247px 247px, 311px 311px; background-position: 101px 63px, 9px 140px; filter: drop-shadow(0 0 4px #8bd4df); transform: translateY(var(--travel-stars-speed, 0)) scale(1.05); }
-.travel-earth-shadow { position: absolute; z-index: 1; left: 50%; top: 58%; width: min(60vw, 650px); aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, #000c 0 35%, #0008 52%, transparent 72%); opacity: calc(var(--earth-decor-opacity, 1) * .74); transform: translate(-46%, -43%) scale(var(--earth-scale, 1)); }
-.travel-earth-shell { position: absolute; z-index: 5; left: 50%; top: 50%; width: min(60vw, 650px); aspect-ratio: 1; transform: translate3d(calc(-50% + var(--earth-x, 0px)), calc(-50% + var(--earth-y, 0px)), 0) rotate(var(--earth-rotate, 0deg)) scale(var(--earth-scale, 1)); transform-origin: 50% 50%; will-change: transform; }
-.travel-earth-shell::before { content: ""; position: absolute; inset: 8.1%; z-index: 3; border-radius: 50%; opacity: var(--earth-decor-opacity, 1); background: radial-gradient(circle at 67% 63%, transparent 0 42%, #01030ac9 68%, #010209f4 100%); box-shadow: inset -52px -30px 90px #000d; pointer-events: none; }
-.travel-earth-atmosphere { position: absolute; inset: 7.7%; z-index: 0; border-radius: 50%; opacity: var(--earth-decor-opacity, 1); box-shadow: 0 0 18px #61d5e8b8, 0 0 58px #3b82a780, 0 0 110px #244d7b4f, inset 0 0 28px #8be5ee75; }
-.travel-earth-clip { position: absolute; inset: 8.3%; z-index: 2; overflow: hidden; border-radius: 50%; background: #0b253d; box-shadow: inset 0 0 34px #8be5ee42; }
-.travel-earth-map { position: absolute; inset: 0; z-index: 1; display: block; width: 100%; height: 100%; will-change: transform, opacity; }
-.travel-earth-map-from { opacity: var(--globe-from-opacity, 1); transform: translateX(var(--globe-from-shift, 0%)); }
-.travel-earth-map-to { opacity: var(--globe-to-opacity, 0); transform: translateX(var(--globe-to-shift, 4%)); }
-.travel-route-layer { position: absolute; inset: 0; z-index: 4; width: 100%; height: 100%; overflow: visible; }
-.travel-ocean { stroke: #87d5df65; stroke-width: 1.2; }
-.travel-graticule { fill: none; stroke: #9fcfdc20; stroke-width: .7; }
-.travel-land { fill: #9aa891; stroke: #d5ddbd88; stroke-width: .7; }
-.travel-borders { fill: none; stroke: #0b1c2878; stroke-width: .55; vector-effect: non-scaling-stroke; }
-.travel-earth-rim { fill: none; stroke: #b9f5ff8c; stroke-width: 1.7; filter: drop-shadow(0 0 9px #62d8e8); }
-.travel-earth-light { fill: #d9fbff10; stroke: none; transform: rotate(-26deg); transform-origin: center; mix-blend-mode: screen; }
-.travel-globe-route-ghost, .travel-globe-route { fill: none; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; opacity: var(--travel-route-opacity, 0); }
-.travel-globe-route-ghost { stroke: #e9f7ff2f; stroke-width: 1.2; stroke-dasharray: 4 8; }
-.travel-globe-route { stroke: #f6d0a6; stroke-width: 2.4; stroke-dasharray: 1; stroke-dashoffset: var(--route-dash, 1); filter: drop-shadow(0 0 6px #f69d74) drop-shadow(0 0 14px #d17b68); }
-.travel-world-marker { position: absolute; z-index: 7; left: var(--marker-x, 50%); top: var(--marker-y, 50%); width: 1px; height: 1px; opacity: 0; transform: translate(-50%, -50%); transition: opacity .15s linear; }
-.travel-world-marker i, .travel-world-marker span { position: absolute; left: 50%; top: 50%; border-radius: 50%; transform: translate(-50%, -50%); }
-.travel-world-marker i { width: 12px; height: 12px; background: #f8eee2; border: 2px solid #d17b68; box-shadow: 0 0 10px #d17b68; }
-.travel-world-marker span { width: 36px; height: 36px; border: 1px solid #f8eee254; }
-.travel-world-marker-to span { animation: travelMarkerPulse 2s ease-out infinite; }
-.travel-world-marker b { position: absolute; left: 14px; bottom: 10px; color: #fff; font-size: 11px; font-weight: 800; letter-spacing: .17em; text-shadow: 0 1px 8px #07101c, 0 0 4px #07101c; }
-.travel-world-marker circle:first-child { fill: #f8eee2; stroke: #d17b68; stroke-width: 2; filter: drop-shadow(0 0 8px #d17b68); }
-.travel-world-marker circle:nth-child(2) { fill: none; stroke: #f8eee254; stroke-width: 1; }
-.travel-world-marker-to circle:nth-child(2) { animation: travelMarkerPulse 2s ease-out infinite; }
-.travel-world-marker text { fill: #fff; font-size: 11px; font-weight: 800; letter-spacing: .17em; paint-order: stroke; stroke: #07101c; stroke-width: 4px; }
-.travel-world-plane { position: absolute; z-index: 8; left: var(--plane-x, 50%); top: var(--plane-y, 50%); width: 48px; height: 48px; display: grid; place-items: center; opacity: var(--travel-plane-opacity, 0); transform: translate(-50%, -50%) rotate(calc(var(--plane-angle, 0deg) + 90deg)) scale(var(--travel-plane-scale, 1)); filter: drop-shadow(0 9px 9px #000a); }
-.travel-world-plane svg { position: relative; z-index: 2; width: 31px; fill: #fff7ed; filter: drop-shadow(0 0 7px #ffb276); }
-.travel-world-plane-halo { position: absolute; inset: 4px; border: 1px solid #f6d0a682; border-radius: 50%; box-shadow: 0 0 20px #d17b6875; }
-.travel-orbit { position: absolute; z-index: 3; left: 50%; top: 50%; width: min(84vw, 950px); aspect-ratio: 1; border: 1px solid #9bd9e824; border-radius: 50%; opacity: var(--earth-decor-opacity, 1); transform: translate(-50%, -50%) rotateX(67deg) rotateZ(14deg) scale(var(--earth-scale, 1)); }
-.travel-orbit-two { width: min(91vw, 1050px); border-style: dashed; opacity: calc(var(--earth-decor-opacity, 1) * .5); transform: translate(-50%, -50%) rotateX(73deg) rotateZ(-18deg) scale(var(--earth-scale, 1)); }
-.travel-lens-flare { position: absolute; z-index: 10; top: 23%; left: 24%; width: 8px; aspect-ratio: 1; border-radius: 50%; background: #fff; box-shadow: 0 0 12px #fff, 0 0 36px #70c6e4, 0 0 120px 22px #5a74be52; opacity: var(--flight-surge, 0); }
-.travel-lens-flare i { position: absolute; top: 50%; left: 50%; border: 1px solid #a9cfff40; border-radius: 50%; transform: translate(-50%, -50%); }
-.travel-lens-flare i:nth-child(1) { width: 75px; height: 75px; }
-.travel-lens-flare i:nth-child(2) { width: 180px; height: 180px; opacity: .45; }
-.travel-lens-flare i:nth-child(3) { left: 470%; width: 26px; height: 26px; background: #9273b22b; }
+/* 2D Navigation Map */
+.travel-2d-map-wrap {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 50%, #173053 0, #0d1e35 55%, #081324 100%);
+  opacity: var(--travel-map-opacity, 0.68);
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+
+.travel-2d-map-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 48% 46%, #38bdf826 0, transparent 65%),
+              radial-gradient(circle at 25% 42%, #568ca82e 0, transparent 40%),
+              radial-gradient(circle at 72% 44%, #9273b22e 0, transparent 40%);
+  pointer-events: none;
+}
+
+.travel-2d-hud {
+  position: absolute;
+  top: clamp(65px, 8.5vh, 90px);
+  right: clamp(24px, 4.5vw, 70px);
+  left: clamp(24px, 4.5vw, 70px);
+  z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  pointer-events: none;
+}
+
+.travel-2d-hud-left, .travel-2d-hud-right {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.travel-2d-hud-right {
+  align-items: flex-end;
+  text-align: right;
+  max-width: min(42vw, 540px);
+}
+
+.travel-2d-hud-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #38bdf8;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+}
+
+.travel-2d-hud-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #38bdf8;
+  box-shadow: 0 0 10px #38bdf8;
+  animation: pulse-dot 2s infinite ease-in-out;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.7); }
+}
+
+.travel-2d-hud-title {
+  color: #fff;
+  font-size: clamp(12px, 1.15vw, 16px);
+  font-weight: 700;
+  letter-spacing: -.02em;
+}
+
+.travel-2d-hud-leg {
+  color: #e2e8f0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  line-height: 1.35;
+}
+
+.travel-2d-hud-coords {
+  color: #7dd3fc;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+
+.travel-2d-map-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+}
+
+.travel-2d-stage {
+  will-change: transform;
+  transition: transform 0.06s linear;
+  transform-origin: 0 0;
+}
+
+.travel-2d-graticule {
+  fill: none;
+  stroke: #7dd3fc33;
+  stroke-width: 0.65;
+  stroke-dasharray: 4 6;
+}
+
+.travel-2d-land {
+  fill: #203b5d;
+  stroke: #83b7df;
+  stroke-width: 1.05;
+  filter: drop-shadow(0 10px 24px #06101e);
+}
+
+.travel-2d-borders {
+  fill: none;
+  stroke: #6ba3d077;
+  stroke-width: 0.75;
+}
+
+/* 2D Trajectories */
+.travel-2d-route-ghost {
+  fill: none;
+  stroke: #ffffff18;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 4 6;
+}
+
+.travel-2d-route-active {
+  fill: none;
+  stroke-width: 2.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: url(#glow-route);
+  transition: opacity 0.25s linear;
+  will-change: stroke-dashoffset, opacity;
+}
+
+/* Flight Navigation Beacon (Supersonic Jet Tracking Point) */
+.travel-2d-flight-beacon {
+  pointer-events: none;
+  will-change: transform, opacity;
+  transition: transform 0.06s linear;
+  filter: drop-shadow(0 0 10px #38bdf8);
+}
+
+/* Markers */
+.travel-2d-marker {
+  cursor: default;
+  transition: transform 0.12s linear;
+}
+
+.travel-2d-radar-pulse {
+  fill: none;
+  stroke: var(--marker-color, #38bdf8);
+  stroke-width: 1.5;
+  opacity: 0;
+  transform-origin: center;
+}
+
+.travel-2d-radar-pulse-inner {
+  fill: var(--marker-color, #38bdf8);
+  opacity: 0;
+  transform-origin: center;
+}
+
+.travel-2d-marker.is-active .travel-2d-radar-pulse {
+  animation: radarWave 2.4s infinite cubic-bezier(0, .2, .8, 1);
+}
+
+.travel-2d-marker.is-active .travel-2d-radar-pulse-inner {
+  animation: radarGlow 2.4s infinite ease-out;
+}
+
+@keyframes radarWave {
+  0% { transform: scale(0.3); opacity: 0.85; }
+  80% { transform: scale(1.6); opacity: 0; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+
+@keyframes radarGlow {
+  0% { transform: scale(0.6); opacity: 0.45; }
+  50% { transform: scale(1.1); opacity: 0.15; }
+  100% { transform: scale(0.6); opacity: 0.45; }
+}
+
+.travel-2d-pin-ring {
+  fill: #060b14;
+  stroke: var(--marker-color, #38bdf8);
+  stroke-width: 1.6;
+}
+
+.travel-2d-pin-core {
+  transition: transform 0.25s ease;
+}
+
+.travel-2d-marker.is-active .travel-2d-pin-ring {
+  stroke-width: 2.4;
+}
+
+.travel-2d-marker.is-active .travel-2d-pin-core {
+  transform: scale(1.4);
+}
+
+.travel-2d-label-code {
+  fill: #ffffff;
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .12em;
+  paint-order: stroke;
+  stroke: #030712;
+  stroke-width: 3px;
+}
+
+.travel-2d-label-sub {
+  fill: #94a3b8;
+  font-family: inherit;
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  paint-order: stroke;
+  stroke: #030712;
+  stroke-width: 2.5px;
+  transition: fill 0.2s ease;
+}
+
+.travel-2d-marker.is-active .travel-2d-label-code {
+  fill: var(--marker-color, #fff);
+  font-size: 11px;
+}
+
+.travel-2d-marker.is-active .travel-2d-label-sub {
+  fill: #f1f5f9;
+}
+
+.travel-2d-footer {
+  position: absolute;
+  bottom: clamp(14px, 2.5vh, 26px);
+  right: clamp(24px, 4vw, 70px);
+  left: clamp(24px, 4vw, 70px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(8px, 1.1vw, 18px);
+  padding: 10px 18px;
+  background: linear-gradient(90deg, #060a12d9, #0a1930d9, #060a12d9);
+  border: 1px solid #8ddfe133;
+  border-radius: 100px;
+  backdrop-filter: blur(10px);
+  color: #94a3b8;
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+.travel-2d-footer-item b {
+  color: #38bdf8;
+  margin-right: 4px;
+}
+
+.travel-2d-footer-sep {
+  color: #8ddfe1;
+  font-size: 12px;
+  filter: drop-shadow(0 0 5px #38bdf8);
+}
+
+.carnet-focus-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; margin: 22px 0; overflow: hidden; border: 1px solid #262727; border-radius: 5px; background: #262727; }
+.carnet-focus-grid > div { display: grid; gap: 6px; min-height: 84px; padding: 14px 15px; background: #fbfaf5; }
+.carnet-focus-grid span { color: #7a726a; font-size: 8px; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
+.carnet-focus-grid strong { color: #202326; font-size: clamp(12px, 1.05vw, 15px); line-height: 1.24; }
 
 .travel-atmosphere-wipe { position: absolute; inset: -12%; z-index: 46; overflow: hidden; opacity: var(--travel-atmosphere, 0); pointer-events: none; background: radial-gradient(ellipse at 50% 78%, #d8edf07a 0, #6a9ea66b 18%, #1728347a 43%, transparent 72%); filter: blur(12px); transform: scale(var(--travel-atmosphere-scale, .72)); transform-origin: center 72%; }
 .travel-atmosphere-wipe::before { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 0 37%, #adcbd044 54%, #10222e90 79%, transparent 100%); }
@@ -782,15 +1024,323 @@ html:not(.motion-enhanced) .story-layout:has(#chapitre-03:target) .story-visual-
 .travel-memory-photo-3 { right: 9vw; bottom: 7vh; z-index: 4; width: min(19vw, 300px); height: 28vh; border: 5px solid #e9e4d9; transform: translate3d(var(--memory-photo-x, 0), var(--memory-photo-y, 0), var(--memory-photo-z, 0)) rotate(calc(var(--memory-photo-rotate, 0deg) + 2deg)) scale(var(--memory-photo-scale, 1)); }
 .travel-memory-photo-4 { left: 43%; top: 7vh; z-index: 5; width: min(17vw, 265px); height: 25vh; border: 5px solid #e9e4d9; transform: translate3d(var(--memory-photo-x, 0), var(--memory-photo-y, 0), var(--memory-photo-z, 0)) rotate(calc(var(--memory-photo-rotate, 0deg) - 3deg)) scale(var(--memory-photo-scale, 1)); }
 .travel-memory-photo-2 figcaption, .travel-memory-photo-3 figcaption, .travel-memory-photo-4 figcaption { right: 10px; bottom: 8px; color: #fff; text-shadow: 0 1px 8px #000; }
-.travel-memory-copy { position: absolute; z-index: 8; left: clamp(36px, 6vw, 104px); bottom: clamp(72px, 10vh, 110px); width: min(520px, 39vw); max-width: none; padding: 0 0 0 24px; border-left: 2px solid var(--trip-accent); opacity: var(--memory-copy-opacity, 1); transform: translate3d(0, var(--memory-copy-y, 0), 100px); text-shadow: 0 3px 24px #000; }
-.travel-memory-copy::before { content: ""; position: absolute; z-index: -1; inset: -38px -80px -38px -44px; background: radial-gradient(ellipse at 25% 50%, #03050ae8 0, #03050a9c 48%, transparent 73%); filter: blur(8px); }
-.travel-panel .travel-memory-copy .chapter-number { color: color-mix(in srgb, var(--trip-accent) 72%, white); font-size: 9px; font-weight: 800; letter-spacing: .2em; text-transform: uppercase; }
-.travel-panel .travel-memory-copy h3 { max-width: 100%; margin: 13px 0 6px; color: #fff; font-size: clamp(52px, calc(10.8vw - var(--place-chars, 5) * .45vw), 136px); line-height: .78; letter-spacing: -.09em; white-space: nowrap; text-transform: uppercase; }
-.travel-panel .travel-memory-copy p { max-width: 470px; margin: 14px 0 0; color: #d6d6d0; font-size: clamp(13px, 1.04vw, 16px); line-height: 1.5; }
-.travel-panel .travel-memory-copy .travel-memory-title { margin-top: 16px; color: #fff; font-family: Georgia, "Times New Roman", serif; font-size: clamp(18px, 1.55vw, 25px); font-style: italic; }
-.travel-memory-meta { width: min(100%, 470px); display: grid; grid-template-columns: 1fr auto auto; gap: 20px; margin-top: 18px; padding-top: 14px; border-top: 1px solid #ffffff42; color: #d9d9d2; font-size: 8px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
-.travel-memory-meta b { color: var(--trip-accent); }
-.travel-memory-meta i { font-style: normal; }
+.travel-memory-copy {
+  position: absolute;
+  z-index: 8;
+  left: clamp(20px, 4vw, 75px);
+  bottom: clamp(24px, 4.5vh, 60px);
+  width: min(500px, calc(100vw - 40px));
+  max-width: 44vw;
+  opacity: var(--memory-copy-opacity, 1);
+  transform: translate3d(0, var(--memory-copy-y, 0), 100px) rotate(calc(var(--memory-copy-y, 0px) * -0.015deg));
+  transform-origin: top left;
+  transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+  box-sizing: border-box;
+}
+
+/* Carnet de Voyage Page Styling — Fully Responsive */
+.travel-carnet-page {
+  position: relative;
+  background: linear-gradient(155deg, rgba(14, 21, 33, 0.95) 0%, rgba(7, 12, 20, 0.98) 100%);
+  background-image: repeating-linear-gradient(0deg, transparent 0 27px, rgba(255, 255, 255, 0.028) 28px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-left: 5px solid var(--trip-accent);
+  border-radius: clamp(10px, 1.2vw, 14px);
+  padding: clamp(16px, 2.2vh, 24px) clamp(18px, 2vw, 26px) clamp(14px, 1.8vh, 20px);
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(16px);
+  box-sizing: border-box;
+  max-height: calc(100svh - clamp(110px, 16vh, 150px));
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+/* Notebook Perforated Spiral Rings */
+.carnet-spiral {
+  position: absolute;
+  top: -8px;
+  left: 24px;
+  display: flex;
+  gap: 16px;
+  pointer-events: none;
+  z-index: 12;
+}
+
+.carnet-spiral span {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #060b13;
+  border: 1.5px solid rgba(255, 255, 255, 0.22);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.9), 0 1px 2px rgba(255, 255, 255, 0.1);
+}
+
+/* Washi Tape Accent */
+.carnet-washi-tape {
+  position: absolute;
+  top: -11px;
+  right: 48px;
+  width: 78px;
+  height: 22px;
+  background: rgba(240, 230, 210, 0.18);
+  border: 1px dashed rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(4px);
+  transform: rotate(-3deg);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+  z-index: 12;
+}
+
+/* Authentic Academic Rubber Visa Stamp */
+.carnet-rubber-stamp {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 84px;
+  height: 84px;
+  border: 2px dashed var(--trip-accent);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(-13deg);
+  opacity: 0.88;
+  pointer-events: none;
+  z-index: 11;
+  box-shadow: inset 0 0 14px color-mix(in srgb, var(--trip-accent) 25%, transparent), 0 0 16px color-mix(in srgb, var(--trip-accent) 18%, transparent);
+}
+
+.carnet-rubber-stamp .stamp-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: var(--trip-accent);
+  text-transform: uppercase;
+  line-height: 1.1;
+}
+
+.carnet-rubber-stamp .stamp-inner small {
+  font-size: 6.5px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+}
+
+.carnet-rubber-stamp .stamp-inner b {
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  margin: 2px 0;
+}
+
+.carnet-rubber-stamp .stamp-inner i {
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  font-style: normal;
+}
+
+/* Carnet Header & School Pill */
+.carnet-header {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(6px, 1vh, 10px);
+  margin-bottom: clamp(6px, 1vh, 10px);
+  padding-right: clamp(60px, 8vw, 80px); /* clear rubber stamp */
+}
+
+.carnet-page-tag {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.carnet-page-tag span {
+  color: #7dd3fc;
+  font-size: clamp(7px, 0.7vw, 8.5px);
+  font-weight: 800;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+}
+
+.carnet-page-tag b {
+  color: #fff;
+  font-size: clamp(10.5px, 1.1vw, 12.5px);
+  font-weight: 800;
+  letter-spacing: .08em;
+}
+
+.carnet-school-pill {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: clamp(4px, 0.6vh, 6px) clamp(8px, 1vw, 12px);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-left: 3px solid var(--trip-accent);
+  border-radius: 6px;
+  width: fit-content;
+}
+
+.carnet-school-label {
+  font-size: clamp(6.5px, 0.65vw, 7.5px);
+  font-weight: 800;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.carnet-school-name {
+  font-size: clamp(10px, 1vw, 12px);
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+/* Project Identification */
+.carnet-project-intro {
+  margin-top: clamp(4px, 0.8vh, 8px);
+}
+
+.carnet-project-kicker {
+  display: block;
+  font-size: clamp(7px, 0.7vw, 8px);
+  font-weight: 800;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--trip-accent);
+}
+
+.travel-carnet-page .travel-project-heading {
+  margin: 3px 0 2px;
+  color: #ffffff;
+  font-size: clamp(18px, calc(13px + 1.2vw), 34px);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -.03em;
+  text-transform: uppercase;
+}
+
+.travel-carnet-page .travel-project-tagline {
+  margin: 0;
+  font-size: clamp(8px, 0.85vw, 10px);
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: #cbd5e1;
+}
+
+/* Academic Mission Briefing Box */
+.carnet-mission-box {
+  margin: clamp(6px, 1vh, 10px) 0 clamp(6px, 0.8vh, 8px);
+  padding: clamp(6px, 0.9vh, 9px) clamp(8px, 1.1vw, 13px);
+  background: rgba(3, 7, 18, 0.7);
+  border-left: 2.5px dashed var(--trip-accent);
+  border-radius: 0 8px 8px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.carnet-mission-box strong {
+  display: block;
+  font-size: clamp(7px, 0.7vw, 8px);
+  font-weight: 800;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--trip-accent);
+  margin-bottom: 3px;
+}
+
+.carnet-mission-box p {
+  margin: 0;
+  font-size: clamp(10px, 0.95vw, 12px);
+  line-height: 1.45;
+  color: #e2e8f0;
+}
+
+/* Detailed summary narrative */
+.travel-carnet-page .travel-project-summary {
+  max-width: 480px;
+  margin: clamp(5px, 0.8vh, 8px) 0 0;
+  color: #94a3b8;
+  font-size: clamp(10px, 0.95vw, 11.5px);
+  line-height: 1.55;
+}
+
+/* Tech Stack Tags */
+.travel-carnet-page .travel-project-stack {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+  margin: clamp(6px, 1vh, 10px) 0 0;
+  padding: 0;
+}
+
+.carnet-stack-label {
+  font-size: 7.5px;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: #64748b;
+  margin-right: 3px;
+}
+
+.travel-carnet-page .travel-stack-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.07);
+  color: #f1f5f9;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+/* Carnet Footer & Meta */
+.carnet-footer-meta {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.16);
+  color: #94a3b8;
+  font-size: 8.5px;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.carnet-footer-meta strong {
+  color: #cbd5e1;
+}
+
+.carnet-val-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #34d399;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.carnet-footer-meta i {
+  font-style: normal;
+  color: #64748b;
+}
 .travel-memory-word { position: absolute; z-index: 1; right: -2vw; bottom: -.08em; color: transparent; font-size: clamp(150px, 24vw, 420px); font-weight: 800; letter-spacing: -.1em; line-height: .8; text-transform: uppercase; opacity: var(--memory-word-opacity, .2); -webkit-text-stroke: 1px color-mix(in srgb, var(--trip-accent) 46%, transparent); transform: scale(var(--memory-word-scale, 1)); transform-origin: right bottom; }
 .travel-country-sign { position: absolute; z-index: 6; top: 8vh; right: 3vw; width: min(48vw, 760px); height: 76vh; overflow: hidden; color: var(--trip-accent); opacity: var(--country-sign-opacity, 0); transform: rotate(var(--country-sign-rotate, 0deg)) scale(var(--country-sign-scale, .7)); transform-origin: 65% 50%; pointer-events: none; }
 .travel-country-sign::before { content: ""; position: absolute; inset: 8%; border: 1px solid color-mix(in srgb, var(--trip-accent) 58%, transparent); border-radius: 50%; box-shadow: 0 0 0 7vw color-mix(in srgb, var(--trip-accent) 5%, transparent), inset 0 0 80px color-mix(in srgb, var(--trip-accent) 14%, transparent); }
@@ -847,7 +1397,6 @@ html:not(.motion-enhanced) .story-layout:has(#chapitre-03:target) .story-visual-
 }
 
 @media (min-width: 761px) and (max-width: 1000px) and (prefers-reduced-motion: no-preference) {
-  .travel-earth-shell { width: min(82vw, 720px); }
   .travel-memory-photo-1 { width: 80vw; }
   .travel-memory-photo-2 { width: 27vw; }
   .travel-memory-photo-3 { width: 22vw; }
@@ -861,7 +1410,8 @@ html:not(.motion-enhanced) .story-layout:has(#chapitre-03:target) .story-visual-
   .story-intro h2 { font-size: clamp(55px, 15vw, 78px); }
   .story-intro p { align-self: flex-start; max-width: 330px; }
   .travel-intro-pass { right: 22px; bottom: 58px; width: calc(100% - 44px); }
-  .travel-world, .travel-cinema-heading, .travel-atmosphere-wipe, .travel-chapter-rail { display: none; }
+  .travel-2d-hud, .travel-2d-footer, .travel-cinema-heading, .travel-atmosphere-wipe, .travel-chapter-rail { display: none; }
+  .travel-2d-map-wrap { opacity: 0.2 !important; }
   .travel-panel, .motion-enhanced .travel-panel { display: flex; flex-direction: column; min-height: 0; padding: 84px 22px 105px; overflow: hidden; border: 0; background: #070910; }
   .travel-panel::before { z-index: 0; opacity: .52; background: radial-gradient(circle at 82% 16%, color-mix(in srgb, var(--trip-accent) 32%, transparent), transparent 40%); }
   .travel-panel::after { display: none; }
@@ -871,22 +1421,31 @@ html:not(.motion-enhanced) .story-layout:has(#chapitre-03:target) .story-visual-
   .travel-memory-photo-2 { top: 18px; right: 14px; width: 36vw; height: 38vw; border-width: 3px; }
   .travel-memory-photo-3 { right: 18px; bottom: 18px; width: 31vw; height: 34vw; border-width: 3px; transform: rotate(2deg) !important; }
   .travel-memory-photo-4 { left: 18px; top: 26px; width: 29vw; height: 31vw; border-width: 3px; transform: rotate(-3deg) !important; }
-  .travel-memory-copy { position: relative; order: 2; left: auto; bottom: auto; width: 100%; margin-top: 45px; padding-left: 18px; opacity: 1 !important; transform: none !important; }
-  .travel-memory-copy::before { inset: -20px; }
-  .travel-panel .travel-memory-copy h3 { font-size: clamp(56px, 16vw, 82px); }
-  .travel-panel .travel-memory-copy p { font-size: 15px; }
-  .travel-memory-meta { grid-template-columns: 1fr auto; }
-  .travel-memory-meta i { display: none; }
+  .travel-memory-copy { position: relative; order: 2; left: auto; bottom: auto; width: 100%; margin-top: 30px; opacity: 1 !important; transform: none !important; }
+  .travel-carnet-page { padding: 24px 18px 18px; border-radius: 10px; }
+  .carnet-spiral { gap: 10px; left: 16px; top: -7px; }
+  .carnet-spiral span { width: 11px; height: 11px; }
+  .carnet-washi-tape { top: -9px; right: 20px; width: 60px; height: 18px; }
+  .carnet-rubber-stamp { width: 66px; height: 66px; top: 14px; right: 12px; }
+  .carnet-rubber-stamp .stamp-inner b { font-size: 12px; }
+  .carnet-rubber-stamp .stamp-inner small { font-size: 5.5px; }
+  .carnet-header { padding-right: 62px; }
+  .travel-carnet-page .travel-project-heading { font-size: clamp(20px, 6.2vw, 32px) !important; }
+  .carnet-footer-meta { flex-wrap: wrap; gap: 8px; }
+  .carnet-footer-meta i { display: none; }
   .travel-memory-word { right: -7vw; bottom: .01em; font-size: 26vw; opacity: .16 !important; }
-  .travel-country-sign, .travel-intro-orbit, .travel-intro-route, .travel-intro-wipe { display: none; }
+  .travel-country-sign, .travel-intro-orbit, .travel-intro-route, .travel-intro-departure { display: none; }
+  .carnet-focus-grid { grid-template-columns: 1fr; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .travel-world, .travel-cinema-heading, .travel-atmosphere-wipe, .travel-chapter-rail { display: none !important; }
+  .travel-2d-hud, .travel-2d-footer, .travel-cinema-heading, .travel-atmosphere-wipe, .travel-chapter-rail { display: none !important; }
+  .travel-2d-map-wrap { opacity: 0.25 !important; }
+  .travel-2d-route-active { stroke-dashoffset: 0 !important; }
   .travel-panel { background: #070910; }
   .travel-memory-photo { opacity: 1 !important; clip-path: none !important; transform: none !important; }
   .travel-memory-copy { opacity: 1 !important; transform: none !important; }
-  .travel-country-sign, .travel-intro-orbit, .travel-intro-route, .travel-intro-wipe { display: none !important; }
+  .travel-country-sign, .travel-intro-orbit, .travel-intro-route, .travel-intro-departure { display: none !important; }
 }
 
 /* Act III — one idea unfolds into a working system */
@@ -1065,4 +1624,214 @@ html.project-viewer-open { overflow: hidden; }
 
 @media (min-width: 761px) and (prefers-reduced-motion: reduce) {
   .intro-sticky .story-intro-overlay { margin-top: 780px; }
+}
+
+/* Act II refinement — dark data atlas, city lock and continuous arrival */
+.travel-2d-map-wrap { background: radial-gradient(ellipse at 50% 54%, #0a1730 0%, #030714 38%, #010208 74%, #000 100%); isolation: isolate; }
+.travel-2d-map-wrap::before { content: ""; position: absolute; z-index: -1; inset: 0; opacity: .72; background-image: radial-gradient(circle at 11% 21%, #baf5ff 0 1px, transparent 1.5px), radial-gradient(circle at 62% 16%, #8c6cff 0 1px, transparent 1.5px), radial-gradient(circle at 83% 68%, #42f5da 0 1px, transparent 1.5px), radial-gradient(circle at 40% 76%, #d6eaff 0 1px, transparent 1.5px), radial-gradient(circle at 20% 48%, #fff 0 1px, transparent 1.5px); background-size: 163px 179px, 241px 223px, 197px 251px, 283px 211px, 313px 271px; animation: atlasStars 12s linear infinite; }
+.travel-2d-map-wrap::after { content: ""; position: absolute; z-index: 1; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 46%, transparent 0 34%, #00000048 68%, #000b 100%), repeating-linear-gradient(0deg, #ffffff08 0 1px, transparent 1px 4px); mix-blend-mode: screen; opacity: .55; }
+@keyframes atlasStars { to { background-position: 38px -72px, -50px 46px, 55px -33px, -29px 59px, 72px 23px; } }
+.travel-2d-map-glow { background: radial-gradient(circle at 50% 49%, #0c6bff30 0, transparent 30%), radial-gradient(circle at 22% 42%, #a86dff24 0, transparent 35%), radial-gradient(circle at 79% 54%, #00ebd52b 0, transparent 32%); filter: blur(18px); }
+.travel-2d-map-svg { z-index: 2; filter: saturate(1.25) contrast(1.14); }
+.travel-2d-hud, .travel-2d-footer { z-index: 12; }
+.travel-2d-hud { padding: 12px 14px; border: 1px solid #7dd3fc2e; border-radius: 3px; background: linear-gradient(90deg, #030816d9, #07142ab8, #030816d9); box-shadow: 0 0 36px #0a89ff20, inset 0 1px #ffffff0d; }
+.travel-2d-hud::after { content: ""; position: absolute; right: 0; bottom: -1px; left: 0; height: 1px; background: linear-gradient(90deg, transparent, #73f7ee, transparent); }
+.travel-2d-graticule { stroke: #58edff4a; stroke-width: .48; stroke-dasharray: 2 7; }
+.travel-2d-land { fill: #071d38; stroke: #4eefff9c; stroke-width: .82; filter: drop-shadow(0 0 8px #00d9ff60) drop-shadow(0 0 24px #1638aa55); }
+.travel-2d-borders { stroke: #418fb063; stroke-width: .45; }
+.travel-2d-route-ghost { stroke: #49f1e24a; stroke-width: .9; stroke-dasharray: 2 9; }
+.travel-2d-route-active { stroke-width: 2.2; filter: url(#glow-route) drop-shadow(0 0 8px #5ef8ef); }
+.travel-2d-flight-beacon { filter: drop-shadow(0 0 16px #68f8ff) drop-shadow(0 0 38px #596bff); }
+.travel-2d-marker-label { opacity: .8; }
+.travel-2d-label-code { stroke: #01030a; stroke-width: 4px; }
+
+.travel-map-arrival { position: absolute; z-index: 44; inset: 0; display: grid; place-items: center; overflow: hidden; pointer-events: none; opacity: var(--map-arrival-opacity, 1); background: radial-gradient(circle at 50% 50%, #093a6a9c 0, #020615e8 31%, #000 75%); transition: opacity .22s linear; }
+.travel-map-arrival-grid { position: absolute; inset: -30%; background-image: linear-gradient(#58e9ff52 1px, transparent 1px), linear-gradient(90deg, #58e9ff52 1px, transparent 1px); background-size: 7vw 7vw; transform: perspective(620px) rotateX(66deg) scale(var(--map-arrival-scale, 1.2)); transform-origin: center 65%; }
+.travel-map-arrival span { position: relative; z-index: 2; color: #dffcff; font-size: 9px; font-weight: 800; letter-spacing: .34em; text-transform: uppercase; transform: translateY(48px); }
+.travel-map-arrival i { position: relative; z-index: 3; color: white; font-size: clamp(40px, 5vw, 82px); font-style: normal; text-shadow: 0 0 18px #6cf7ff, 0 0 70px #316eff; transform: translateY(-12px); }
+.travel-map-arrival b { position: absolute; z-index: 1; width: min(115vw, 1600px); height: 2px; background: linear-gradient(90deg, transparent, #6cf7ff, #fff, #6cf7ff, transparent); box-shadow: 0 0 25px #42dcff, 0 0 80px #3569ff; transform: rotate(-8deg); }
+
+.travel-project-console { width: min(550px, calc(100vw - 40px)); max-width: 44vw; padding: 22px 24px 20px; border: 1px solid #6cf7ff42; border-left: 3px solid var(--trip-accent); border-radius: 7px; background: linear-gradient(135deg, #050b17ed, #071a2be8 58%, #050714ed); box-shadow: 0 24px 70px #000b, inset 0 1px #ffffff17, 0 0 48px color-mix(in srgb, var(--trip-accent) 16%, transparent); backdrop-filter: blur(18px); }
+.travel-project-console::before { content: ""; position: absolute; top: 0; right: 16px; left: 16px; height: 1px; background: linear-gradient(90deg, transparent, var(--trip-accent), #62f7ef, transparent); }
+.project-console-topline, .project-console-location, .project-console-bottom { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+.project-console-topline { padding-bottom: 10px; border-bottom: 1px solid #ffffff18; color: #7eeeff; font-size: 8px; font-weight: 800; letter-spacing: .16em; }
+.project-console-topline i { color: #ffffff80; font-size: 7px; font-style: normal; letter-spacing: .12em; }
+.project-console-location { align-items: start; margin-top: 14px; }
+.project-console-location span { color: #f3fcff; font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.project-console-location small { max-width: 48%; color: #8fa7bd; font-size: 8px; font-weight: 700; letter-spacing: .07em; line-height: 1.35; text-align: right; }
+.project-console-title { margin: 13px 0 3px; color: white; font-size: clamp(30px, 3.1vw, 49px); line-height: .92; letter-spacing: -.055em; text-transform: uppercase; }
+.project-console-category { margin: 0; color: #a6c4db; font-size: 8px; font-weight: 800; letter-spacing: .12em; line-height: 1.4; text-transform: uppercase; }
+.project-console-focus { margin: 17px 0 12px; padding: 12px 13px; border: 1px solid #63e9e430; background: #0922398c; }
+.project-console-focus span { display: block; margin-bottom: 5px; color: #62f7ef; font-size: 7px; font-weight: 800; letter-spacing: .17em; text-transform: uppercase; }
+.project-console-focus strong { color: white; font-size: clamp(14px, 1.35vw, 18px); line-height: 1.2; }
+.project-console-brief { margin: 0; color: #c4d3e0; font-size: clamp(11px, 1vw, 13px); line-height: 1.5; }
+.project-console-bottom { margin-top: 16px; padding-top: 12px; border-top: 1px solid #ffffff16; }
+.project-console-stack { display: flex; flex-wrap: wrap; gap: 5px; }
+.project-console-stack span { padding: 4px 6px; border: 1px solid #ffffff22; color: #dffcff; font-size: 7px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
+.project-console-role { max-width: 36%; color: var(--trip-accent); font-size: 8px; font-weight: 800; letter-spacing: .08em; line-height: 1.35; text-align: right; text-transform: uppercase; }
+
+@media (max-width: 760px) {
+  .travel-map-arrival { display: none; }
+  .travel-project-console { width: 100%; max-width: none; padding: 20px; }
+  .project-console-title { font-size: clamp(30px, 10vw, 46px); }
+  .travel-2d-hud { top: 12px; right: 12px; left: 12px; }
+  .travel-2d-hud-right { display: none; }
+  .travel-2d-footer { right: 10px; bottom: 10px; left: 10px; overflow: hidden; justify-content: flex-start; }
+  .travel-2d-footer-item { white-space: nowrap; }
+}
+
+@media (prefers-reduced-motion: reduce) { .travel-map-arrival { display: none; } .travel-2d-map-wrap::before { animation: none; } }
+
+/* Interactive atlas — map is a single optional stop, never a scroll-controlled chapter */
+.travel-map-section .story-journey, .motion-enhanced .travel-map-section .story-journey { height: 100svh; }
+.travel-map-section .story-sticky, .motion-enhanced .travel-map-section .story-sticky { position: relative; height: 100svh; min-height: 620px; opacity: 1; overflow: hidden; }
+.travel-map-section .story-track, .travel-map-section .travel-atmosphere-wipe, .travel-map-section .travel-chapter-rail, .travel-map-section .travel-cinema-heading, .travel-map-section .travel-map-arrival { display: none; }
+.travel-atlas { position: absolute; inset: 0; overflow: hidden; isolation: isolate; background: radial-gradient(circle at 18% 45%, #75344f26, transparent 28%), radial-gradient(circle at 78% 18%, #3faaa51a, transparent 25%), linear-gradient(135deg, var(--space-soft), #090a0f 72%); }
+.travel-atlas::before { content: ""; position: absolute; z-index: -1; inset: -5%; opacity: .45; background-image: radial-gradient(circle at 11% 21%, #ebeae5 0 1px, transparent 1.5px), radial-gradient(circle at 62% 16%, #9273b2 0 1px, transparent 1.5px), radial-gradient(circle at 83% 68%, #3faaa5 0 1px, transparent 1.5px), radial-gradient(circle at 40% 76%, #d17b68 0 1px, transparent 1.5px); background-size: 163px 179px, 241px 223px, 197px 251px, 283px 211px; animation: atlasStarDrift 22s ease-in-out infinite alternate; }
+.travel-atlas::after { content: ""; position: absolute; z-index: 3; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 49%, transparent 0 36%, #090a0f42 68%, #090a0fd9 100%), repeating-linear-gradient(0deg, #ebeae505 0 1px, transparent 1px 5px); }
+.travel-atlas-svg { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; filter: saturate(.9) contrast(1.08); }
+.atlas-intro-transition { position: absolute; z-index: 10; inset: 0; display: grid; place-content: center; gap: 18px; overflow: hidden; background: radial-gradient(circle at 50% 50%, #2b203599 0, #111019 36%, #09090d 72%); color: var(--paper); text-align: center; pointer-events: none; transition: opacity .28s ease .62s, visibility 0s linear .9s; }.atlas-intro-transition::before, .atlas-intro-transition::after { content: ""; position: absolute; left: -20%; width: 140%; height: 1px; background: linear-gradient(90deg, transparent, #75344f, var(--paper), #9273b2, transparent); box-shadow: 0 0 24px #9273b266, 0 0 72px #75344f52; }.atlas-intro-transition::before { top: 43%; transform: rotate(-8deg); }.atlas-intro-transition::after { top: 57%; transform: rotate(8deg); }.atlas-intro-transition i { position: relative; z-index: 2; font-size: clamp(42px, 6vw, 92px); font-style: normal; text-shadow: 0 0 18px #9273b2, 0 0 70px #75344f; }.atlas-intro-transition span { position: relative; z-index: 2; font-size: 9px; font-weight: 800; letter-spacing: .32em; text-transform: uppercase; }.travel-atlas.is-introduced .atlas-intro-transition { opacity: 0; visibility: hidden; }
+.travel-atlas-stage { transition: transform 1.12s cubic-bezier(.16, 1, .3, 1); transform-origin: 0 0; }
+.atlas-map-scan { pointer-events: none; mix-blend-mode: screen; animation: atlasMapScan 9s linear infinite; }
+.atlas-map-scan line { stroke: #a8e7e3; stroke-width: 1; opacity: .38; filter: url(#atlas-glow); }
+.atlas-grid { fill: none; stroke: #c7c3d724; stroke-width: .5; stroke-dasharray: 2 8; animation: atlasGridFlow 14s linear infinite; }
+.atlas-land { fill: #181722; stroke: #9273b28c; stroke-width: .85; filter: drop-shadow(0 0 9px #9273b240) drop-shadow(0 0 28px #75344f2e); animation: atlasLandBreath 7s ease-in-out infinite; }
+.atlas-borders { fill: none; stroke: #ebeae52b; stroke-width: .45; animation: atlasBorderSignal 5.5s ease-in-out infinite; }
+@keyframes atlasStarDrift { from { transform: translate3d(-1.2%, -.7%, 0) scale(1.01); } to { transform: translate3d(1.2%, .7%, 0) scale(1.035); } }
+@keyframes atlasMapScan { from { transform: translateX(0); opacity: 0; } 8% { opacity: .75; } 82% { opacity: .42; } to { transform: translateX(1300px); opacity: 0; } }
+@keyframes atlasGridFlow { to { stroke-dashoffset: -100; } }
+@keyframes atlasLandBreath { 0%, 100% { fill: #181722; stroke-opacity: .72; } 50% { fill: #1d1927; stroke-opacity: 1; } }
+@keyframes atlasBorderSignal { 0%, 100% { stroke-opacity: .48; } 50% { stroke-opacity: .9; } }
+.atlas-flight-route { fill: none; stroke: #d7c6df; stroke-width: 2.4; stroke-linecap: round; filter: url(#atlas-glow); stroke-dasharray: 100; animation: atlasRoute 1.15s ease both; }
+@keyframes atlasRoute { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
+.atlas-plane circle { fill: #9273b224; stroke: #a889c7; stroke-width: 1; stroke-dasharray: 3 3; }
+.atlas-plane path { fill: var(--paper); stroke: #a889c7; stroke-width: 1.1; }
+.atlas-point { cursor: pointer; outline: none; }
+.atlas-point:focus-visible .atlas-core { stroke: white; stroke-width: 3; }
+.atlas-radar { color: var(--point-color); transform-box: fill-box; transform-origin: center; animation: atlasRadarSweep 4.6s linear infinite; animation-delay: var(--radar-delay); }
+.atlas-radar-ring { fill: none; stroke: currentColor; }
+.atlas-radar-ring-outer { stroke-width: 1; opacity: .38; stroke-dasharray: 2 4; }
+.atlas-radar-ring-inner { stroke-width: .7; opacity: .2; }
+.atlas-radar-sweep { fill: currentColor; opacity: .11; transition: opacity .25s ease; }
+.atlas-radar-arm { stroke: currentColor; stroke-width: 1.25; opacity: .82; filter: url(#atlas-glow); }
+.atlas-point:hover .atlas-radar-sweep, .atlas-point:focus-visible .atlas-radar-sweep { opacity: .28; }
+@keyframes atlasRadarSweep { to { transform: rotate(360deg); } }
+.atlas-core { fill: var(--point-color); stroke: #fff; stroke-width: 1.2; transition: transform .3s ease; }
+.atlas-point:hover .atlas-core, .atlas-point.is-selected .atlas-core { transform: scale(1.65); }
+.atlas-point-code, .atlas-point-name { font-family: inherit; font-weight: 800; paint-order: stroke; stroke: #01030a; stroke-width: 4px; pointer-events: none; }
+.atlas-point-code { fill: var(--point-color); font-size: 9px; letter-spacing: .14em; }
+.atlas-point-name { fill: #fff; font-size: 7px; letter-spacing: .1em; }
+.travel-atlas-hud { position: absolute; z-index: 5; top: clamp(22px, 4vh, 48px); right: clamp(20px, 4vw, 68px); left: clamp(20px, 4vw, 68px); display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 12px 14px; border-top: 1px solid #ebeae552; border-bottom: 1px solid #ebeae51f; background: linear-gradient(90deg, #0c0d12e8, #181722c7, #0c0d12e8); color: var(--paper); font-size: 8px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+.travel-atlas-hud span { color: #b69acb; }.travel-atlas-hud span i { display: inline-block; width: 6px; height: 6px; margin-right: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px #9273b2; }.travel-atlas-hud b { color: var(--paper); }.travel-atlas-hud small { color: #a6a5ae; font-size: inherit; }
+.travel-atlas-prompt { position: absolute; z-index: 5; bottom: clamp(26px, 5vh, 56px); left: 50%; width: max-content; max-width: calc(100vw - 40px); margin: 0; padding: 10px 14px; border: 1px solid #ebeae52e; background: #0c0d12df; color: #d6d4cc; font-size: 9px; font-weight: 700; letter-spacing: .1em; text-align: center; transform: translateX(-50%); }
+.atlas-project-panel { position: absolute; z-index: 6; right: clamp(22px, 5vw, 86px); bottom: clamp(28px, 7vh, 82px); width: min(440px, calc(100vw - 44px)); padding: 24px; border: 1px solid #ebeae536; border-left: 3px solid var(--accent); background: linear-gradient(135deg, #111019f5, #181722f2); box-shadow: 0 28px 80px #000c, 0 0 60px #75344f1f; backdrop-filter: blur(18px); animation: atlasPanelIn .45s cubic-bezier(.16, 1, .3, 1) both; }
+@keyframes atlasPanelIn { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: none; } }
+.atlas-close { position: absolute; top: 12px; right: 12px; display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid #ebeae542; border-radius: 50%; background: #0c0d12cc; color: var(--paper); cursor: pointer; font-size: 22px; line-height: 1; }.atlas-close span { position: absolute; right: 42px; color: #c7c5bd; font-size: 8px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }.atlas-close:hover { border-color: var(--accent); background: #292134; }
+.atlas-project-code { color: #b69acb; font-size: 8px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; }.atlas-project-panel h3 { max-width: 88%; margin: 18px 0 6px; color: var(--paper); font-size: clamp(32px, 4vw, 58px); line-height: .88; letter-spacing: -.06em; text-transform: uppercase; }.atlas-project-school { margin: 0 0 20px; color: #aaa8a3; font-size: 11px; font-weight: 700; }.atlas-project-panel > div { padding: 13px; border: 1px solid #9273b230; background: #9273b20d; }.atlas-project-panel > div span { display: block; margin-bottom: 5px; color: #b69acb; font-size: 7px; font-weight: 800; letter-spacing: .17em; text-transform: uppercase; }.atlas-project-panel > div strong { color: var(--paper); font-size: 17px; line-height: 1.2; }.atlas-project-panel footer { display: flex; justify-content: space-between; gap: 12px; margin-top: 16px; padding-top: 12px; border-top: 1px solid #ebeae516; color: #d6d4cc; font-size: 8px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }.atlas-project-panel footer b { max-width: 42%; color: #b69acb; text-align: right; }
+@media (max-width: 760px) { .travel-map-section .story-journey, .motion-enhanced .travel-map-section .story-journey { height: 100svh; }.travel-map-section .story-sticky, .motion-enhanced .travel-map-section .story-sticky { position: relative; height: 100svh; min-height: 0; }.travel-atlas-hud { top: 12px; right: 12px; left: 12px; }.travel-atlas-hud small { display: none; }.travel-atlas-hud b { text-align: right; }.atlas-project-panel { right: 12px; bottom: 18px; left: 12px; width: auto; padding: 20px; }.atlas-point-name { display: none; }.travel-atlas-prompt { bottom: 20px; font-size: 8px; }.atlas-project-panel h3 { font-size: clamp(32px, 10vw, 48px); }.atlas-project-panel footer { display: block; line-height: 1.6; }.atlas-project-panel footer b { display: block; max-width: none; text-align: left; } }
+@media (prefers-reduced-motion: reduce) { .travel-atlas::before, .atlas-map-scan, .atlas-grid, .atlas-land, .atlas-borders, .atlas-radar, .atlas-flight-route { animation: none; }.travel-atlas-stage { transition: none; } }
+
+/* Scroll handoffs: each incoming chapter rises over a completed, frozen frame. */
+@media (min-width: 761px) and (prefers-reduced-motion: no-preference) {
+  .motion-enhanced .intro-journey { height: 670svh; }
+
+  .motion-enhanced .travel-map-section {
+    position: relative;
+    z-index: 20;
+    margin-top: -100svh;
+  }
+
+  .travel-map-section .story-journey,
+  .motion-enhanced .travel-map-section .story-journey { height: 300svh; }
+
+  .travel-map-section .story-sticky,
+  .motion-enhanced .travel-map-section .story-sticky {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+    min-height: 620px;
+    opacity: 1;
+    box-shadow: 0 -28px 90px #0008;
+  }
+
+  .motion-enhanced .capability-journey {
+    z-index: 30;
+    margin-top: -100svh;
+    isolation: isolate;
+    box-shadow: 0 -34px 110px #000b;
+  }
+
+  .motion-enhanced .capability-sticky {
+    z-index: 1;
+    background: var(--space);
+    transform: translateZ(0);
+  }
+}
+
+/* Constant-size beacons keep their hit area stable while the radar rotates. */
+.atlas-point-visual {
+  transform-box: view-box;
+  transform-origin: 0 0;
+  transition: transform 1.35s cubic-bezier(.16, 1, .3, 1);
+}
+
+.travel-atlas.is-focused .atlas-point-visual { transform: scale(.274); }
+.atlas-point-hit { fill: transparent; pointer-events: all; }
+.atlas-point-visual > :not(.atlas-point-hit) { pointer-events: none; }
+.atlas-heart-ring { fill: color-mix(in srgb, var(--point-color) 12%, transparent); stroke: var(--point-color); stroke-width: 1.2; opacity: .72; transform-box: fill-box; transform-origin: center; }
+.atlas-core { transform-box: fill-box; transform-origin: center; animation: atlasCorePulse 2.8s ease-in-out infinite; }
+.atlas-point:hover .atlas-core,
+.atlas-point:focus-visible .atlas-core,
+.atlas-point.is-selected .atlas-core { animation: none; transform: scale(1.55); }
+.travel-atlas.is-focused .atlas-core { animation-play-state: paused; }
+.atlas-point-code { font-size: 11px; }
+.atlas-point-name { font-size: 8.5px; }
+
+@keyframes atlasCorePulse {
+  0%, 100% { opacity: .82; transform: scale(.92); }
+  50% { opacity: 1; transform: scale(1.12); }
+}
+
+/* The map and its detail panel settle in layers rather than snapping together. */
+.travel-atlas-stage { transition-duration: 1.35s; }
+.atlas-project-panel {
+  visibility: hidden;
+  pointer-events: none;
+  opacity: 0;
+  clip-path: inset(18% 0 0 0 round 10px);
+  transform: translate3d(0, 42px, 0) scale(.965);
+  filter: blur(8px);
+  animation: none;
+  transition:
+    opacity .62s cubic-bezier(.16, 1, .3, 1),
+    transform .72s cubic-bezier(.16, 1, .3, 1),
+    clip-path .72s cubic-bezier(.16, 1, .3, 1),
+    filter .55s ease,
+    visibility 0s linear .72s;
+}
+
+.atlas-project-panel.is-visible {
+  visibility: visible;
+  pointer-events: auto;
+  opacity: 1;
+  clip-path: inset(0 round 7px);
+  transform: translate3d(0, 0, 0) scale(1);
+  filter: blur(0);
+  transition-delay: 0s;
+}
+
+.atlas-project-panel.is-closing { transition-duration: .36s; }
+
+@media (max-width: 760px) {
+  .travel-atlas.is-focused .atlas-point-visual { transform: scale(.34); }
+  .atlas-project-panel {
+    max-height: calc(100svh - 94px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atlas-core { animation: none; }
+  .atlas-project-panel { filter: none; transition-duration: 0s; }
 }

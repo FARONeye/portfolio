@@ -97,7 +97,9 @@
     const updateIntro = () => {
       if (!introJourney || !introSticky || reducedMotion.matches || window.innerWidth <= 760) return;
       const rect = introJourney.getBoundingClientRect();
-      const travel = Math.max(1, introJourney.offsetHeight - window.innerHeight);
+      // Keep one viewport at the end of the intro as a completed, static frame.
+      // The map uses that runway to rise over the intro instead of interrupting it.
+      const travel = Math.max(1, introJourney.offsetHeight - window.innerHeight * 2);
       const openingProgress = clamp(-rect.top / travel);
       const progress = clamp(openingProgress / .895);
       const heroDepart = ease(range(progress, .055, .16));
@@ -231,7 +233,7 @@
     const updateTravelIntro = () => {
       if (!introJourney || !storyIntro || !travelIntroStage || reducedMotion.matches || window.innerWidth <= 760) return;
       const rect = introJourney.getBoundingClientRect();
-      const travel = Math.max(1, introJourney.offsetHeight - window.innerHeight);
+      const travel = Math.max(1, introJourney.offsetHeight - window.innerHeight * 2);
       const openingProgress = clamp(-rect.top / travel);
       const progress = range(openingProgress, .86, 1);
       const arrival = ease(range(progress, 0, .22));
@@ -253,8 +255,9 @@
       set(travelIntroStage, "--travel-intro-route", route.toFixed(3));
       set(travelIntroStage, "--travel-intro-orbit-scale", mix(.82, 1.25, range(route, .32, 1)).toFixed(3));
       set(travelIntroStage, "--travel-intro-orbit-rotate", `${mix(18, 128, range(route, .32, 1))}deg`);
-      set(travelIntroStage, "--travel-intro-wipe", `${mix(0, 145, departure)}%`);
-      set(travelIntroStage, "--travel-intro-wipe-label", (range(progress, .7, .82) * (1 - range(progress, .9, .98))).toFixed(3));
+      set(travelIntroStage, "--travel-intro-departure-opacity", (range(progress, .61, .75) * (1 - range(progress, .94, 1))).toFixed(3));
+      set(travelIntroStage, "--travel-intro-departure-x", `${mix(-28, 58, departure)}vw`);
+      set(travelIntroStage, "--travel-intro-departure-line", mix(0, 1, departure).toFixed(3));
     };
 
     const updateStory = () => {
@@ -268,37 +271,20 @@
       const segmentIndex = Math.min(lastIndex - 1, Math.floor(position));
       const segmentProgress = atFinalDestination ? 1 : position % 1;
       const active = atFinalDestination ? lastIndex : Math.min(lastIndex, Math.floor(position + .55));
-      const departure = atFinalDestination ? 0 : ease(range(segmentProgress, .12, .28));
-      const approach = atFinalDestination ? 1 : ease(range(segmentProgress, .3, .58));
-      const arrival = atFinalDestination ? 1 : ease(range(segmentProgress, .48, .82));
-      const flightProgress = atFinalDestination ? 1 : range(segmentProgress, .18, .6);
+      const departure = atFinalDestination ? 0 : ease(range(segmentProgress, .08, .22));
+      // Arrival of memory card happens much later (from 0.72 to 0.92) so the user has ample time to see the map zoom in on the destination country first!
+      const arrival = atFinalDestination ? 1 : ease(range(segmentProgress, .72, .92));
+      const flightProgress = atFinalDestination ? 1 : range(segmentProgress, .10, .70);
       const flightSurge = Math.sin(flightProgress * Math.PI);
-      const globeFade = atFinalDestination ? 1 : ease(range(segmentProgress, .4, .58));
-      const globeVisibility = atFinalDestination ? 0 : Math.sin(segmentProgress * Math.PI) * (1 - globeFade * .98);
-      const globeScale = atFinalDestination
-        ? 3.4
-        : segmentProgress < .4
-          ? mix(3.4, 1, departure)
-          : mix(1, 3.4, approach);
-      const globeTilt = Math.sin(segmentProgress * Math.PI * 2) * flightSurge * 4.5;
-      const atmosphere = Math.sin(range(segmentProgress, .39, .68) * Math.PI) * (segmentProgress < .68 ? 1 : 0);
+      const mapOpacity = mix(0.42, 1, flightSurge);
+      const mapArrival = 1 - ease(range(progress, .012, .14));
 
       set(storySticky, "--story-progress", progress.toFixed(4));
       set(storySticky, "--story-stage-opacity", rect.top <= 1 ? "1" : "0");
       set(storySticky, "--flight-surge", flightSurge.toFixed(4));
-      set(storySticky, "--earth-opacity", globeVisibility.toFixed(3));
-      set(storySticky, "--earth-scale", globeScale.toFixed(3));
-      set(storySticky, "--earth-rotate", `${globeTilt}deg`);
-      set(storySticky, "--earth-decor-opacity", (1 - globeFade).toFixed(3));
-      set(storySticky, "--earth-x", `${Math.sin(segmentProgress * Math.PI) * -2.5}vw`);
-      set(storySticky, "--earth-y", `${mix(7, 0, flightSurge)}vh`);
-      set(storySticky, "--travel-plane-opacity", (range(segmentProgress, .17, .25) * (1 - range(segmentProgress, .46, .56))).toFixed(3));
-      set(storySticky, "--travel-plane-scale", (0.82 + flightSurge * .28).toFixed(3));
-      set(storySticky, "--travel-route-opacity", (flightSurge * .95).toFixed(3));
-      set(storySticky, "--travel-stars-speed", `${position * -8}vh`);
-      set(storySticky, "--travel-atmosphere", (atmosphere * .7).toFixed(3));
-      set(storySticky, "--travel-atmosphere-scale", mix(.72, 1.28, approach).toFixed(3));
-      set(storySticky, "--travel-space-vignette", (.48 + flightSurge * .3).toFixed(3));
+      set(storySticky, "--travel-map-opacity", mapOpacity.toFixed(3));
+      set(storySticky, "--map-arrival-opacity", mapArrival.toFixed(3));
+      set(storySticky, "--map-arrival-scale", mix(1.2, .74, 1 - mapArrival).toFixed(3));
       storySticky.dataset.activeChapter = String(active);
 
       window.dispatchEvent(new CustomEvent("portfolio:travel", {
@@ -325,11 +311,12 @@
         set(panel, "--scene-z", `${motion * -720}px`);
         set(panel, "--scene-y", `${direction * motion * 7}vh`);
         set(panel, "--scene-rotate-x", `${direction * motion * 9}deg`);
-        set(panel, "--memory-copy-opacity", range(memoryPresence, .48, .82).toFixed(3));
-        set(panel, "--memory-copy-y", `${motion * 64}px`);
+        // The carnet blocks only appear once arrival is well underway, giving full clear view of the zoomed country
+        set(panel, "--memory-copy-opacity", range(memoryPresence, .68, .96).toFixed(3));
+        set(panel, "--memory-copy-y", `${(1 - range(memoryPresence, .68, .96)) * 48}px`);
         set(panel, "--memory-word-opacity", (memoryPresence * .22).toFixed(3));
         set(panel, "--memory-word-scale", mix(.84, 1, memoryPresence).toFixed(3));
-        set(panel, "--country-sign-opacity", (range(memoryPresence, .22, .72) * .82).toFixed(3));
+        set(panel, "--country-sign-opacity", (range(memoryPresence, .50, .85) * .82).toFixed(3));
         set(panel, "--country-sign-scale", mix(.62, 1, memoryPresence).toFixed(3));
         set(panel, "--country-sign-rotate", `${mix(direction * -18, 0, memoryPresence)}deg`);
         set(panel, "--country-sign-progress", memoryPresence.toFixed(3));
