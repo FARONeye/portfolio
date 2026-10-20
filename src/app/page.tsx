@@ -2,171 +2,67 @@
 import Image from "next/image";
 import type { CSSProperties } from "react";
 import TravelMap from "./TravelMap";
+import Experiences from "./Experiences";
+import Jobs from "./Jobs";
 import { projectCards } from "./projects";
+import { closing, passions, profile } from "./content";
 
 const portrait = "/media/portraits/21C7AA17-2AB3-464F-9942-D4346396FAD9_1_102_o.jpeg";
-const landscape = "/media/editorial/179A20D3-83DA-4AD6-82FF-CDAB89055602_1_105_c.jpeg";
-const introGlyphs = Array.from("INVENTER");
-const introVerbs = ["Concevoir", "Développer", "Déployer"];
 
-const studyTrips = [
-  {
-    number: "01",
-    code: "PAR",
-    place: "Paris",
-    country: "France",
-    cities: "Paris · France",
-    school: "HETIC & Campus Numérique Paris",
-    schoolTag: "Campus Paris · HETIC",
-    projectTitle: "Nexus Platform",
-    projectCategory: "Projet de Fin d'Études · Architecture SaaS & Design System",
-    specialization: "Architecture front-end & design systems",
-    title: "Projet majeur : Nexus Platform · Architecture SaaS Next.js",
-    mission: "Défi académique : Concevoir et développer une plateforme SaaS complète de monitoring d'audience pour le diplôme d'ingénierie web.",
-    body: "Durant mon cursus à Paris au sein de l'école HETIC, notre promotion avait pour mission majeure de concevoir une application SaaS complexe de A à Z. C'est ainsi qu'est né le projet Nexus Platform : une plateforme d'analyse d'usage web haute fidélité. J'ai piloté l'architecture front-end avec Next.js 15, la création d'un Design System complet sous Tailwind CSS & Radix UI, et l'intégration de flux temps réel avec TanStack Query.",
-    stack: ["Next.js 15", "TypeScript", "Tailwind CSS", "Radix UI", "TanStack Query"],
-    role: "Lead Front-End & Design System",
-    validation: "Projet majeur validé · Mention Très Bien",
-    visaStamp: "HETIC PARIS · PROJET MAJEUR · 2024",
-    gallery: [
-      "/media/editorial/7A7E0BCD-AB71-4BA1-A135-0D157678584A_1_105_c.jpeg",
-      "/media/editorial/179A20D3-83DA-4AD6-82FF-CDAB89055602_1_105_c.jpeg",
-      "/media/editorial/6B6CEFDE-8017-4ABB-9CEA-B0C063FFD69C_1_105_c.jpeg",
-      "/media/editorial/95ADA646-F765-4F7D-92FF-0061B22DC9B2_1_105_c.jpeg",
-    ],
-    signature: "FRANCE",
-    emblem: "◇",
-    motif: "HETIC Paris · Architecture SaaS",
-    caption: "France / carnet personnel",
-    color: "#a78bfa",
-  },
-  {
-    number: "02",
-    code: "DUB",
-    place: "Dublin",
-    country: "Irlande",
-    cities: "Dublin · Irlande",
-    school: "Trinity College Dublin (School of Computer Science)",
-    schoolTag: "Trinity College Dublin · IRL",
-    projectTitle: "Keltik Workspace",
-    projectCategory: "Projet d'Échange International · Application Collaborative",
-    specialization: "Temps réel, synchronisation & back-end collaboratif",
-    title: "Projet majeur : Keltik Workspace · Collaboration en direct & WebSockets",
-    mission: "Défi académique : Développer en équipe internationale un espace de travail temps réel avec synchronisation sans conflit.",
-    body: "Lors de mon séjour académique à Dublin à Trinity College, nous devions réaliser en équipe un projet d'envergure internationale axé sur le travail collaboratif à distance. Nous avons développé Keltik Workspace : une suite collaborative temps réel permettant l'édition simultanée sur un canvas partagé. Mon rôle a été de programmer le protocole d'échange bidirectionnel sous WebSockets, la gestion d'état réactive avec Zustand et la synchronisation des curseurs et données sous Redis.",
-    stack: ["React", "Node.js", "WebSockets", "Zustand", "Redis"],
-    role: "Développeur Full-Stack Temps Réel",
-    validation: "Projet d'échange validé · First Class Honours",
-    visaStamp: "TRINITY COLLEGE · DUBLIN ACADEMY · 2024",
-    gallery: [
-      "/media/editorial/E6D07DB3-7C44-4319-BC7F-B20A524CA3DB_1_105_c.jpeg",
-      "/media/editorial/1488A6F5-5115-49EA-B944-8C700C5759AA_1_105_c.jpeg",
-      "/media/editorial/391665BB-CAC2-4720-998F-288B554439D3_1_105_c.jpeg",
-      "/media/editorial/DF9C0147-1911-46A3-8474-33F006E599EE_1_105_c.jpeg",
-    ],
-    signature: "IRLANDE",
-    emblem: "☘",
-    motif: "Trinity Dublin · Moteur Temps Réel",
-    caption: "Irlande / carnet personnel",
-    color: "#2dd4bf",
-  },
-  {
-    number: "03",
-    code: "BCN",
-    place: "Barcelone",
-    country: "Espagne",
-    cities: "Barcelone · Espagne",
-    school: "UPC Barcelona Tech (Univ. Politècnica de Catalunya)",
-    schoolTag: "UPC Barcelona Tech · ESP",
-    projectTitle: "Solara Atelier",
-    projectCategory: "Projet de Spécialisation · E-Commerce Headless & Motion",
-    specialization: "E-commerce headless & motion design",
-    title: "Projet majeur : Solara Atelier · Vitrine e-commerce headless & animations",
-    mission: "Défi académique : Concevoir une boutique en ligne headless ultra-performante interfacée à une API tierce avec micro-interactions cinématiques.",
-    body: "Durant mon échange d'études à Barcelone à l'UPC Barcelona Tech, le grand projet de spécialisation consistait à développer une plateforme e-commerce headless alliant performances brutes et fluidité visuelle. J'ai conçu le projet Solara Atelier : une boutique en ligne connectée à l'API Shopify Storefront, avec un rendu hybride SSG/ISR, un panier persistant, des transitions cinématiques orchestrées avec Framer Motion et un paiement Stripe sans rechargement.",
-    stack: ["Next.js", "Shopify API", "Framer Motion", "Stripe", "PostgreSQL"],
-    role: "Développeur Web Créatif & Front-End",
-    validation: "Projet de spécialisation validé · Matrícula de Honor",
-    visaStamp: "UPC BARCELONA · TECH LAB · 2025",
-    gallery: [
-      "/media/editorial/391665BB-CAC2-4720-998F-288B554439D3_1_105_c.jpeg",
-      "/media/editorial/AC28D49D-9D04-4929-A23A-DA9494540415_1_105_c.jpeg",
-      "/media/editorial/C5900B4D-CF48-4442-9C1D-A44E17BD2352_1_201_a.jpeg",
-      "/media/editorial/DF9C0147-1911-46A3-8474-33F006E599EE_1_105_c.jpeg",
-    ],
-    signature: "ESPAGNE",
-    emblem: "☀",
-    motif: "UPC Barcelone · E-Commerce Headless",
-    caption: "Espagne / carnet personnel",
-    color: "#fb923c",
-  },
-  {
-    number: "04",
-    code: "YUL",
-    place: "Montréal",
-    country: "Canada",
-    cities: "Montréal · Canada",
-    school: "Polytechnique Montréal (Génie Informatique)",
-    schoolTag: "Polytechnique Montréal · CAN",
-    projectTitle: "Nordic Pulse",
-    projectCategory: "Projet d'Ingénierie Graphique · Rendu 3D WebGL & Performance",
-    specialization: "3D web, shaders & performance GPU",
-    title: "Projet majeur : Nordic Pulse · Visualisations 3D & performance GPU",
-    mission: "Défi académique : Repousser les limites des rendus graphiques dans le navigateur avec des shaders WebGL personnalisés à 60 FPS constants.",
-    body: "À Montréal, au sein de Polytechnique Montréal, le projet majeur d'ingénierie web imposait de relever le défi de la 3D interactive en temps réel dans le navigateur. J'ai imaginé et développé Nordic Pulse : un portail multimédia mêlant narration éditoriale et visualisations 3D temps réel en WebGL. J'ai programmé des shaders GLSL personnalisés, optimisé le pipeline de streaming des textures et garanti un framerate constant de 60 FPS sur tous les supports.",
-    stack: ["TypeScript", "Three.js", "WebGL", "GLSL Shaders", "Tailwind CSS"],
-    role: "Développeur Web & WebGL",
-    validation: "Projet d'ingénierie validé · Mention d'Excellence",
-    visaStamp: "POLYTECHNIQUE MTL · LAB 3D · 2025",
-    gallery: [
-      "/media/editorial/5697E241-CEB6-4301-90A5-D370B221FD6C_1_105_c.jpeg",
-      "/media/editorial/188E0467-E3CD-4547-8DCD-CCD6A6751292_1_105_c.jpeg",
-      "/media/editorial/95ADA646-F765-4F7D-92FF-0061B22DC9B2_1_105_c.jpeg",
-      "/media/editorial/A34DDE4B-24DD-4894-80AF-DBC037B986B0_1_105_c.jpeg",
-    ],
-    signature: "CANADA",
-    emblem: "✦",
-    motif: "Polytechnique MTL · 3D WebGL",
-    caption: "Montréal / carnet personnel",
-    color: "#38bdf8",
-  },
-  {
-    number: "05",
-    code: "BOS",
-    place: "Boston",
-    country: "États-Unis",
-    cities: "Boston · USA",
-    school: "MIT & Boston Tech Innovation Hub",
-    schoolTag: "MIT Innovation Hub · USA",
-    projectTitle: "Beacon Metrics",
-    projectCategory: "Projet de Fin de Cycle · Dashboard Haute Fréquence & D3.js",
-    specialization: "Data visualisation & systèmes temps réel",
-    title: "Projet majeur : Beacon Metrics · Monitoring temps réel & flux complexes",
-    mission: "Défi académique : Concevoir une console de surveillance technique capable d'absorber et visualiser des flux massifs de données à la seconde.",
-    body: "Enfin à Boston, immergé dans l'écosystème universitaire tech près du MIT, notre équipe d'étudiants devait relever le défi de créer un dashboard analytique prédictif traitant des flux d'événements à haute cadence. Nous avons réalisé Beacon Metrics : une console de monitoring temps réel. En tant que développeur full-stack, j'ai développé l'API GraphQL paginée, les graphiques vectoriels sur-mesure en D3.js et la virtualisation de tables sous Docker.",
-    stack: ["TypeScript", "D3.js", "GraphQL", "Docker", "Tailwind CSS"],
-    role: "Développeur Full-Stack & Data Viz",
-    validation: "Projet de cycle validé · Capstone Award",
-    visaStamp: "MIT BOSTON · CAPSTONE PROJECT · 2026",
-    gallery: [
-      "/media/editorial/193943EB-7EDC-4981-AD66-94F79AE8B6F7_1_105_c.jpeg",
-      "/media/editorial/A34DDE4B-24DD-4894-80AF-DBC037B986B0_1_105_c.jpeg",
-      "/media/editorial/1488A6F5-5115-49EA-B944-8C700C5759AA_1_105_c.jpeg",
-      "/media/editorial/188E0467-E3CD-4547-8DCD-CCD6A6751292_1_105_c.jpeg",
-    ],
-    signature: "USA",
-    emblem: "◎",
-    motif: "MIT Boston · Data Viz & GraphQL",
-    caption: "Boston / carnet personnel",
-    color: "#f43f5e",
-  },
+// The opening introduces Mathis like a terminal session: `whoami` prints his profile, the
+// card renders it, then the stack is checked before the parcours begins.
+const devSteps = ["Profil", "Compétences"];
+const devCaptions = [
+  "Bonjour, moi c’est Mathis.",
+  "Développeur full-stack, Node.js & Google Cloud.",
+  "Voici mon parcours.",
+];
+// Each code line is a list of [token class, text] pairs; the scroll types them one by one.
+const devCode: [string, string][][] = [
+  [["c", "$ whoami --format json"]],
+  [["", "{"]],
+  [["p", "  \"nom\""], ["", ": "], ["s", `"${profile.name}"`], ["", ","]],
+  [["p", "  \"rôle\""], ["", ": "], ["s", `"${profile.role}"`], ["", ","]],
+  [["p", "  \"basé à\""], ["", ": "], ["s", `"${profile.city}"`], ["", ","]],
+  [["p", "  \"poste\""], ["", ": "], ["s", `"${profile.company}"`], ["", ","]],
+  [["p", "  \"statut\""], ["", ": "], ["s", `"${profile.status}"`]],
+  [["", "}"]],
+];
+const devTerminal: [string, string, string][] = [
+  ["$", "mathis --stack", ""],
+  ...profile.stack.map(({ area, tools }): [string, string, string] => ["›", area, `✓ ${tools}`]),
+  ["●", "En poste", profile.company],
 ];
 
+// One rail names every chapter of the page, so the scroll reads as a single story.
+const chapters = [
+  { id: "presentation", label: "Qui je suis" },
+  { id: "experiences", label: "Expériences pro" },
+  { id: "jobs", label: "Jobs étudiants" },
+  { id: "passions", label: "Passions" },
+  { id: "projets", label: "Projets" },
+  { id: "atlas", label: "Études" },
+  { id: "suite", label: "Mot de fin" },
+];
+// A contribution graph for the closing scene; the level pattern is fixed so server and client agree.
+const commitColumns = 40;
+const commitCells = Array.from({ length: commitColumns * 7 }, (_, index) => {
+  const column = Math.floor(index / 7);
+  const row = index % 7;
+  return { column, row, level: (column * 7 + row * 11 + ((column * row) % 5)) % 5 };
+});
 
 export default function Home() {
   return (
     <main id="accueil" className="site-shell">
       <div className="page-progress" aria-hidden="true"><span /></div>
+      <nav className="chapter-rail" aria-label="Chapitres de la page">
+        {chapters.map((chapter, index) => (
+          <a href={`#${chapter.id}`} data-chapter-link={chapter.id} key={chapter.id}>
+            <span>0{index + 1}</span><b>{chapter.label}</b>
+          </a>
+        ))}
+      </nav>
       <a className="skip-link" href="#presentation">Aller au contenu</a>
 
       <section id="presentation" className="intro-journey" data-intro-journey aria-labelledby="hero-title">
@@ -178,9 +74,9 @@ export default function Home() {
             </a>
             <span className="header-edition">Full stack & Cloud&nbsp; / &nbsp;2026</span>
             <nav className="header-nav" aria-label="Sections du site">
-              <a href="#presentation">Présentation</a>
+              <a href="#experiences">Expériences pro</a>
               <a href="#projets">Projets</a>
-              <a href="#univers">Mon approche</a>
+              <a href="#atlas">Études</a>
               <a className="nav-external" href="https://github.com/FARONeye" target="_blank" rel="noopener noreferrer">
                 GitHub <span aria-hidden="true">↗</span>
               </a>
@@ -191,7 +87,7 @@ export default function Home() {
             <div className="hero-copy">
               <div className="hero-intro-line">
                 <span className="eyebrow"><span className="eyebrow-mark" /> Développeur full stack & cloud</span>
-                <span className="section-index">01 / 05</span>
+                <span className="section-index">01 / 07</span>
               </div>
               <h1 id="hero-title" className="hero-title">
                 <span className="hero-title-line">Mathis</span>
@@ -199,10 +95,10 @@ export default function Home() {
               </h1>
               <div className="hero-bottom">
                 <p className="hero-description">
-                  De l’idée à la mise en ligne.<br />
-                  Je conçois des expériences web, développe leurs fonctionnalités et les déploie dans le cloud.
+                  Développeur full-stack chez {profile.company}.<br />
+                  Je conçois des applications internes sécurisées, du front-end jusqu’au déploiement sur Google Cloud.
                 </p>
-                <a className="round-link" href="#recit" aria-label="Découvrir mon parcours de développeur">
+                <a className="round-link" href="#experiences" aria-label="Découvrir mon parcours de développeur">
                   <span aria-hidden="true">↘</span>
                 </a>
               </div>
@@ -226,140 +122,132 @@ export default function Home() {
               <span>Full stack</span><span>Web créatif</span><span>Cloud</span>
             </div>
             <div className="hero-side-note" aria-hidden="true">Conception · Développement · Cloud</div>
-            <a className="scroll-invitation" href="#recit">Défiler pour découvrir <span aria-hidden="true">↓</span></a>
+            <a className="scroll-invitation" href="#experiences">Défiler pour découvrir <span aria-hidden="true">↓</span></a>
           </div>
 
-          <div className="intro-narration" aria-hidden="true">
-            <p className="intro-beat intro-beat-1"><span>01</span> Tout commence par une idée à construire.</p>
-            <p className="intro-beat intro-beat-2"><span>02</span> L’interface prend forme. Le code la fait vivre.</p>
-            <p className="intro-beat intro-beat-3"><span>03</span> Du front-end au cloud, je relie chaque détail.</p>
+          <div className="dev-stage" aria-hidden="true">
+            <ol className="dev-steps">
+              {devSteps.map((step, index) => (
+                <li key={step} data-dev-step={index}><span>0{index + 1}</span>{step}</li>
+              ))}
+            </ol>
+            <div className="dev-captions">
+              {devCaptions.map((caption) => <p key={caption}>{caption}</p>)}
+            </div>
+
+            <div className="dev-window dev-editor">
+              <div className="dev-window-bar"><i /><i /><i /><span>terminal — whoami</span></div>
+              <pre className="dev-code">
+                {devCode.map((line, index) => (
+                  <code key={index} data-dev-line={index}>
+                    <span className="dev-gutter">{index + 1}</span>
+                    <span className="dev-line">{line.map(([kind, text], token) => <span className={kind && `tok-${kind}`} key={token}>{text}</span>)}</span>
+                  </code>
+                ))}
+              </pre>
+            </div>
+
+            <div className="dev-window dev-preview">
+              <div className="dev-window-bar"><i /><i /><i /><span>profil.tsx</span></div>
+              <div className="dev-ui dev-profile">
+                <div className="dev-profile-head" data-dev-build={0}>
+                  <span className="dev-profile-avatar"><Image src={portrait} alt="" fill sizes="80px" /></span>
+                  <div><strong>{profile.name}</strong><small>{profile.role}</small></div>
+                </div>
+                <div className="dev-profile-tags" data-dev-build={1}><span>◎ {profile.city}</span>{profile.tags.map((tag) => <span key={tag}>{tag}</span>)}</div>
+                <div className="dev-profile-stats" data-dev-build={2}>
+                  {profile.stats.map((stat) => <span key={stat.label}><b>{stat.value}</b>{stat.label}</span>)}
+                </div>
+                <div className="dev-ui-status" data-dev-build={3}><span>● {profile.status}</span></div>
+              </div>
+            </div>
+
+            <div className="dev-window dev-terminal">
+              <div className="dev-window-bar"><i /><i /><i /><span>terminal</span></div>
+              <div className="dev-terminal-lines">
+                {devTerminal.map(([prompt, command, result], index) => (
+                  <p key={command} data-dev-term={index}><b>{prompt}</b><span>{command}</span><i>{result}</i></p>
+                ))}
+              </div>
+            </div>
+
           </div>
-          <div className="intro-shutter-stage" aria-hidden="true">
-            {Array.from({ length: 6 }, (_, index) => <span data-intro-shutter={index} key={index} />)}
-          </div>
-          <div className="intro-glyph-word" aria-hidden="true">
-            {introGlyphs.map((glyph, index) => <span data-intro-glyph={index} key={`${glyph}-${index}`}>{glyph}</span>)}
-          </div>
-          <div className="intro-filmstrip" aria-hidden="true">
-            <figure className="film-frame film-frame-1">
-              <Image src="/media/editorial/391665BB-CAC2-4720-998F-288B554439D3_1_105_c.jpeg" alt="" fill loading="eager" sizes="64vw" />
-            </figure>
-            <figure className="film-frame film-frame-2">
-              <Image src="/media/editorial/193943EB-7EDC-4981-AD66-94F79AE8B6F7_1_105_c.jpeg" alt="" fill loading="eager" sizes="64vw" />
-            </figure>
-            <figure className="film-frame film-frame-3">
-              <Image src="/media/editorial/6B6CEFDE-8017-4ABB-9CEA-B0C063FFD69C_1_105_c.jpeg" alt="" fill loading="eager" sizes="64vw" />
-            </figure>
-          </div>
-          <div className="intro-verb-stack" aria-hidden="true">
-            {introVerbs.map((verb, index) => <span data-intro-verb={index} key={verb}>{verb}</span>)}
-          </div>
-          <div className="intro-fold-mark" aria-hidden="true">
-            <span /><span /><span />
-          </div>
-          <div className="intro-film-grain" aria-hidden="true" />
           <div className="intro-meter" aria-hidden="true">
-            <span className="intro-meter-label">Ouverture</span>
+            <span className="intro-meter-label">Pipeline</span>
             <i><b /></i>
             <span className="intro-meter-count">00</span>
-          </div>
-          <div className="intro-curtain" aria-hidden="true">
-            <div className="intro-handoff-stars"><i /><i /><i /></div>
-            <div className="intro-handoff-orbit"><i /><i /></div>
-            <div className="intro-handoff-copy">
-              <span>De l’idée au déploiement</span>
-              <strong>L&apos;expérience<br /><em>change d&apos;échelle.</em></strong>
-            </div>
-            <div className="intro-handoff-route"><span>Le code</span><b /><span>Le cloud</span></div>
-          </div>
-          <div id="recit" className="story-intro story-intro-overlay" data-travel-intro>
-            <div className="travel-intro-stage">
-              <span className="eyebrow">02 / Escales & Projets Web</span>
-              <h2 id="story-title"><span>Chaque expérience,</span><em>une autre façon de créer.</em></h2>
-              <p>Interfaces, API, données et déploiement : mon parcours relie les différentes facettes du développement web full stack.</p>
-              <div className="travel-intro-pass" aria-hidden="true">
-                <span>Parcours international</span><strong>05 projets web</strong><i>PARIS ✈ BOSTON</i>
-              </div>
-              <div className="travel-intro-orbit" aria-hidden="true"><i /><i /><i /></div>
-              <div className="travel-intro-route" aria-hidden="true"><span>PAR</span><b /><span>BOS</span></div>
-              <div className="travel-intro-departure" aria-hidden="true">
-                <span>Embarquement immédiat</span><i /><b>✈</b><strong>Décollage vers la carte</strong>
-              </div>
-            </div>
           </div>
         </div>
       </section>
 
-      <section id="atlas" className="story travel-map-section" aria-labelledby="story-title">
-        <div className="story-journey" data-story-journey>
-          <div className="story-sticky" data-active-chapter="0">
-            <TravelMap />
-            <div className="travel-map-arrival" aria-hidden="true">
-              <div className="travel-map-arrival-grid" />
-              <span>Initialisation du parcours</span><i>✈</i><b />
-            </div>
-            <div className="travel-cinema-heading" aria-hidden="true">
-              <span>02 / Parcours & Projets Web</span>
-              <b>Paris — Boston · 5 spécialisations</b>
-            </div>
-            <div className="story-track">
-              {studyTrips.map((trip, index) => (
-                <article
-                  id={`escale-${trip.number}`}
-                  className={`story-panel travel-panel story-panel-${index}${index === 0 ? " is-current is-present" : ""}`}
-                  data-chapter={index}
-                  key={trip.number}
-                  style={{ "--trip-accent": trip.color, "--place-chars": trip.place.length } as CSSProperties}
-                >
-                  <div className="travel-country-sign" aria-hidden="true">
-                    <span>{trip.signature}</span><b>{trip.emblem}</b><small>{trip.motif}</small>
-                    <i /><i /><i />
-                  </div>
-                  <div className="travel-memory-gallery">
-                    {trip.gallery.map((image, photoIndex) => (
-                      <figure className={`travel-memory-photo travel-memory-photo-${photoIndex + 1}`} data-travel-photo={photoIndex} key={image}>
-                        <Image
-                          src={image}
-                          alt={`Photographie souvenir de ${trip.place}, escale ${trip.number} (${photoIndex + 1})`}
-                          fill
-                          loading="eager"
-                          unoptimized={image.includes("7A7E0BCD")}
-                          sizes={photoIndex === 0 ? "(max-width: 760px) 100vw, 72vw" : "(max-width: 760px) 46vw, 28vw"}
-                        />
-                        <figcaption>{trip.caption} / {String(photoIndex + 1).padStart(2, "0")}</figcaption>
-                      </figure>
-                    ))}
-                  </div>
-                  <div className="story-panel-copy travel-memory-copy travel-project-console">
-                    <div className="project-console-topline"><span>ESC. {trip.number} / 05 · {trip.code}</span><i>LIVE CASE STUDY</i></div>
-                    <div className="project-console-location"><span>{trip.place}, {trip.country}</span><small>{trip.school}</small></div>
-                    <h3 className="project-console-title">{trip.projectTitle}</h3>
-                    <p className="project-console-category">{trip.projectCategory}</p>
-                    <div className="project-console-focus"><span>Spécialisation</span><strong>{trip.specialization}</strong></div>
-                    <p className="project-console-brief">{trip.mission}</p>
-                    <div className="project-console-bottom">
-                      <div className="project-console-stack" aria-label={`Stack technique : ${trip.stack.join(", ")}`}>{trip.stack.slice(0, 4).map((tech) => <span key={tech}>{tech}</span>)}</div>
-                      <span className="project-console-role">{trip.role}</span>
+
+
+
+
+      <Experiences />
+      <Jobs />
+
+      <section id="passions" className="passion-journey" data-passion-journey aria-labelledby="passions-title">
+        <div className="passion-sticky">
+          <div className="passion-heading">
+            <span className="eyebrow">04 / Passions</span>
+            <h2 id="passions-title">Ce qui me fait <em>vibrer.</em></h2>
+          </div>
+          {passions.map((passion, index) => (
+            <article className={`passion passion-${passion.kind}`} data-passion={index} key={passion.title} style={{ "--tone": passion.color } as CSSProperties}>
+              <div className="passion-copy">
+                <span>0{index + 1} / 0{passions.length}</span>
+                <h3>{passion.title}</h3>
+                <p>{passion.text}</p>
+                <ul>{passion.tags.map((tag) => <li key={tag}>{tag}</li>)}</ul>
+              </div>
+              <div className="passion-media" aria-hidden="true">
+                {passion.kind === "video" && (
+                  <div className="editor">
+                    <figure className="viewfinder">
+                      <Image src={passion.images[0]} alt="" fill sizes="(max-width: 760px) 90vw, 46vw" />
+                      <i className="viewfinder-corners" /><i className="viewfinder-focus" /><i className="viewfinder-flash" />
+                      <figcaption><span>● REC</span><span>4K · 24 fps · 00:00:12:04</span></figcaption>
+                    </figure>
+                    <div className="editor-timeline">
+                      <div className="editor-track editor-track-video">{Array.from({ length: 5 }, (_, clip) => <i key={clip} style={{ "--k": clip } as CSSProperties} />)}</div>
+                      <div className="editor-track editor-track-audio">{Array.from({ length: 48 }, (_, bar) => <i key={bar} style={{ "--k": bar, "--h": ((bar * 37) % 11) / 10 } as CSSProperties} />)}</div>
+                      <span className="editor-playhead" />
                     </div>
                   </div>
-                  <span className="travel-memory-word" aria-hidden="true">{trip.place}</span>
-                </article>
-              ))}
-            </div>
-            <div className="travel-atmosphere-wipe" aria-hidden="true"><i /><i /></div>
-            <div className="story-rail travel-chapter-rail" aria-hidden="true">
-              <span>Défiler pour tracer les trajectoires</span>
-              <i><b /></i>
-              <span className="story-rail-count"><b>PAR</b><b>DUB</b><b>BCN</b><b>YUL</b><b>BOS</b> / 05</span>
-            </div>
-          </div>
+                )}
+                {passion.kind === "sport" && passion.disciplines && (
+                  <div className="training">
+                    <svg className="training-pulse" viewBox="0 0 400 60" preserveAspectRatio="none"><path d="M0 30 H120 L135 30 L145 6 L158 54 L170 18 L180 30 H260 L272 30 L282 10 L294 50 L304 30 H400" pathLength={100} /></svg>
+                    <div className="training-rings">
+                      {passion.disciplines.map((discipline, ring) => (
+                        <div className="training-ring" key={discipline.name} style={{ "--k": ring, "--years": discipline.years } as CSSProperties}>
+                          <span className="training-dial"><b>{discipline.years}</b><small>ans</small></span>
+                          <strong>{discipline.name}</strong>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {passion.kind === "music" && (
+                  <div className="turntable">
+                    <span className="vinyl"><i /></span>
+                    <span className="tonearm" />
+                    <div className="equalizer">{Array.from({ length: 24 }, (_, bar) => <i key={bar} style={{ "--b": bar } as CSSProperties} />)}</div>
+                    <p className="now-playing"><b>En boucle</b> Playlist éclectique<i><b /></i></p>
+                  </div>
+                )}
+              </div>
+              <span className="passion-word" aria-hidden="true">{passion.title}</span>
+            </article>
+          ))}
         </div>
       </section>
 
       <section id="projets" className="project-journey capability-journey" data-capability-journey aria-labelledby="capability-title">
         <div className="capability-sticky">
           <div className="capability-heading">
-            <span className="eyebrow">03 / Galerie de projets</span>
+            <span className="eyebrow">05 / Projets</span>
             <span className="temporary-label">Concepts provisoires</span>
           </div>
           <h2 id="capability-title" className="capability-title">
@@ -369,6 +257,15 @@ export default function Home() {
             <span className="project-instruction-kicker">Mode exploration</span>
             <p><strong>Faites défiler</strong> pour explorer, puis <strong>cliquez où vous voulez sur une carte</strong> pour découvrir sa page.</p>
             <span className="project-instruction-icon" aria-hidden="true">↘</span>
+          </div>
+
+          <div className="registry" aria-hidden="true">
+            <p className="registry-prompt"><b>$</b> ls ~/projets --statut</p>
+            {projectCards.map((card, index) => (
+              <p className="registry-row" data-registry-row={index} key={card.slug} style={{ "--project-accent": card.color } as CSSProperties}>
+                <span>{card.number}</span><b>{card.slug}</b><i>{card.label}</i><em>● en ligne</em>
+              </p>
+            ))}
           </div>
 
           <div className="capability-deck">
@@ -386,6 +283,14 @@ export default function Home() {
                   <figcaption>{card.accent}</figcaption>
                 </figure>
                 <div className="project-card-shade" aria-hidden="true" />
+                <pre className="project-card-code" aria-hidden="true">
+                  <code><b>export const</b> {card.slug} = {"{"}</code>
+                  <code>  titre: <i>&quot;{card.title}&quot;</i>,</code>
+                  <code>  type: <i>&quot;{card.label}&quot;</i>,</code>
+                  <code>  stack: [{card.tags.map((tag) => `"${tag}"`).join(", ")}],</code>
+                  <code>{"}"};</code>
+                  <code><b>await</b> deployer({card.slug}); <em>{"// → /projets/"}{card.slug}</em></code>
+                </pre>
                 <div className="capability-card-top project-card-top">
                   <span>{card.number}</span><span>{card.label}</span>
                 </div>
@@ -398,6 +303,7 @@ export default function Home() {
                 </div>
                 <span className="project-card-object" aria-hidden="true"><i /><i /></span>
                 <span className="project-card-sequence" aria-hidden="true">Projet — {card.number} / 05</span>
+                <span className="project-card-status" aria-hidden="true">● Déployé · build #{card.number}{card.title.length}</span>
                 <span className="project-card-action" aria-hidden="true">
                   <span>Voir le projet</span><i>↗</i>
                 </span>
@@ -406,8 +312,8 @@ export default function Home() {
           </div>
 
           <div className="capability-finale" aria-hidden="true">
-            <span>Concevoir · Développer · Déployer</span>
-            <strong>Créer la suite.</strong>
+            <span>Ensuite · 06 / Études</span>
+            <strong>Mes études.</strong>
             <i>↓</i>
           </div>
           <div className="capability-meter" aria-hidden="true">
@@ -416,56 +322,52 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="univers" className="about" data-section-motion aria-labelledby="about-title">
-        <div className="about-heading" data-reveal>
-          <span className="eyebrow dark-eyebrow">04 / Mon approche</span>
-          <h2 id="about-title">Penser le web.<br /><em>Tout relier.</em></h2>
+      <section id="atlas" className="story travel-map-section" aria-labelledby="studies-title">
+        <div className="story-journey" data-story-journey>
+          <div className="story-sticky" data-active-chapter="0">
+            <TravelMap />
+            <div className="studies-heading">
+              <span className="eyebrow">06 / Études</span>
+              <h2 id="studies-title">Quatre villes,<br /><em>un même fil.</em></h2>
+            </div>
+          </div>
         </div>
-        <div className="about-body" data-reveal>
-          <p>
-            Je suis Mathis, développeur full stack et cloud. Je crée des applications web
-            en reliant une interface soignée, une logique métier claire et une infrastructure
-            adaptée. Ce qui me motive : transformer une idée en un produit qui fonctionne, de bout en bout.
-          </p>
-          <ol className="build-steps" aria-label="Mon processus de création">
-            <li data-reveal><span>01</span><div><strong>Concevoir</strong><p>Comprendre l’usage. Dessiner l’expérience.</p></div><i aria-hidden="true">↗</i></li>
-            <li data-reveal><span>02</span><div><strong>Développer</strong><p>Relier interface, API et données.</p></div><i aria-hidden="true">↗</i></li>
-            <li data-reveal><span>03</span><div><strong>Déployer</strong><p>Mettre en ligne. Observer. Améliorer.</p></div><i aria-hidden="true">↗</i></li>
-          </ol>
-          <a href="https://github.com/FARONeye" target="_blank" rel="noopener noreferrer" className="text-link">
-            Voir ce que je construis sur GitHub <span aria-hidden="true">↗</span>
-          </a>
-        </div>
-        <figure className="about-image" data-reveal>
-          <Image
-            src={landscape}
-            alt="Paysage au coucher du soleil, issu des photographies de Mathis"
-            fill
-            sizes="(max-width: 760px) 100vw, 36vw"
-            className="landscape-image"
-          />
-          <figcaption>Prendre du recul. Construire avec précision.</figcaption>
-        </figure>
       </section>
 
-      <section className="outro" data-section-motion aria-labelledby="outro-title">
-        <div className="outro-orbit" aria-hidden="true"><i /><i /><i /></div>
-        <div className="outro-image" aria-hidden="true">
-          <Image src="/media/portraits/15DA74D7-7A5A-4209-A366-588B874A98EF_1_102_o.jpeg" alt="" fill sizes="(max-width: 760px) 100vw, 38vw" />
-        </div>
-        <div className="outro-content">
-          <span className="eyebrow" data-reveal>05 / Et ensuite ?</span>
-          <h2 id="outro-title" data-reveal>La prochaine<br /><em>idée prend vie.</em></h2>
-          <p data-reveal>Une interface à imaginer, une application à développer, un service à déployer. Chaque projet est une nouvelle occasion de créer.</p>
-          <a className="outro-link" href="https://github.com/FARONeye" target="_blank" rel="noopener noreferrer" data-reveal>
-            Explorer mon GitHub <span aria-hidden="true">↗</span>
-          </a>
+      <section id="suite" className="outro-journey" data-outro-journey data-jump-progress=".66" aria-labelledby="outro-title">
+        <div className="outro outro-sticky" data-section-motion>
+          <div className="commit-graph" aria-hidden="true">
+            {commitCells.map((cell, index) => (
+              <i key={index} style={{ "--c": cell.column, "--r": cell.row, "--lvl": cell.level } as CSSProperties} />
+            ))}
+          </div>
+          <div className="outro-orbit" aria-hidden="true"><i /><i /><i /></div>
+          <div className="outro-image" aria-hidden="true">
+            <div className="dev-window-bar outro-window-bar"><i /><i /><i /><span>mathis.jpg</span></div>
+            <Image src="/media/portraits/15DA74D7-7A5A-4209-A366-588B874A98EF_1_102_o.jpeg" alt="" fill sizes="(max-width: 760px) 100vw, 38vw" />
+          </div>
+          <div className="outro-content">
+            <span className="eyebrow" data-reveal>07 / Mot de fin</span>
+            <p className="outro-prompt" aria-hidden="true"><b>$</b> <span>git commit -m &quot;merci de votre visite&quot;</span></p>
+            <h2 id="outro-title" data-reveal aria-label={closing.headline.join(" ")}>
+              <span data-scramble={closing.headline[0]} aria-hidden="true">{closing.headline[0]}</span><br /><em data-scramble={closing.headline[1]} aria-hidden="true">{closing.headline[1]}</em>
+            </h2>
+            <p data-reveal>{closing.text}</p>
+            <div className="outro-links">
+              {closing.links.map((link) => (
+                <a className={`outro-link${link.primary ? "" : " outro-link-secondary"}`} href={link.href} key={link.label} {...(link.href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})} data-reveal>
+                  {link.label} <span aria-hidden="true">↗</span>
+                </a>
+              ))}
+            </div>
+            <p className="outro-status" aria-hidden="true"><i /> {closing.status}</p>
+          </div>
         </div>
       </section>
 
       <footer className="site-footer">
         <span>Mathis Truong © 2026</span>
-        <span>Développement full stack & cloud</span>
+        <span className="footer-status"><i aria-hidden="true" /> Tous les systèmes opérationnels</span>
         <a href="#accueil">Retour en haut ↑</a>
       </footer>
     </main>

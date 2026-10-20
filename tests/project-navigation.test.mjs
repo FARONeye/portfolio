@@ -37,17 +37,19 @@ function gallery({ width = 1440, reduced = false, progress = .48 } = {}) {
   const journey = Object.assign(element(), { offsetHeight: 7200 });
   journey.querySelector = selector => selector === '.capability-sticky' ? sticky : null;
   const navigations = [];
+  const scrolls = [];
   const window = {
     ...target(), innerWidth: width, innerHeight: 1000, scrollY: 3000 + 6200 * progress,
     location: { assign: href => navigations.push(href), reload() {} },
     matchMedia: query => ({ matches: query.includes('reduced') ? reduced : width <= 760, ...target() }),
     requestAnimationFrame: callback => { frames.set(++frameId, callback); return frameId; },
     cancelAnimationFrame: id => frames.delete(id),
-    scrollTo(x, y) { this.scrollY = typeof x === 'object' ? x.top : y; this.emit('scroll'); },
+    history: { pushState() {} },
+    scrollTo(x, y) { scrolls.push(typeof x === 'object' ? x : { top: y }); this.scrollY = typeof x === 'object' ? x.top : y; this.emit('scroll'); },
   };
   journey.getBoundingClientRect = () => ({ top: 3000 - window.scrollY });
   const document = {
-    documentElement: root, readyState: 'complete',
+    ...target(), documentElement: root, readyState: 'complete', getElementById: id => id === 'accueil' ? { getBoundingClientRect: () => ({ top: -window.scrollY }) } : null,
     querySelector: selector => selector === '[data-capability-journey]' ? journey : null,
     querySelectorAll: selector => selector === '[data-capability-card]' ? cards : [],
   };
@@ -66,7 +68,14 @@ function gallery({ width = 1440, reduced = false, progress = .48 } = {}) {
     cards[index].emit('click', event);
     return event;
   };
-  return { cards, sticky, window, root, navigations, advance, click };
+  // Clicks an in-page link, as the footer's "Retour en haut" does.
+  const follow = href => {
+    const link = { getAttribute: () => href, classList: { contains: () => false } };
+    const event = { target: { closest: () => link }, button: 0, defaultPrevented: false, preventDefault() { this.defaultPrevented = true; } };
+    document.emit('click', event);
+    return event;
+  };
+  return { cards, sticky, window, root, navigations, scrolls, advance, click, follow };
 }
 
 test('every rendered card remains clickable, including faint background cards and the opening stack', () => {
@@ -110,14 +119,32 @@ test('a second selection replaces the first pending navigation', () => {
   assert.deepEqual(scene.navigations, ['/projets/3']);
 });
 
-test('mobile, reduced motion and modified clicks retain native link behavior', () => {
-  for (const options of [{ width: 390 }, { reduced: true }, {}]) {
+test('reduced motion and modified clicks retain native link behavior', () => {
+  for (const options of [{ reduced: true }, {}]) {
     const scene = gallery(options);
-    const event = scene.click(1, options.width || options.reduced ? {} : { metaKey: true });
+    const event = scene.click(1, options.reduced ? {} : { metaKey: true });
     assert.equal(event.defaultPrevented, false);
     scene.advance(1000);
     assert.deepEqual(scene.navigations, []);
   }
+});
+
+test('a phone plays the same carousel: a tapped card centres before its page opens', () => {
+  const scene = gallery({ width: 390 });
+  assert(scene.click(3).defaultPrevented);
+  scene.advance(1000);
+  assert.equal(scene.sticky.dataset.activeProject, '3');
+  assert.deepEqual(scene.navigations, ['/projets/3']);
+});
+
+test('a toolbar sliding away mid-navigation does not cancel it', () => {
+  const scene = gallery({ width: 390 });
+  scene.click(3);
+  scene.advance(200);
+  scene.window.innerHeight = 1080;
+  scene.window.emit('resize');
+  scene.advance(1000);
+  assert.deepEqual(scene.navigations, ['/projets/3']);
 });
 
 test('trackpad momentum after the click does not cancel the navigation', () => {
@@ -143,9 +170,17 @@ test('escape, resizing and history restoration cancel pending navigation', () =>
     const scene = gallery();
     scene.click(3);
     scene.advance(200);
+    if (name === 'resize') scene.window.innerWidth = 1100;
     scene.window.emit(name, event);
     scene.advance(1000);
     assert.deepEqual(scene.navigations, []);
     assert.equal(scene.root.classList.contains('project-navigating'), false);
   }
+});
+
+test('back to top teleports past the pinned scenes and only glides the last screen', () => {
+  const scene = gallery({ progress: .9 });
+  assert(scene.follow('#accueil').defaultPrevented);
+  // One instant jump to a screen short of the top, then a single smooth glide.
+  assert.equal(JSON.stringify(scene.scrolls.slice(-2)), JSON.stringify([{ top: 900 }, { top: 0, behavior: 'smooth' }]));
 });
