@@ -153,7 +153,7 @@ export default function TravelMap() {
         </g>
       </svg>
       {activeDestination && <aside className={`atlas-project-panel${panelVisible ? " is-visible" : ""}${panelClosing ? " is-closing" : ""}`} aria-live="polite" aria-hidden={!panelVisible}><button type="button" className="atlas-close" onClick={closePanel} aria-label="Fermer le détail et revenir à la carte"><span>Fermer</span>×</button><span className="atlas-project-code">{activeDestination.code} · {activeDestination.country}</span><h3>{activeDestination.project}</h3><p className="atlas-project-school">{activeDestination.school}</p><div><span>Spécialisation</span><strong>{activeDestination.specialization}</strong></div><footer><span>{activeDestination.stack.join(" · ")}</span><b>{activeDestination.role}</b></footer></aside>}
-      {selected === null && !flight && <p className="travel-atlas-prompt">Les balises réagissent au survol. Cliquez pour voyager vers un projet.</p>}
+      {selected === null && !flight && <p className="travel-atlas-prompt">Sélectionnez une balise pour explorer un projet web.</p>}
     </div>
   );
 }

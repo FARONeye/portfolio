@@ -3,8 +3,8 @@ import Script from "next/script";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Mathis Truong — Portfolio",
-  description: "Le portfolio personnel de Mathis Truong : développement, création et curiosité.",
+  title: "Mathis Truong — Développeur full stack & cloud",
+  description: "Mathis Truong, développeur full stack et cloud. Conception d’interfaces, applications web, API et déploiement cloud.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -12,7 +12,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="fr">
       <body>
         {children}
-        <Script src="/motion.js?v=24" strategy="afterInteractive" />
+        <Script src="/motion.js?v=30" strategy="afterInteractive" />
       </body>
     </html>
   );

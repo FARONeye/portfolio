@@ -22,13 +22,16 @@
     const capabilityCards = Array.from(document.querySelectorAll("[data-capability-card]"));
     const capabilityCount = capabilityJourney?.querySelector(".capability-count");
     const capabilityMeterLabel = capabilityJourney?.querySelector(".capability-meter > span:first-child");
-    const projectViewer = document.querySelector("[data-project-viewer]");
-    const projectPanels = Array.from(document.querySelectorAll("[data-project-panel]"));
-    const projectOpenButtons = Array.from(document.querySelectorAll("[data-project-open]"));
-    const projectCloseButton = projectViewer?.querySelector("[data-project-close]");
     const about = document.querySelector(".about");
-    const reveals = Array.from(document.querySelectorAll("[data-reveal]"));
+    const mobileRevealSelectors = ".hero-intro-line, .hero-title-line, .hero-description, .round-link, .hero-portrait, .travel-intro-stage > .eyebrow, .travel-intro-stage h2, .travel-intro-stage > p, .travel-atlas-hud, .capability-heading, .capability-title, .project-instruction, .project-card, .project-card-copy > *, .site-footer";
+    document.querySelectorAll(mobileRevealSelectors).forEach((element) => element.setAttribute("data-mobile-reveal", ""));
+    const reveals = Array.from(document.querySelectorAll("[data-reveal], [data-mobile-reveal]"));
+    const sectionScenes = Array.from(document.querySelectorAll("[data-section-motion]"));
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const carouselStart = .18;
+    const carouselEnd = .78;
+    let projectNavigationFrame = 0;
+    let openingProject = null;
     let frame = 0;
     let lastScrollY = window.scrollY;
     let scrollVelocity = 0;
@@ -38,48 +41,6 @@
     const ease = (value) => value * value * (3 - 2 * value);
     const mix = (from, to, amount) => from + (to - from) * amount;
     const set = (element, property, value) => element?.style.setProperty(property, String(value));
-
-    let lastProjectTrigger = null;
-    let projectCloseTimer = 0;
-
-    const openProject = (index, trigger) => {
-      if (!projectViewer || !projectPanels[index]) return;
-      window.clearTimeout(projectCloseTimer);
-      lastProjectTrigger = trigger;
-      projectPanels.forEach((panel, panelIndex) => { panel.hidden = panelIndex !== index; });
-      projectViewer.setAttribute("aria-labelledby", `project-viewer-title-${index}`);
-      const accent = getComputedStyle(projectPanels[index]).getPropertyValue("--project-accent").trim();
-      if (accent) set(projectViewer, "--project-accent", accent);
-      if (typeof projectViewer.showModal === "function") projectViewer.showModal();
-      else projectViewer.setAttribute("open", "");
-      root.classList.add("project-viewer-open");
-      window.requestAnimationFrame(() => {
-        projectViewer.classList.add("is-open");
-        projectCloseButton?.focus();
-      });
-    };
-
-    const closeProject = () => {
-      if (!projectViewer?.hasAttribute("open")) return;
-      projectViewer.classList.remove("is-open");
-      const finish = () => {
-        if (typeof projectViewer.close === "function") projectViewer.close();
-        else projectViewer.removeAttribute("open");
-        root.classList.remove("project-viewer-open");
-        lastProjectTrigger?.focus();
-      };
-      if (reducedMotion.matches) finish();
-      else projectCloseTimer = window.setTimeout(finish, 320);
-    };
-
-    projectOpenButtons.forEach((button, index) => button.addEventListener("click", () => openProject(index, button)));
-    projectCloseButton?.addEventListener("click", closeProject);
-    projectViewer?.addEventListener("click", (event) => { if (event.target === projectViewer) closeProject(); });
-    projectViewer?.addEventListener("cancel", (event) => { event.preventDefault(); closeProject(); });
-    projectViewer?.addEventListener("close", () => {
-      projectViewer.classList.remove("is-open");
-      root.classList.remove("project-viewer-open");
-    });
 
     if (!reducedMotion.matches) {
       root.classList.add("motion-enhanced");
@@ -349,12 +310,16 @@
     };
 
     const updateCapabilities = () => {
-      if (!capabilityJourney || !capabilitySticky || !capabilityCards.length || reducedMotion.matches || window.innerWidth <= 760) return;
+      if (!capabilityJourney || !capabilitySticky || !capabilityCards.length) return;
+      if (reducedMotion.matches || window.innerWidth <= 760) {
+        capabilityCards.forEach((card) => { card.inert = false; card.removeAttribute("aria-hidden"); });
+        return;
+      }
       const rect = capabilityJourney.getBoundingClientRect();
       const travel = Math.max(1, capabilityJourney.offsetHeight - window.innerHeight);
       const progress = clamp(-rect.top / travel);
       const unfold = ease(range(progress, .06, .18));
-      const carouselProgress = range(progress, .18, .78);
+      const carouselProgress = range(progress, carouselStart, carouselEnd);
       const carouselPosition = carouselProgress * (capabilityCards.length - 1);
       const exit = ease(range(progress, .78, .9));
       const finale = ease(range(progress, .84, .99));
@@ -407,6 +372,12 @@
         set(card, "--project-action-opacity", (focus > .62 && unfold > .7 && exit < .2 ? 1 : 0).toFixed(3));
         card.style.zIndex = String(20 - Math.round(distance * 8));
         card.classList.toggle("is-current", index === active);
+        // Match the opacity rounded for rendering: even a faint visible card is a link.
+        const hidden = Number((mix(1, distanceOpacity, unfold) * (1 - exit)).toFixed(3)) === 0;
+        if (card.inert !== hidden) {
+          card.inert = hidden;
+          card.setAttribute("aria-hidden", String(hidden));
+        }
       });
 
       set(capabilitySticky, "--cap-finale-radius", `${mix(0, 145, finale)}%`);
@@ -430,15 +401,88 @@
       updateTravelIntro();
       updateStory();
       updateCapabilities();
+      if (!reducedMotion.matches) sectionScenes.forEach((scene) => {
+        const rect = scene.getBoundingClientRect();
+        if (rect.top > window.innerHeight || rect.bottom < 0) return;
+        const progress = clamp((window.innerHeight - rect.top) / (window.innerHeight + rect.height));
+        set(scene, "--scene-progress", progress.toFixed(4));
+        set(scene, "--scene-drift", `${(progress - .5) * 70}px`);
+      });
 
-      if (!reducedMotion.matches && about) {
+      if (!reducedMotion.matches && window.innerWidth > 760 && about) {
         const rect = about.getBoundingClientRect();
         const progress = clamp((window.innerHeight - rect.top) / (window.innerHeight + rect.height));
-        set(about, "--about-title-x", `${(.5 - progress) * 9}vw`);
-        set(about, "--about-clip", `${(1 - progress) * 32}%`);
+        set(about, "--about-title-x", `${(.5 - progress) * 3}vw`);
+        set(about, "--about-clip", `${(1 - ease(range(progress, 0, .52))) * 18}%`);
         set(about, "--about-y", `${(1 - progress) * 80}px`);
       }
     };
+
+    const cancelProjectNavigation = () => {
+      window.cancelAnimationFrame(projectNavigationFrame);
+      projectNavigationFrame = 0;
+      openingProject?.classList.remove("is-opening");
+      openingProject = null;
+      root.classList.remove("project-navigating");
+    };
+
+    capabilityCards.forEach((card, index) => {
+      card.addEventListener("click", (event) => {
+        // Keep native links for touch layouts, reduced motion and opening new tabs.
+        if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        if (!capabilityJourney || reducedMotion.matches || window.innerWidth <= 760) return;
+        event.preventDefault();
+        cancelProjectNavigation();
+        openingProject = card;
+        card.classList.add("is-opening");
+        root.classList.add("project-navigating");
+
+        const startY = window.scrollY;
+        const journeyTop = startY + capabilityJourney.getBoundingClientRect().top;
+        const travel = Math.max(1, capabilityJourney.offsetHeight - window.innerHeight);
+        const position = index / Math.max(1, capabilityCards.length - 1);
+        const targetY = clamp(journeyTop + travel * mix(carouselStart, carouselEnd, position), 0, root.scrollHeight - window.innerHeight);
+        // A card already in focus opens almost at once; a distant one travels longer.
+        const cardSteps = Math.abs(targetY - startY) / Math.max(1, travel * (carouselEnd - carouselStart) / Math.max(1, capabilityCards.length - 1));
+        const duration = Math.abs(targetY - startY) < 2 ? 0 : Math.round(mix(220, 900, clamp(cardSteps / 3)));
+        const startedAt = performance.now();
+        const animate = (now) => {
+          const elapsed = now - startedAt;
+          const progress = duration === 0 ? 1 : clamp(elapsed / duration);
+          // html.project-navigating disables smooth scrolling, so each frame lands exactly.
+          window.scrollTo(0, mix(startY, targetY, ease(progress)));
+          update();
+          // Let the centered card paint before leaving the gallery.
+          if (elapsed >= duration + 120) {
+            window.location.assign(card.href);
+            return;
+          }
+          projectNavigationFrame = window.requestAnimationFrame(animate);
+        };
+        projectNavigationFrame = window.requestAnimationFrame(animate);
+      });
+    });
+
+    // Wheel events are deliberately ignored: trackpad momentum keeps firing them after
+    // the click, which would silently cancel the navigation the visitor just asked for.
+    window.addEventListener("keydown", (event) => {
+      if (["Escape", "ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", " ", "Tab"].includes(event.key)) cancelProjectNavigation();
+    });
+    window.addEventListener("pagehide", cancelProjectNavigation);
+    window.addEventListener("pageshow", cancelProjectNavigation);
+    window.addEventListener("resize", cancelProjectNavigation);
+
+    const mobileLayout = window.matchMedia("(max-width: 760px)");
+    mobileLayout.addEventListener("change", () => {
+      // Clear desktop scroll values before entering the flowing mobile layout.
+      [introSticky, travelIntroStage, capabilitySticky, about, ...capabilityCards].forEach((element) => {
+        if (!element) return;
+        Array.from(element.style).forEach((property) => {
+          if (property.startsWith("--") && property !== "--project-accent") element.style.removeProperty(property);
+        });
+      });
+      requestUpdate();
+    });
 
     const requestUpdate = () => {
       if (!frame) frame = window.requestAnimationFrame(update);
@@ -449,7 +493,16 @@
     window.addEventListener("pageshow", requestUpdate);
     reducedMotion.addEventListener?.("change", () => window.location.reload());
     update();
-    window.requestAnimationFrame(() => window.requestAnimationFrame(update));
+    window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
+      // The browser resolved the #hash before the scroll scenes grew to full height.
+      const anchor = window.location.hash && document.getElementById(decodeURIComponent(window.location.hash.slice(1)));
+      if (anchor && !reducedMotion.matches) {
+        root.classList.add("project-navigating");
+        window.scrollTo(0, window.scrollY + anchor.getBoundingClientRect().top);
+        root.classList.remove("project-navigating");
+      }
+      update();
+    }));
   };
 
   if (document.readyState === "loading") {
