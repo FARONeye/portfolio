@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { geoEqualEarth, geoGraticule10, geoInterpolate, geoPath } from "d3-geo";
 import { feature, mesh } from "topojson-client";
 import type { GeometryCollection, Topology } from "topojson-specification";
@@ -22,6 +22,16 @@ const destinations = [
 ];
 const ease = (value: number) => value * value * (3 - 2 * value);
 
+// A portrait screen cannot show the wide map, so phones frame the five
+// destinations instead and let the surrounding map spill past the viewBox.
+const compactQuery = "(max-width: 760px)";
+const compactView = { x: 238, width: 610, focusLift: 200 };
+const subscribeCompact = (onChange: () => void) => {
+  const query = window.matchMedia(compactQuery);
+  query.addEventListener("change", onChange);
+  return () => query.removeEventListener("change", onChange);
+};
+
 export default function TravelMap() {
   const [selected, setSelected] = useState<number | null>(null);
   const [flight, setFlight] = useState<Flight | null>(null);
@@ -30,6 +40,7 @@ export default function TravelMap() {
   const [introduced, setIntroduced] = useState(false);
   const activeRef = useRef(0);
   const atlasRef = useRef<HTMLDivElement | null>(null);
+  const compact = useSyncExternalStore(subscribeCompact, () => window.matchMedia(compactQuery).matches, () => false);
   const flightFromIndex = flight?.from;
   const flightToIndex = flight?.to;
   const map = useMemo(() => {
@@ -95,7 +106,10 @@ export default function TravelMap() {
   };
 
   const activeDestination = selected === null ? null : map.points[selected];
-  const stageTransform = activeDestination ? `translate(430 300) scale(3.65) translate(${-activeDestination.x} ${-activeDestination.y})` : "translate(0 0) scale(1)";
+  // On phones the detail panel covers the lower half, so the city settles above it.
+  const focusX = compact ? compactView.x + compactView.width / 2 : 430;
+  const focusY = compact ? 300 - compactView.focusLift : 300;
+  const stageTransform = activeDestination ? `translate(${focusX} ${focusY}) scale(3.65) translate(${-activeDestination.x} ${-activeDestination.y})` : "translate(0 0) scale(1)";
   const flightCoordinate = flight ? map.projection(geoInterpolate(destinations[flight.from].coordinates, destinations[flight.to].coordinates)(flight.progress)) : null;
   const flightPath = flight ? Array.from({ length: 48 }, (_, index) => map.projection(geoInterpolate(destinations[flight.from].coordinates, destinations[flight.to].coordinates)(index / 47))).filter((point): point is [number, number] => Boolean(point)).map(([x, y], index) => `${index === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`).join(" ") : "";
 
@@ -103,13 +117,18 @@ export default function TravelMap() {
     <div ref={atlasRef} className={`travel-atlas${introduced ? " is-introduced" : ""}${selected !== null ? " is-focused" : ""}${flight ? " is-flying" : ""}`}>
       <div className="travel-atlas-hud"><span><i /> ATLAS DE PROJETS</span><b>{flight ? "VOL EN COURS" : selected !== null ? "MODE ESCALE" : "CHOISISSEZ UNE ESCALE"}</b><small>05 destinations · développement web</small></div>
       <div className="atlas-intro-transition" aria-hidden="true"><i>✈</i><span>Connexion à l&apos;atlas</span></div>
-      <svg className="travel-atlas-svg" viewBox="0 0 1080 600" preserveAspectRatio="xMidYMid slice" aria-label="Carte interactive des projets réalisés pendant le voyage">
+      <svg
+        className="travel-atlas-svg"
+        viewBox={compact ? `${compactView.x} 0 ${compactView.width} 600` : "0 0 1080 600"}
+        preserveAspectRatio={compact ? "xMidYMid meet" : "xMidYMid slice"}
+        aria-label="Carte interactive des projets réalisés pendant le voyage"
+      >
         <defs>
           <filter id="atlas-glow"><feGaussianBlur stdDeviation="2.4" result="blur" /><feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
           <radialGradient id="atlas-ocean" cx="38%" cy="46%" r="82%"><stop offset="0" stopColor="#211b2b" /><stop offset=".52" stopColor="#111019" /><stop offset="1" stopColor="#09090d" /></radialGradient>
           <linearGradient id="atlas-scan-gradient" x1="0" x2="1"><stop offset="0" stopColor="#61bbb6" stopOpacity="0" /><stop offset=".72" stopColor="#61bbb6" stopOpacity=".04" /><stop offset="1" stopColor="#b69acb" stopOpacity=".38" /></linearGradient>
         </defs>
-        <rect width="1080" height="600" fill="url(#atlas-ocean)" />
+        <rect className="atlas-ocean" width="1080" height="600" fill="url(#atlas-ocean)" />
         <g className="atlas-map-scan" aria-hidden="true">
           <rect x="-220" y="0" width="220" height="600" fill="url(#atlas-scan-gradient)" />
           <line x1="0" y1="0" x2="0" y2="600" />

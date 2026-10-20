@@ -407,6 +407,50 @@ html.has-project-story { scroll-snap-type: y proximity; }
   .el-pin b { font-size: 9px; }
 }
 
+/* ───────────── Phone toolbars ─────────────
+   The pinned stage fills the large viewport, so no gap opens beneath it when the browser
+   toolbar slides away. Readable content stays inside the small viewport (--toolbar-gap). */
+.ps-track { height: calc(var(--story-units) * 120svh + var(--screen)); }
+.ps-stage { height: var(--screen); }
+.ps-scene, .af-rail > .ps-scene { bottom: var(--toolbar-gap); }
+.ps-progress { bottom: calc(26px + var(--toolbar-gap)); }
+.so-clock { bottom: calc(74px + var(--toolbar-gap)); }
+.ps-v-solstice .ps-scene { bottom: calc(68px + var(--toolbar-gap)); }
+
+@media (max-width: 760px) {
+  .ps-progress { bottom: calc(20px + var(--toolbar-gap)); }
+  .so-clock { bottom: calc(52px + var(--toolbar-gap)); }
+  .ps-v-solstice .ps-scene { bottom: calc(128px + var(--toolbar-gap)); }
+  .ps-v-elsewhere .el-card { bottom: calc(64px + var(--toolbar-gap)); }
+
+  /* Three steps must fit above the progress rail, even on a short phone. */
+  .af-approach { padding-top: 24svh; }
+  .af-pipeline { margin-top: 18px; }
+  .af-steps { gap: 12px; }
+  .af-steps p { font-size: 13px; line-height: 1.45; }
+  .hz-building { height: 26svh; }
+  .hz-approach { padding-top: 33svh; }
+  .hz-steps { gap: 12px; margin-top: 14px; }
+  .hz-steps p { font-size: 13px; line-height: 1.45; }
+  /* The arrow sits beside the next title; the title shrinks so both stay on screen. */
+  .ps-next strong { font-size: min(15vw, calc((100vw - 44px) / (var(--letters) * .7))); }
+}
+
+/* Short phones (iPhone SE and similar) need a tighter rhythm for the densest chapters. */
+@media (max-width: 760px) and (max-height: 620px) {
+  .af-approach { padding-top: 19svh; }
+  .af-pipeline { margin-top: 10px; }
+  .af-steps { gap: 8px; }
+  .af-steps strong { font-size: 19px; }
+  .af-steps p { font-size: 12px; }
+  .ps-v-solstice .ps-scene { top: 58px; bottom: calc(100px + var(--toolbar-gap)); padding: 16px; }
+  .so-clock { bottom: calc(40px + var(--toolbar-gap)); }
+  .so-clock b { font-size: 28px; }
+  .so-columns { gap: 10px; margin-top: 12px; }
+  .so-columns strong { font-size: 20px; }
+  .so-columns p { font-size: 13px; line-height: 1.4; }
+}
+
 /* ───────────── Reduced motion: a calm, readable page ───────────── */
 @media (prefers-reduced-motion: reduce) {
   html.has-project-story { scroll-snap-type: none; }

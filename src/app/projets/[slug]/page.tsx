@@ -75,7 +75,7 @@ export default async function ProjectPage({ params }: Props) {
           </div>
         </div>
       </div>
-      <Script src="/story.js?v=7" strategy="afterInteractive" />
+      <Script src="/story.js?v=8" strategy="afterInteractive" />
     </main>
   );
 }

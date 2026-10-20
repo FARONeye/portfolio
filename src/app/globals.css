@@ -1884,3 +1884,39 @@ html.project-navigating { scroll-behavior: auto; }
 }
 
 @keyframes text-unveil { from { clip-path: inset(0 -8% 100%); } to { clip-path: inset(-15% -8% -25%); } }
+
+/* Phone viewport — browsers grow the viewport as their toolbars slide away while scrolling.
+   Full-screen stages use the large viewport (--screen) so no gap opens beneath them, and
+   anything anchored to the bottom keeps clear of the toolbar with --toolbar-gap. */
+:root { --screen: 100vh; --toolbar-gap: 0px; }
+@supports (height: 100lvh) {
+  :root { --screen: 100lvh; --toolbar-gap: calc(100lvh - 100svh); }
+}
+
+@media (min-width: 761px) and (prefers-reduced-motion: no-preference) {
+  .motion-enhanced .intro-sticky,
+  .motion-enhanced .capability-sticky,
+  .travel-map-section .story-sticky,
+  .motion-enhanced .travel-map-section .story-sticky { height: var(--screen); }
+  .motion-enhanced .travel-map-section,
+  .motion-enhanced .capability-journey { margin-top: calc(-1 * var(--screen)); }
+  .intro-meter { bottom: calc(28px + var(--toolbar-gap)); }
+  .capability-meter { bottom: calc(26px + var(--toolbar-gap)); }
+}
+.travel-atlas-prompt { bottom: calc(clamp(26px, 5vh, 56px) + var(--toolbar-gap)); }
+.atlas-project-panel { bottom: calc(clamp(28px, 7vh, 82px) + var(--toolbar-gap)); }
+
+@media (max-width: 760px) {
+  /* The ticket joins the text flow instead of floating over the heading. */
+  .story-intro { min-height: 0; }
+  .travel-intro-pass { position: relative; right: auto; bottom: auto; width: 100%; margin-top: 44px; }
+
+  /* The atlas fills the screen even once the toolbar has slid away. */
+  .travel-map-section .story-journey, .motion-enhanced .travel-map-section .story-journey,
+  .travel-map-section .story-sticky, .motion-enhanced .travel-map-section .story-sticky { height: var(--screen); }
+  .travel-atlas-svg { overflow: visible; }
+  .atlas-ocean, .atlas-map-scan { display: none; }
+  .atlas-point-visual { transform: scale(1.25); }
+  .travel-atlas-prompt { bottom: calc(20px + var(--toolbar-gap)); }
+  .atlas-project-panel { bottom: calc(18px + var(--toolbar-gap)); max-height: calc(100svh - 120px); }
+}

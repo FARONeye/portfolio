@@ -385,14 +385,16 @@
       if (index === stepScene) return steps.map((__, step) => ({ scene: index, unit: start + .3 + (step + .5) / steps.length * (weight - .6) }));
       return [{ scene: index, unit: start + weight / 2 }];
     });
-    const scrollTopFor = (unit) => window.scrollY + track.getBoundingClientRect().top + (unit / units) * Math.max(1, track.offsetHeight - window.innerHeight);
+    // The pinned distance is measured against the stage, not innerHeight, which changes as phone toolbars slide away.
+    const travel = () => Math.max(1, track.offsetHeight - stage.offsetHeight);
+    const scrollTopFor = (unit) => window.scrollY + track.getBoundingClientRect().top + (unit / units) * travel();
 
     root.classList.add("has-project-story");
     stops.forEach(({ unit }) => {
       const stop = document.createElement("span");
       stop.className = "ps-snap";
       stop.setAttribute("aria-hidden", "true");
-      stop.style.top = `calc(${(unit / units).toFixed(5)} * (100% - 100svh))`;
+      stop.style.top = `calc(${(unit / units).toFixed(5)} * (100% - var(--screen, 100svh)))`;
       track.append(stop);
     });
     chapterButtons.forEach((button) => button.addEventListener("click", () => {
@@ -429,7 +431,7 @@
       const width = window.innerWidth;
       const height = window.innerHeight;
       const rect = track.getBoundingClientRect();
-      const progress = clamp(-rect.top / Math.max(1, track.offsetHeight - height));
+      const progress = clamp(-rect.top / travel());
       const unit = progress * units;
       ctx.velocity = ctx.velocity * .82 + (window.scrollY - lastY) * .18;
       lastY = window.scrollY;

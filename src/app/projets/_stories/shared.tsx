@@ -70,7 +70,7 @@ export function NextScene({ next }: { next: Project }) {
   return (
     <section className="ps-scene ps-scene-next" {...scene(5)} aria-labelledby="ps-next-title">
       <Chapter>05 — La suite</Chapter>
-      <a className="ps-next ps-rise" href={`/projets/${next.slug}`} style={vars({ "--d": .08, "--next-accent": next.color })}>
+      <a className="ps-next ps-rise" href={`/projets/${next.slug}`} style={vars({ "--d": .08, "--next-accent": next.color, "--letters": next.title.length + 1 })}>
         <span>Projet suivant · {next.number}</span>
         <strong id="ps-next-title">{next.title}<i aria-hidden="true">↗</i></strong>
         <small>{next.body}</small>
