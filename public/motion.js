@@ -41,9 +41,6 @@
         active: -1,
       };
     });
-    const passionJourney = document.querySelector("[data-passion-journey]");
-    const passionSticky = passionJourney?.querySelector(".passion-sticky");
-    const passionPanels = Array.from(passionJourney?.querySelectorAll("[data-passion]") || []);
     const chapterRail = document.querySelector(".chapter-rail");
     const chapterLinks = Array.from(chapterRail?.querySelectorAll("[data-chapter-link]") || []);
     const chapterSections = chapterLinks.map((link) => document.getElementById(link.dataset.chapterLink));
@@ -79,7 +76,7 @@
     let viewportHeight = window.innerHeight;
     let maxScroll = 1;
     let forceUpdate = true;
-    const journeys = [introJourney, ...sceneJourneys.map(({ journey }) => journey), passionJourney, capabilityJourney, storyJourney, outroJourney];
+    const journeys = [introJourney, ...sceneJourneys.map(({ journey }) => journey), capabilityJourney, storyJourney, outroJourney];
     const measure = () => {
       viewportHeight = window.innerHeight;
       maxScroll = Math.max(1, root.scrollHeight - viewportHeight);
@@ -351,23 +348,6 @@
       }
     };
 
-    // Each passion opens like a lens iris over the previous one, then plays its own scene.
-    const updatePassions = () => {
-      if (!passionJourney || !passionSticky || !passionPanels.length || reducedMotion.matches) return;
-      // The last screen stays still: the project gallery rises over it.
-      const progress = journeyProgress(passionJourney, 2);
-      if (!moved(passionJourney, progress)) return;
-      const timeline = range(progress, .03, .97) * passionPanels.length;
-      set(passionSticky, "--passion-intro", ease(range(timeline, .1, .45)).toFixed(3));
-      passionPanels.forEach((panel, index) => {
-        const inner = clamp((timeline - index - .35) / .6);
-        set(panel, "--enter", ease(clamp((timeline - index - .1) / .4)).toFixed(4));
-        set(panel, "--inner", inner.toFixed(4));
-        // The shutter fires once, as the photograph finishes developing.
-        set(panel, "--flash", Math.max(0, 1 - Math.abs(inner - .55) * 14).toFixed(3));
-      });
-    };
-
     // Scroll-driven decoding: resolved characters lead, the rest flicker through code glyphs.
     const scrambleGlyphs = "<>/{}[]=+*#01abcdefxyz";
     const scrambleText = (decode, tick) => {
@@ -414,13 +394,216 @@
       }
     };
 
+    // ── Sound: a scene with data-sound plays it while it is the current scene. Browsers only allow
+    // sound after the visitor has interacted once (a tap, click or key), so the first interaction
+    // anywhere on the page unlocks it; until then each player shows an "Activer le son" chip.
+    // Two sources: an <audio> element for the artists' previews, and the official SoundCloud player
+    // for Mathis's own tracks (data-sound="sc:<soundcloud url>"), driven through its Widget API.
+    const soundSequences = sceneJourneys.filter(({ scenes }) => scenes.some((scene) => scene.dataset.sound));
+    const audio = typeof Audio !== "undefined" && soundSequences.length ? new Audio() : null;
+    const isSoundCloud = (src) => typeof src === "string" && src.startsWith("sc:");
+    let soundUnlocked = false;
+    let unlockedAt = -1e9;
+    let soundPaused = false;
+    let wanted = null;
+    let fadeFrame = 0;
+    try { soundPaused = window.localStorage.getItem("portfolio-sound") === "off"; } catch {}
+    const fadeTo = (target, done) => {
+      if (!audio) return;
+      window.cancelAnimationFrame(fadeFrame);
+      const from = audio.volume;
+      const startedAt = performance.now();
+      const step = (now) => {
+        const t = clamp((now - startedAt) / 450);
+        audio.volume = mix(from, target, t);
+        if (t < 1) fadeFrame = window.requestAnimationFrame(step);
+        else done?.();
+      };
+      fadeFrame = window.requestAnimationFrame(step);
+    };
+
+    // The SoundCloud player lives in a hidden iframe, created once the page has loaded.
+    const soundCloud = { widget: null, ready: false, url: "", pending: null, playing: false };
+    const firstSoundCloud = soundSequences.flatMap(({ scenes }) => scenes).map((scene) => scene.dataset.sound).find(isSoundCloud);
+    const setupSoundCloud = () => {
+      if (!firstSoundCloud || soundCloud.widget || typeof document.createElement !== "function") return;
+      const frame = document.createElement("iframe");
+      frame.className = "sc-player";
+      frame.title = "Lecteur SoundCloud";
+      frame.allow = "autoplay; encrypted-media";
+      frame.setAttribute("aria-hidden", "true");
+      frame.tabIndex = -1;
+      soundCloud.url = firstSoundCloud.slice(3);
+      frame.src = `https://w.soundcloud.com/player/?url=${encodeURIComponent(soundCloud.url)}&auto_play=false&visual=false&show_comments=false&show_user=false&color=%23ff8a00`;
+      (document.querySelector("[data-sc-host]") || document.body).append(frame);
+      soundCloud.frame = frame;
+      const script = document.createElement("script");
+      script.src = "https://w.soundcloud.com/player/api.js";
+      script.onload = () => {
+        const widget = window.SC.Widget(frame);
+        soundCloud.widget = widget;
+        widget.bind(window.SC.Widget.Events.READY, () => {
+          soundCloud.ready = true;
+          widget.setVolume(85);
+          if (soundCloud.pending) { const url = soundCloud.pending; soundCloud.pending = null; playSoundCloud(url); }
+        });
+        // Once it really plays, the tap request (phones) is no longer needed.
+        widget.bind(window.SC.Widget.Events.PLAY, () => {
+          soundCloud.frame.parentElement?.classList.remove("needs-tap");
+          soundPaused = false;
+          renderSound();
+        });
+        widget.bind(window.SC.Widget.Events.PLAY_PROGRESS, (event) => {
+          if (!wanted || !isSoundCloud(wanted.src)) return;
+          const progress = Number(event.relativePosition || 0).toFixed(4);
+          set(wanted.scene, "--play", progress);
+          const button = wanted.scene.querySelector(`[data-play-track="${CSS.escape(wanted.src)}"]`);
+          set(button, "--track-play", progress);
+          wanted.scene.classList.add("is-sounding");
+        });
+        // A track ends: the next one in the list follows, back to the first after the last.
+        widget.bind(window.SC.Widget.Events.FINISH, () => {
+          if (!wanted || !isSoundCloud(wanted.src)) return;
+          const buttons = Array.from(wanted.scene.querySelectorAll("[data-play-track]"));
+          const index = buttons.findIndex((button) => button.dataset.playTrack === wanted.src);
+          playTrack(buttons[(index + 1) % buttons.length]);
+        });
+      };
+      document.head.append(script);
+    };
+    const playSoundCloud = (src) => {
+      const url = src.slice(3);
+      if (!soundCloud.ready) { soundCloud.pending = src; setupSoundCloud(); return; }
+      soundCloud.playing = true;
+      if (soundCloud.url !== url) {
+        soundCloud.url = url;
+        soundCloud.widget.load(url, { auto_play: true, visual: false, show_comments: false, show_user: false, color: "#ff8a00", callback: () => { soundCloud.widget.setVolume(85); soundCloud.widget.play(); } });
+      } else soundCloud.widget.play();
+      // Phones (iOS) refuse to start a cross-site player from the page: show it, so a tap on it plays.
+      window.clearTimeout(soundCloud.check);
+      soundCloud.check = window.setTimeout(() => soundCloud.widget.isPaused((paused) => {
+        if (paused && soundCloud.playing) soundCloud.frame.parentElement?.classList.add("needs-tap");
+      }), 2500);
+    };
+    const pauseSoundCloud = () => {
+      soundCloud.pending = null;
+      if (soundCloud.ready && soundCloud.playing) soundCloud.widget.pause();
+      soundCloud.playing = false;
+    };
+
+    // Each scene shows its own player; the page only says whether sound plays or waits to be turned on.
+    const renderSound = () => {
+      root.classList.toggle("sound-playing", Boolean(wanted) && soundUnlocked && !soundPaused);
+      root.classList.toggle("sound-locked", Boolean(wanted) && !soundUnlocked);
+      document.querySelectorAll?.("[data-play-track]").forEach((button) => button.classList.toggle("is-current", button.dataset.playTrack === wanted?.src));
+    };
+    const applySound = () => {
+      renderSound();
+      if (!audio) return;
+      if (!wanted || !soundUnlocked || soundPaused || document.hidden) {
+        if (!audio.paused) fadeTo(0, () => audio.pause());
+        pauseSoundCloud();
+        return;
+      }
+      if (isSoundCloud(wanted.src)) {
+        if (!audio.paused) fadeTo(0, () => audio.pause());
+        playSoundCloud(wanted.src);
+        return;
+      }
+      pauseSoundCloud();
+      if (audio.dataset.src !== wanted.src) {
+        audio.dataset.src = wanted.src;
+        audio.src = wanted.src;
+        audio.loop = true;
+        audio.volume = 0;
+      }
+      const playing = audio.play();
+      playing?.catch?.(() => { soundUnlocked = false; renderSound(); });
+      fadeTo(.85);
+    };
+    const setWanted = (scene) => {
+      const next = scene?.dataset.sound ? { src: scene.dataset.sound, title: scene.dataset.soundTitle || "", artist: scene.dataset.soundArtist || "", artwork: scene.dataset.soundArtwork || "", scene } : null;
+      if (next?.src === wanted?.src) { wanted = next; return; }
+      wanted?.scene.classList.remove("is-sounding");
+      wanted = next;
+      applySound();
+    };
+    // Called every frame: the playing scene is the active scene of a sequence the visitor is inside.
+    const updateSound = () => {
+      if (!audio) return;
+      let scene = null;
+      soundSequences.forEach((sequence) => {
+        const box = boxes.get(sequence.journey);
+        const inside = box && window.scrollY >= box.top - viewportHeight * .3 && window.scrollY <= box.top + box.height - viewportHeight * 1.3;
+        if (inside && sequence.active >= 0) scene = sequence.scenes[sequence.active];
+      });
+      if (scene !== wanted?.scene) setWanted(scene);
+    };
+    const unlock = () => {
+      if (soundUnlocked || !audio) return;
+      soundUnlocked = true;
+      unlockedAt = performance.now();
+      // iOS only lets an <audio> element play from code once it has played inside a gesture.
+      const preview = soundSequences.flatMap(({ scenes }) => scenes).map((scene) => scene.dataset.sound).find((src) => src && !isSoundCloud(src));
+      if (wanted && !soundPaused && !isSoundCloud(wanted.src)) applySound();
+      else {
+        if (preview) {
+          audio.muted = true;
+          audio.src = preview;
+          audio.play()?.then?.(() => { audio.pause(); audio.muted = false; audio.removeAttribute("src"); audio.dataset.src = ""; }).catch?.(() => { audio.muted = false; });
+        }
+        if (wanted && !soundPaused) applySound();
+      }
+      renderSound();
+    };
+    // One of Mathis's own tracks: it becomes its scene's sound and plays at once.
+    const playTrack = (button) => {
+      if (!button) return;
+      const scene = button.closest("[data-xp-scene]");
+      scene.dataset.sound = button.dataset.playTrack;
+      scene.dataset.soundTitle = button.dataset.trackTitle || "";
+      soundPaused = false;
+      wanted = null;
+      setWanted(scene);
+    };
+    if (audio) {
+      ["pointerdown", "keydown", "touchend"].forEach((name) => window.addEventListener(name, unlock, { capture: true, passive: true }));
+      window.setTimeout(setupSoundCloud, 1500);
+      document.addEventListener("click", (event) => {
+        const toggle = event.target?.closest?.("[data-sound-toggle]");
+        const track = event.target?.closest?.("[data-play-track]");
+        if (track) {
+          // A click on the track already playing pauses it; any other track starts.
+          if (track.dataset.playTrack === wanted?.src && soundUnlocked && !soundPaused && performance.now() - unlockedAt > 1500) {
+            soundPaused = true;
+            applySound();
+          } else playTrack(track);
+          return;
+        }
+        if (!toggle) return;
+        // The press that unlocked the sound is the same gesture as this click: it means "play",
+        // never "pause" — toggling here used to stop the music the instant it started.
+        const justUnlocked = !soundUnlocked || performance.now() - unlockedAt < 1500;
+        if (!soundUnlocked) unlock();
+        soundPaused = justUnlocked ? false : !soundPaused;
+        try { window.localStorage.setItem("portfolio-sound", soundPaused ? "off" : "on"); } catch {}
+        applySound();
+      });
+      audio.addEventListener("timeupdate", () => {
+        if (!wanted || isSoundCloud(wanted.src) || !audio.duration) return;
+        const progress = (audio.currentTime / audio.duration).toFixed(4);
+        set(wanted.scene, "--play", progress);
+        wanted.scene.classList.add("is-sounding");
+      });
+      document.addEventListener("visibilitychange", applySound);
+    }
+
     const update = () => {
       frame = 0;
       // Written on the bar itself: on <html> it restyled the whole document every frame.
       set(pageProgress, "--page-progress", Math.min(1, window.scrollY / maxScroll).toFixed(4));
       updateIntro();
       sceneJourneys.forEach(updateSceneJourney);
-      updatePassions();
       updateStory();
       updateCapabilities();
       updateOutro();
@@ -432,6 +615,7 @@
         set(scene, "--scene-progress", progress.toFixed(4));
         set(scene, "--scene-drift", `${(progress - .5) * 70}px`);
       });
+      updateSound();
       forceUpdate = false;
     };
 

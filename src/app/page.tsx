@@ -4,8 +4,9 @@ import type { CSSProperties } from "react";
 import TravelMap from "./TravelMap";
 import Experiences from "./Experiences";
 import Jobs from "./Jobs";
+import Passions from "./Passions";
 import { projectCards } from "./projects";
-import { closing, passions, profile } from "./content";
+import { closing, profile } from "./content";
 
 const portrait = "/media/portraits/21C7AA17-2AB3-464F-9942-D4346396FAD9_1_102_o.jpeg";
 
@@ -187,62 +188,7 @@ export default function Home() {
       <Experiences />
       <Jobs />
 
-      <section id="passions" className="passion-journey" data-passion-journey aria-labelledby="passions-title">
-        <div className="passion-sticky">
-          <div className="passion-heading">
-            <span className="eyebrow">04 / Passions</span>
-            <h2 id="passions-title">Ce qui me fait <em>vibrer.</em></h2>
-          </div>
-          {passions.map((passion, index) => (
-            <article className={`passion passion-${passion.kind}`} data-passion={index} key={passion.title} style={{ "--tone": passion.color } as CSSProperties}>
-              <div className="passion-copy">
-                <span>0{index + 1} / 0{passions.length}</span>
-                <h3>{passion.title}</h3>
-                <p>{passion.text}</p>
-                <ul>{passion.tags.map((tag) => <li key={tag}>{tag}</li>)}</ul>
-              </div>
-              <div className="passion-media" aria-hidden="true">
-                {passion.kind === "video" && (
-                  <div className="editor">
-                    <figure className="viewfinder">
-                      <Image src={passion.images[0]} alt="" fill sizes="(max-width: 760px) 90vw, 46vw" />
-                      <i className="viewfinder-corners" /><i className="viewfinder-focus" /><i className="viewfinder-flash" />
-                      <figcaption><span>● REC</span><span>4K · 24 fps · 00:00:12:04</span></figcaption>
-                    </figure>
-                    <div className="editor-timeline">
-                      <div className="editor-track editor-track-video">{Array.from({ length: 5 }, (_, clip) => <i key={clip} style={{ "--k": clip } as CSSProperties} />)}</div>
-                      <div className="editor-track editor-track-audio">{Array.from({ length: 48 }, (_, bar) => <i key={bar} style={{ "--k": bar, "--h": ((bar * 37) % 11) / 10 } as CSSProperties} />)}</div>
-                      <span className="editor-playhead" />
-                    </div>
-                  </div>
-                )}
-                {passion.kind === "sport" && passion.disciplines && (
-                  <div className="training">
-                    <svg className="training-pulse" viewBox="0 0 400 60" preserveAspectRatio="none"><path d="M0 30 H120 L135 30 L145 6 L158 54 L170 18 L180 30 H260 L272 30 L282 10 L294 50 L304 30 H400" pathLength={100} /></svg>
-                    <div className="training-rings">
-                      {passion.disciplines.map((discipline, ring) => (
-                        <div className="training-ring" key={discipline.name} style={{ "--k": ring, "--years": discipline.years } as CSSProperties}>
-                          <span className="training-dial"><b>{discipline.years}</b><small>ans</small></span>
-                          <strong>{discipline.name}</strong>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {passion.kind === "music" && (
-                  <div className="turntable">
-                    <span className="vinyl"><i /></span>
-                    <span className="tonearm" />
-                    <div className="equalizer">{Array.from({ length: 24 }, (_, bar) => <i key={bar} style={{ "--b": bar } as CSSProperties} />)}</div>
-                    <p className="now-playing"><b>En boucle</b> Playlist éclectique<i><b /></i></p>
-                  </div>
-                )}
-              </div>
-              <span className="passion-word" aria-hidden="true">{passion.title}</span>
-            </article>
-          ))}
-        </div>
-      </section>
+      <Passions />
 
       <section id="projets" className="project-journey capability-journey" data-capability-journey aria-labelledby="capability-title">
         <div className="capability-sticky">

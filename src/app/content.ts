@@ -279,49 +279,194 @@ export const sideJobs = {
     { company: "DADA Drinks", role: "Primeur au marché", dates: "02/23 — 06/23", place: "Paris", did: "J’ai monté l’étal, vendu, conseillé et encaissé au rythme du marché." },
     { company: "Divertir Pour Secourir", role: "Trésorier d’association", dates: "10/22 — 07/23", place: "Paris 14e", did: "J’ai tenu la trésorerie d’évènements caritatifs pour la cause animale." },
   ],
-  achievements: [
-    { icon: "⚡", title: "Rythme soutenu", detail: "Service des JO, rush de concert, marché du matin" },
-    { icon: "🤝", title: "Relation client", detail: "Accueil, conseil, négociation B2B" },
-    { icon: "🧾", title: "Gestion de caisse", detail: "Encaissement rapide et trésorerie d’association" },
-    { icon: "📦", title: "Logistique", detail: "Manutention, réception, stocks en FIFO" },
-    { icon: "🛡️", title: "Hygiène & sécurité", detail: "Protocoles HACCP en restauration collective" },
-    { icon: "🌍", title: "Anglais C1", detail: "Prêt pour les équipes internationales" },
-  ],
 };
 
-export const passions = [
-  {
-    kind: "video",
-    title: "Création",
-    text: "Je fais des montages vidéo et je produis mes propres musiques, en autodidacte. Cadrer, rythmer, raconter : le même soin que pour une interface.",
-    tags: ["Montage vidéo", "Production musicale", "Autodidacte"],
-    images: ["/media/editorial/6B6CEFDE-8017-4ABB-9CEA-B0C063FFD69C_1_105_c.jpeg"],
-    color: "#d17b68",
+// Passions, one world per scene. Artist facts come from their Wikipedia pages (October 2026);
+// photos are from Wikimedia Commons under free licences and credited where they appear.
+const passionCredits: Record<string, Credit> = {
+  "joji-live.png": { label: "Samuel Kenwright, CC BY 2.0", href: "https://commons.wikimedia.org/wiki/File:Joji_Performing_Live_in_2018.png" },
+  "don-toliver-portrait.jpg": { label: "Sanchez Productions, CC BY-SA 4.0", href: "https://commons.wikimedia.org/wiki/File:Don_Toliver_by_Sanchez_Productions.jpg" },
+  "don-toliver-studio.jpg": { label: "Sanchez Productions, CC BY-SA 4.0", href: "https://commons.wikimedia.org/wiki/File:Don_by_Sanchez.jpg" },
+  "bad-bunny-portrait.jpg": { label: "Glenn Francis (Toglenn), CC BY-SA 4.0", href: "https://commons.wikimedia.org/wiki/File:Bad_Bunny_2019_by_Glenn_Francis_(cropped).jpg" },
+  "bad-bunny-lisbonne-2026.jpg": { label: "Stillfatnomar, CC0", href: "https://commons.wikimedia.org/wiki/File:Bad_Bunny_performing_at_Est%C3%A1dio_Da_Luz,_Lisbon,_27_May_2026.jpg" },
+  "bad-bunny-met-gala-2026.jpg": { label: "SWinxy, CC BY 4.0", href: "https://commons.wikimedia.org/wiki/File:Guests_at_the_2026_Met_Gala_385.jpg" },
+  "musculation-salle.jpg": { label: "Cobragym1, CC BY-SA 3.0", href: "https://commons.wikimedia.org/wiki/File:Pin_loaded_machine.jpg" },
+  "skate-kickflip.jpg": { label: "Almonroth, CC BY-SA 3.0", href: "https://commons.wikimedia.org/wiki/File:Skateboarding_kickflip.jpg" },
+  "skate-pier7.jpg": { label: "Kylelovesyou, CC0", href: "https://commons.wikimedia.org/wiki/File:Skateboarding_at_San_Francisco_Pier_7.jpg" },
+  "athletisme-sprint.jpg": { label: "Sport the library, CC BY-SA 3.0", href: "https://commons.wikimedia.org/wiki/File:211000_-_Athletics_track_100m_semi_Don_Elgin_action_-_3b_-_2000_Sydney_race_photo.jpg" },
+  "athletisme-arrivee.jpg": { label: "Sport the library, CC BY-SA 3.0", href: "https://commons.wikimedia.org/wiki/File:141100_-_Athletics_track_finish_line_from_above_-_3b_-_2000_Sydney_race_photo.jpg" },
+  "volley-smash.jpg": { label: "FEMA, domaine public", href: "https://commons.wikimedia.org/wiki/File:Male_beach_volleyball_player_spiking_a_volleyball.jpg" },
+  "volley-plage.jpg": { label: "Chris Hunkeler, CC BY-SA 2.0", href: "https://commons.wikimedia.org/wiki/File:Beach_volleyball_(7354193838).jpg" },
+};
+const passionPhoto = (file: string, alt: string, caption = ""): JobPhoto => ({ src: `/media/passions/${file}`, alt, caption, credit: passionCredits[file] });
+
+export const passions = {
+  video: {
+    title: "Montage vidéo",
+    tool: "CapCut",
+    logo: "/media/passions/capcut-icon.svg",
+    shots: ["/media/editorial/6B6CEFDE-8017-4ABB-9CEA-B0C063FFD69C_1_105_c.jpeg", "/media/editorial/179A20D3-83DA-4AD6-82FF-CDAB89055602_1_105_c.jpeg"],
+    text: "Je monte mes propres vidéos sur CapCut, en autodidacte : dérusher, couper au bon moment, poser les transitions et caler les plans sur le rythme de la musique.",
+    tags: ["Montage", "Rythme", "Narration", "Autodidacte"],
+    image: "/media/editorial/6B6CEFDE-8017-4ABB-9CEA-B0C063FFD69C_1_105_c.jpeg",
   },
-  {
-    kind: "music",
-    title: "Musique",
-    text: "Éclectique, j’écoute tous les styles. Une playlist pour chaque phase d’un projet, et le rythme d’un morceau ressemble souvent à celui d’une bonne animation.",
-    tags: ["Éclectique", "Tous les styles"],
-    images: [],
-    color: "#9273b2",
-  },
-  {
-    kind: "sport",
-    title: "Sport",
-    text: "La régularité de l’entraînement m’a appris la persévérance et l’esprit d’équipe que je retrouve dans chaque projet.",
-    tags: ["Musculation", "Skateboard", "Athlétisme", "Volley-ball"],
-    images: [],
-    color: "#3faaa5",
-    // Years of practice, drawn as rings that fill up as the scene plays.
-    disciplines: [
-      { name: "Musculation", years: 5 },
-      { name: "Skateboard", years: 4 },
-      { name: "Athlétisme", years: 3 },
-      { name: "Volley-ball", years: 2 },
+  production: {
+    title: "Production musicale",
+    tool: "FL Studio",
+    logo: "/media/passions/fl-studio-logo.png",
+    icon: "/media/passions/fl-studio-icon.png",
+    // My own productions, streamed from SoundCloud through its official player. To add a song,
+    // add it to a SoundCloud playlist and list it here with its SoundCloud link.
+    soundcloud: {
+      profile: "https://soundcloud.com/mathis-truong",
+      playlists: [
+        { title: "2026 trash", year: 2026, url: "https://soundcloud.com/mathis-truong/sets/2026a1", tracks: [
+          { title: "Mario sprint", url: "https://soundcloud.com/mathis-truong/jazz-pure", length: "0:48" },
+          { title: "hoodtrap pt1", url: "https://soundcloud.com/mathis-truong/hoodtrap-pt1", length: "0:39" },
+          { title: "du lourd", url: "https://soundcloud.com/mathis-truong/du-lourd", length: "1:37" },
+          { title: "ESDEEKID MIST", url: "https://soundcloud.com/mathis-truong/esdeekid-mist", length: "0:39" },
+          { title: "playboi crashtest", url: "https://soundcloud.com/mathis-truong/playboi-crashtest", length: "0:21" },
+        ] },
+        { title: "2023 trash", year: 2023, url: "https://soundcloud.com/mathis-truong/sets/2023a1", tracks: [
+          { title: "PLUGNNB", url: "https://soundcloud.com/mathis-truong/plugnnb", length: "1:01" },
+          { title: "BIENNNG", url: "https://soundcloud.com/mathis-truong/biennng", length: "0:46" },
+          { title: "BEll_2", url: "https://soundcloud.com/mathis-truong/bell_2", length: "1:18" },
+        ] },
+      ],
+    },
+    text: "Je compose et produis mes propres sons sur FL Studio, en autodidacte : une mélodie, des batteries programmées pas à pas, des basses, puis le mixage.",
+    steps: ["Mélodie au piano roll", "Batterie au step sequencer", "808 et basses", "Mixage et export"],
+    // The step sequencer pattern: 1 = hit. Kick, snare, hi-hat, 808.
+    pattern: [
+      [1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+      [1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1],
+      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
     ],
   },
-];
+  listening: {
+    logo: "/media/passions/spotify-logo.png",
+    icon: "/media/passions/spotify-icon.svg",
+    text: "J’écoute de tout, tout le temps, sur Spotify. Trois artistes reviennent sans cesse dans mes écoutes.",
+  },
+  // Each artist plays one song while their scene is on screen: the official 30-second preview
+  // from Apple Music (iTunes Search API). To change a song, look it up on music.apple.com and
+  // replace preview / artwork / link — or ask Claude to fetch them for a given title.
+  artists: [
+    {
+      name: "Joji",
+      lettering: "joji",
+      realName: "George Kusunoki Miller",
+      origin: "Né à Osaka (Japon) · australien",
+      genre: "R&B · lo-fi · trip-hop",
+      label: "88rising",
+      labelLogo: "/media/passions/88rising-logo.svg",
+      color: "#7ea4d8",
+      intro: "Une voix douce et mélancolique, des productions lentes et feutrées : le R&B lo-fi de Joji est fait pour les longues nuits.",
+      albums: [{ title: "Ballads 1", year: 2018, cover: "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/b8/42/74/b8427409-1c8f-5c8a-dee2-82a4ed7b6954/190296940323.jpg/600x600bb.jpg" }, { title: "Nectar", year: 2020, cover: "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/06/fb/8e/06fb8e9a-6748-3bad-8a84-5d00b15e4857/190296849497.jpg/600x600bb.jpg" }, { title: "Smithereens", year: 2022, cover: "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/53/97/a8/5397a8df-b197-6eae-8b53-a4c871563a54/93624864394.jpg/600x600bb.jpg" }, { title: "Piss in the Wind", year: 2026, cover: "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/58/1b/85/581b8559-1868-e64c-c796-b117bb417dcc/198704821745_Cover.jpg/600x600bb.jpg" }],
+      hits: ["Glimpse of Us", "Slow Dancing in the Dark", "Sanctuary"],
+      fact: "Avec Ballads 1, il devient le premier artiste asiatique en tête du classement Billboard Top R&B/Hip-Hop Albums.",
+      stat: { value: "N°8", label: "« Glimpse of Us » au Billboard Hot 100" },
+      song: {
+        title: "Die for You",
+        album: "Smithereens",
+        preview: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/47/4e/31/474e31a5-5d0f-5e48-868f-60487004c113/mzaf_1175503825665906253.plus.aac.p.m4a",
+        artwork: "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/d0/2a/43/d02a433a-3ab8-9a94-b07d-1dc599b64966/93624864387.jpg/600x600bb.jpg",
+        link: "https://music.apple.com/us/album/die-for-you/1776748879",
+      },
+      photos: [
+        { src: "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/06/fb/8e/06fb8e9a-6748-3bad-8a84-5d00b15e4857/190296849497.jpg/1400x1400bb.jpg", alt: "Portrait de Joji en lumière rouge, pochette de l’album Nectar", caption: "Nectar, 2020", credit: { label: "Pochette « Nectar » (88rising), via Apple Music", href: "https://music.apple.com/us/album/nectar/1524813433" } },
+        passionPhoto("joji-live.png", "Joji chante sur scène en 2018, sous des néons", "En concert, 2018"),
+      ],
+    },
+    {
+      name: "Bad Bunny",
+      lettering: "bunny",
+      realName: "Benito Antonio Martínez Ocasio",
+      origin: "Bayamón (Porto Rico)",
+      genre: "Reggaeton · trap latino",
+      label: "Rimas Entertainment",
+      color: "#e83f6f",
+      intro: "Le roi du reggaeton et du trap latino, qui a imposé l’espagnol tout en haut des classements mondiaux.",
+      albums: [{ title: "X 100pre", year: 2018, cover: "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/cf/3a/db/cf3adbe6-8ea1-f60f-60fd-713eefda3962/193483317984.jpg/600x600bb.jpg" }, { title: "YHLQMDLG", year: 2020, cover: "https://is1-ssl.mzstatic.com/image/thumb/Music114/v4/8c/0f/81/8c0f81f2-9f10-5e3d-b9de-5961a73e8e52/195081078724.jpg/600x600bb.jpg" }, { title: "Un Verano Sin Ti", year: 2022, cover: "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/3e/04/eb/3e04ebf6-370f-f59d-ec84-2c2643db92f1/196626945068.jpg/600x600bb.jpg" }, { title: "Nadie Sabe…", year: 2023, cover: "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/00/e0/31/00e0311e-9dab-fd0c-fc37-ee3d36aafbf3/197190137897.jpg/600x600bb.jpg" }, { title: "Debí Tirar Más Fotos", year: 2025, cover: "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/90/5e/7e/905e7ed5-a8fa-a8f3-cd06-0028fdf3afaa/199066342442.jpg/600x600bb.jpg" }],
+      hits: ["DtMF", "Tití Me Preguntó", "Dákiti", "Me Porto Bonito"],
+      fact: "Debí Tirar Más Fotos remporte le Grammy de l’album de l’année en 2026 — une première pour un album en espagnol — et il assure le show de la mi-temps du Super Bowl LX.",
+      stat: { value: "4×", label: "artiste le plus écouté au monde sur Spotify" },
+      song: {
+        title: "Baile Inolvidable",
+        album: "Debí Tirar Más Fotos",
+        preview: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/3a/ea/38/3aea38e3-106b-db96-7beb-5d2bc02bdf70/mzaf_17568275540135957611.plus.aac.p.m4a",
+        artwork: "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/90/5e/7e/905e7ed5-a8fa-a8f3-cd06-0028fdf3afaa/199066342442.jpg/600x600bb.jpg",
+        link: "https://music.apple.com/us/album/baile-inolvidable/1787022393",
+      },
+      photos: [
+        passionPhoto("bad-bunny-portrait.jpg", "Portrait de Bad Bunny en lunettes de soleil", "Bad Bunny"),
+        passionPhoto("bad-bunny-lisbonne-2026.jpg", "Bad Bunny en concert à Lisbonne en mai 2026, tournée Debí Tirar Más Fotos", "Tournée DtMF, Lisbonne 2026"),
+        passionPhoto("bad-bunny-met-gala-2026.jpg", "Bad Bunny, cheveux blancs et costume noir, au Met Gala 2026", "Met Gala, mai 2026"),
+      ],
+    },
+    {
+      name: "Don Toliver",
+      lettering: "don",
+      realName: "Caleb Zackery Toliver",
+      origin: "Houston, Texas (États-Unis)",
+      genre: "Hip-hop · trap · R&B",
+      label: "Cactus Jack · Atlantic",
+      color: "#e0a14f",
+      intro: "Une voix aérienne et reconnaissable entre mille, posée sur des productions trap psychédéliques venues de Houston.",
+      albums: [{ title: "Heaven or Hell", year: 2020, cover: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/a5/c2/a5/a5c2a541-9f56-7c98-eb01-3c3198267851/075679823908.jpg/600x600bb.jpg" }, { title: "Life of a Don", year: 2021, cover: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/fc/ca/a0/fccaa0f7-0c60-0f80-ab06-5b3c7e23e240/075679767868.jpg/600x600bb.jpg" }, { title: "Love Sick", year: 2023, cover: "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/15/3a/d1/153ad1fe-7884-a2e5-18be-750a21bd1af1/075679699893.jpg/600x600bb.jpg" }, { title: "Hardstone Psycho", year: 2024, cover: "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/22/3c/5d/223c5d96-501e-040e-a34d-0608e6e5c4ff/075679638434.jpg/600x600bb.jpg" }, { title: "Octane", year: 2026, cover: "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/e8/e5/c6/e8e5c690-a958-622e-eb62-0dce6059300e/075679599360.jpg/600x600bb.jpg" }],
+      hits: ["After Party", "No Idea", "Lemonade", "Bandit"],
+      fact: "« No Idea » et « After Party » sont tous deux certifiés triple platine, et Octane devient en 2026 son premier album numéro 1.",
+      stat: { value: "N°1", label: "Octane au Billboard 200" },
+      song: {
+        title: "Bus Stop (feat. Brent Faiyaz)",
+        album: "Love Sick",
+        preview: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/89/c0/c3/89c0c39c-45a2-bddb-2808-a37369d7f151/mzaf_2134455710884314382.plus.aac.p.m4a",
+        artwork: "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/15/3a/d1/153ad1fe-7884-a2e5-18be-750a21bd1af1/075679699893.jpg/600x600bb.jpg",
+        link: "https://music.apple.com/us/album/bus-stop-feat-brent-faiyaz/1672446197",
+      },
+      photos: [
+        passionPhoto("don-toliver-portrait.jpg", "Portrait de Don Toliver en lunettes de soleil", "Don Toliver"),
+        passionPhoto("don-toliver-studio.jpg", "Don Toliver photographié en studio", ""),
+      ],
+    },
+  ],
+  sports: [
+    {
+      kind: "muscu", name: "Musculation", years: 5, color: "#e0533d",
+      text: "Cinq ans de séances régulières : la discipline, la patience et une progression qui se mesure semaine après semaine.",
+      lesson: "Régularité",
+      photos: [passionPhoto("musculation-salle.jpg", "Une salle de musculation avec des machines à charge guidée", "La salle")],
+    },
+    {
+      kind: "skate", name: "Skateboard", years: 4, color: "#f0c04a",
+      text: "Tomber, se relever, retenter le trick jusqu’à le poser : le skate m’a appris à persévérer.",
+      lesson: "Persévérance",
+      photos: [
+        passionPhoto("skate-kickflip.jpg", "Un skateur en plein kickflip", "Kickflip"),
+        passionPhoto("skate-pier7.jpg", "Le spot de skate de Pier 7 à San Francisco", ""),
+      ],
+    },
+    {
+      kind: "athle", name: "Athlétisme", years: 3, color: "#3faaa5",
+      text: "Le chrono ne ment pas : se fixer un objectif, s’entraîner pour le battre, recommencer.",
+      lesson: "Dépassement de soi",
+      photos: [
+        passionPhoto("athletisme-sprint.jpg", "Un sprinteur sur une piste d’athlétisme", "Le sprint"),
+        passionPhoto("athletisme-arrivee.jpg", "La ligne d’arrivée d’une piste vue d’en haut", ""),
+      ],
+    },
+    {
+      kind: "volley", name: "Volley-ball", years: 2, color: "#2e6be6",
+      text: "Un point ne se gagne jamais seul : communication, placement et confiance dans l’équipe.",
+      lesson: "Esprit d’équipe",
+      photos: [
+        passionPhoto("volley-smash.jpg", "Un joueur de beach-volley frappe le ballon au-dessus du filet", "Le smash"),
+        passionPhoto("volley-plage.jpg", "Un joueur de beach-volley au service", ""),
+      ],
+    },
+  ],
+};
 
 // Studies and stays abroad, placed on the atlas in chronological order; the data network links them in this order.
 export const studies = [

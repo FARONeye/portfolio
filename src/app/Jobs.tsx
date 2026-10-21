@@ -9,7 +9,7 @@ import { sideJobs, studentJobs, type JobPhoto } from "./content";
 const v = (vars: Record<string, string | number>) => vars as CSSProperties;
 const { sodexo, coca, fuze, ewc, ricard, loreal, terrain } = studentJobs;
 
-const weights = { intro: 1, sodexo: 1.3, service: 1.3, games: 1.2, coca: 1.2, fuze: 1.1, ewc: 1.2, ricard: 1.1, loreal: 1.1, terrain: 1.3, unlocked: 1 };
+const weights = { intro: 1, sodexo: 1.3, service: 1.3, games: 1.2, coca: 1.2, fuze: 1.1, ewc: 1.2, ricard: 1.1, loreal: 1.1, terrain: 1.3 };
 const units = Object.values(weights).reduce((sum, weight) => sum + weight, 0);
 
 // The logo wall of the opening: every world the chapter visits.
@@ -249,16 +249,6 @@ export default function Jobs() {
           <Credits photos={terrain.photos} />
         </article>
 
-        {/* 10 — what those worlds taught, as achievement toasts. */}
-        <article className="xp-scene xp-s-unlocked xp-t-iris" data-xp-scene data-weight={weights.unlocked} data-label="Compétences débloquées">
-          <span className="xp-kicker">Compétences débloquées</span>
-          <h3>Ce que le terrain <em>m’a appris.</em></h3>
-          <ol className="xp-achievements">
-            {sideJobs.achievements.map((item, k) => (
-              <li key={item.title} style={v({ "--k": k, "--side": k % 2 ? 1 : -1 })}><i>{item.icon}</i><div><small>Succès débloqué</small><b>{item.title}</b><span>{item.detail}</span></div></li>
-            ))}
-          </ol>
-        </article>
       </div>
     </section>
   );
