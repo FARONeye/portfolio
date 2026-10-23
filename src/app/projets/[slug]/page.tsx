@@ -47,6 +47,12 @@ export default async function ProjectPage({ params }: Props) {
   return (
     <main className={`project-story ps-v-${project.slug}`} style={vars({ "--project-accent": project.color, "--story-units": units })}>
       <a className="skip-link" href="#project-title">Aller au projet</a>
+      {/* The portal the card opened on the home page, which now lifts to reveal the story. */}
+      <div className="ps-arrival" aria-hidden="true">
+        <Image src={project.image} alt="" fill priority sizes="100vw" />
+        <div className="ps-arrival-copy"><span>Projet {project.number} · ouverture</span><strong>{project.title}</strong></div>
+        <i className="ps-arrival-bar" />
+      </div>
 
       <header className="ps-header">
         <a className="wordmark" href="/" aria-label="Mathis Truong, accueil"><span className="wordmark-symbol">M<span className="wordmark-dot">.</span>T</span></a>

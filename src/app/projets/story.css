@@ -470,3 +470,16 @@ html.has-project-story { scroll-snap-type: y proximity; }
   .af-network li, .af-network li > span { position: static; transform: none; opacity: 1; }
   .ps-v-solstice .ps-scene::after { display: none; }
 }
+
+/* Arrival — the same frame as the portal on the home page, lifted away to reveal the story. */
+.ps-arrival { position: fixed; z-index: 90; inset: 0; overflow: hidden; background: #050508; pointer-events: none; animation: ps-arrival-out .95s .2s cubic-bezier(.7, 0, .2, 1) forwards; }
+.ps-arrival img { object-fit: cover; animation: ps-arrival-image .95s .2s cubic-bezier(.7, 0, .2, 1) forwards; }
+.ps-arrival::after { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 50% 58%, color-mix(in srgb, var(--project-accent) 38%, transparent), transparent 62%), linear-gradient(180deg, #05050a40, #05050ae0); }
+.ps-arrival-copy { position: absolute; z-index: 2; inset: 0; display: grid; place-content: center; justify-items: center; gap: 16px; padding: 0 20px; color: #fff; text-align: center; animation: ps-arrival-copy .7s .2s cubic-bezier(.7, 0, .2, 1) forwards; }
+.ps-arrival-copy span { color: var(--project-accent); font: 700 12px var(--mono); letter-spacing: .2em; text-transform: uppercase; }
+.ps-arrival-copy strong { font: 900 clamp(46px, 9vw, 150px)/.9 Arial, sans-serif; letter-spacing: -.05em; text-transform: uppercase; }
+.ps-arrival-bar { position: absolute; z-index: 2; bottom: 14vh; left: 50%; width: min(320px, 60vw); height: 2px; background: var(--project-accent); box-shadow: 0 0 14px var(--project-accent); transform: translateX(-50%); }
+@keyframes ps-arrival-out { to { clip-path: inset(0 0 100% 0); visibility: hidden; } }
+@keyframes ps-arrival-image { to { transform: translateY(-18%) scale(1.06); } }
+@keyframes ps-arrival-copy { to { opacity: 0; transform: translateY(-60px); } }
+@media (prefers-reduced-motion: reduce) { .ps-arrival { display: none; } }

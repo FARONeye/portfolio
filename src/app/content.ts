@@ -11,10 +11,20 @@ export const profile = {
   status: "CDI recherché dès décembre 2027",
   summary:
     "Développeur full-stack spécialisé dans la conception de solutions internes sécurisées sur Google Cloud et Google Workspace. Plus de deux ans chez Air Liquide en développement front-end et back-end, automatisation, administration des accès et déploiement d’applications cloud.",
+  // The opening: the words that rotate under the name, the story told in four pictures
+  // (art = the photo or drawing of each panel, see About.tsx), then the numbers that count up.
+  rotator: ["des applications sécurisées", "des outils internes", "des automatisations", "des interfaces soignées"],
+  story: [
+    { art: "portrait", title: "Moi, c’est Mathis", caption: "22 ans · Île-de-France" },
+    { art: "code", title: "Je code", caption: "full-stack chez Air Liquide" },
+    { art: "cloud", title: "J’automatise", caption: "du front jusqu’au cloud" },
+    { art: "music", title: "Je crée", caption: "des sons, des vidéos" },
+  ],
   stats: [
-    { value: "2+", label: "ans chez Air Liquide" },
-    { value: "500+", label: "utilisateurs au quotidien" },
-    { value: "2", label: "expériences pro" },
+    { value: 2, suffix: "+", label: "ans chez Air Liquide" },
+    { value: 500, suffix: "+", label: "collaborateurs utilisent mon application" },
+    { value: 2, suffix: "", label: "expériences pro en développement" },
+    { value: 22, suffix: "", label: "ans, et l’envie d’aller plus loin" },
   ],
   stack: [
     { area: "front", tools: "React · Vue.js · Next.js · Tailwind" },
@@ -39,17 +49,19 @@ export const experiences = [
       "Gestion des droits d’accès à des comptes techniques partagés et génération sécurisée de codes TOTP.",
       "Migration d’Apps Script et Google Sheets vers Firebase Hosting, Firestore et Google Cloud, avec authentification Okta SSO et Google Sign-In.",
       "Environnements de développement, test et production, journalisation des opérations dans BigQuery.",
+      "Automatisation de tâches lourdes et répétitives pour le service IT.",
     ],
     stack: ["Firebase", "Firestore", "Google Cloud", "BigQuery", "Okta SSO", "Apps Script"],
     did: [
       "J’ai créé une application interne de double authentification, de la conception à la mise en production.",
-      "J’ai développé le back-end serverless (Cloud Functions, Firestore) et l’interface des utilisateurs.",
-      "J’ai intégré Okta SSO et Google Sign-In, et mis en place la gestion des droits.",
+      "J’ai développé son back-end serverless (Cloud Functions, Firestore) et son interface, avec Okta SSO et Google Sign-In.",
+      "J’automatise des tâches lourdes et répétitives pour le service IT.",
       "J’ai séparé les environnements de test et de production, branché les journaux sur BigQuery et rédigé les tutoriels.",
     ],
     brought: [
       "Un accès centralisé et sécurisé aux comptes techniques partagés.",
       "Moins de demandes d’accès manuelles, grâce à la délégation des droits.",
+      "Du temps rendu au service IT, libéré des tâches lourdes et répétitives.",
       "Une traçabilité complète des actions, sans jamais exposer un code.",
     ],
   },
@@ -92,49 +104,27 @@ export const airLiquide = {
     { image: "/media/experiences/air-liquide-site-industriel.jpg", alt: "Unité de production Air Liquide de nuit, avec une cuve au logo du groupe", caption: "Un groupe industriel mondial", credit: "Photo : Konushna, CC BY-SA 3.0, via Wikimedia Commons" },
     { image: "/media/experiences/air-liquide-siege-paris.jpg", alt: "Façade en pierre du siège d’Air Liquide à Paris", caption: "Siège · Paris", credit: "Photo : BobVillars, CC0, via Wikimedia Commons" },
   ],
-  pitch: "En charge du développement complet d’une application interne de double authentification : architecture, back-end serverless, interface, gestion des droits, déploiement et accompagnement des utilisateurs.",
   stats: [
     { value: 500, suffix: "+", label: "collaborateurs l’utilisent chaque jour" },
     { value: 5, suffix: "", label: "fonctions serverless" },
     { value: 2, suffix: "", label: "interfaces : app & console admin" },
     { value: 0, suffix: "", label: "code OTP exposé au navigateur ou journalisé" },
   ],
-  problem: {
-    title: "Des comptes partagés, des codes qui circulaient à la main.",
-    points: [
-      "Des comptes techniques partagés entre plusieurs équipes, protégés par une double authentification.",
-      "Des codes 2FA difficiles à partager, des droits gérés dans un tableur.",
-      "Une solution Apps Script qui atteignait ses limites pour des centaines d’utilisateurs.",
-    ],
-    question: "Comment sécuriser l’accès à ces comptes tout en le rendant fluide pour chaque équipe ?",
-  },
-  architecture: [
-    { id: "user", label: "Collaborateur", detail: "PC · mobile" },
-    { id: "okta", label: "Okta SSO", detail: "session entreprise" },
-    { id: "google", label: "Google Sign-In", detail: "identité vérifiée" },
-    { id: "front", label: "Firebase Hosting", detail: "HTML · CSS · JS" },
-    { id: "functions", label: "Cloud Functions", detail: "Node.js 20 · JWT" },
-    { id: "firestore", label: "Firestore", detail: "comptes · droits · secrets" },
-    { id: "bigquery", label: "BigQuery", detail: "journaux & audit" },
-    { id: "admin", label: "Console Apps Script", detail: "administration" },
+  // The 2FA app in five short steps, on a single scene.
+  appSteps: [
+    { title: "Le besoin", text: "Des codes 2FA partagés à la main et des droits gérés dans un tableur." },
+    { title: "L’architecture", text: "Okta SSO, Google Sign-In, Firebase et des Cloud Functions que j’ai conçues." },
+    { title: "Les codes", text: "Calculés côté serveur, valables 30 secondes, jamais exposés." },
+    { title: "Les droits", text: "Chaque équipe gère elle-même qui accède à ses comptes." },
+    { title: "La traçabilité", text: "Chaque action journalisée dans BigQuery ; test et production séparés." },
   ],
   otpSteps: ["Jeton JWT vérifié", "Droits contrôlés dans Firestore", "Secret lu côté serveur", "HMAC-SHA1 · pas de 30 s", "10 codes calculés d’avance"],
-  accessSteps: [
-    { title: "Ajouter un collègue", text: "Un utilisateur déjà autorisé ouvre l’accès à un collègue par son e-mail, sans attendre un administrateur." },
-    { title: "Retirer avec confirmation", text: "Un retrait passe par une confirmation, et chaque opération est tracée." },
-    { title: "Administrer sans toucher au cloud", text: "Une console Apps Script limitée donne aux administrateurs les seules actions utiles, sans accès au projet Google Cloud." },
-  ],
-  logs: [
-    { level: "INFO", event: "otp.request", detail: "compte : ta-reporting@…" },
-    { level: "INFO", event: "access.grant", detail: "ajout : l.martin@…" },
-    { level: "WARNING", event: "access.denied", detail: "utilisateur non autorisé" },
-    { level: "INFO", event: "access.revoke", detail: "retrait confirmé" },
-    { level: "ERROR", event: "token.invalid", detail: "session expirée · 401" },
-    { level: "INFO", event: "otp.request", detail: "code : jamais enregistré" },
-  ],
-  environments: ["Développement", "Test", "Production"],
-  skills: ["Cloud Functions", "Firestore", "BigQuery", "Firebase Hosting", "Okta SSO", "Google Sign-In", "Apps Script", "TOTP · HMAC", "Node.js 20"],
-  lesson: "Le bon outil au bon endroit : Firebase pour l’application, Apps Script pour la console d’administration.",
+  // The automation of heavy IT tasks. The task names are generic examples, shown as an illustration.
+  automation: {
+    text: "Des opérations longues et répétitives, faites jusque-là à la main : je les transforme en scripts qui tournent tout seuls, pour que l’équipe IT se concentre sur l’essentiel.",
+    points: ["Repérer les tâches qui prennent le plus de temps", "Les automatiser avec des scripts fiables", "Rendre ce temps à l’équipe IT"],
+    tasks: ["Extractions et rapports", "Mises à jour en masse", "Contrôles récurrents", "Traitements de fichiers"],
+  },
 };
 
 // Student jobs, alongside the developer path. Each one gets its brand's art direction.
@@ -143,11 +133,6 @@ export const airLiquide = {
 type Credit = { label: string; href: string };
 const jobCredits: Record<string, Credit> = {
   "jo-vasque-nuit.jpg": { label: "Medea7, CC BY 4.0", href: "https://commons.wikimedia.org/wiki/File:Olympic_Fire_Jardin_Tuileries_Paris_summernight.jpg" },
-  "jo-vasque-jour.jpg": { label: "Pronoia, CC0", href: "https://commons.wikimedia.org/wiki/File:2024_Summer_Olympics_and_Paralympics_cauldron_-_Vasque_Olympique_Jeux_Olympiques_Paris_2024_-_2024-09-03_(1).jpg" },
-  "jo-champ-de-mars.jpg": { label: "MFonzatti, CC BY-SA 4.0", href: "https://commons.wikimedia.org/wiki/File:Site_olympique_Champ-de-Mars_2024.jpg" },
-  "jo-volontaires.jpg": { label: "AlSepPhoenix, CC BY-SA 4.0", href: "https://commons.wikimedia.org/wiki/File:Tir_arc_JO_Paris_2024_volontaires.jpg" },
-  "jo-grand-palais.jpg": { label: "AlSepPhoenix, CC BY 4.0", href: "https://commons.wikimedia.org/wiki/File:Grand_Palais_-_JO_Paris_2024_-_Taekwondo_(04).jpg" },
-  "jo-anneaux-tour-eiffel.jpg": { label: "Ibex73, CC BY 4.0", href: "https://commons.wikimedia.org/wiki/File:Olympic_rings_on_the_Eiffel_Tower_2024_(21).jpg" },
   "concert-celine-dion.jpg": { label: "Anirudh Koul, CC BY 2.0", href: "https://commons.wikimedia.org/wiki/File:Celine_Dion_Concert_-_Laser_Lighting.jpg" },
   "coca-cola-canette.jpg": { label: "M0tty, CC BY-SA 3.0", href: "https://commons.wikimedia.org/wiki/File:Coca-cola_50cl_can_-_Italia.jpg" },
   "coca-cola-canettes.jpg": { label: "Solomon203, CC BY-SA 4.0", href: "https://commons.wikimedia.org/wiki/File:2_cans_of_Coca-Cola_Zero_Sugar_20220124.jpg" },
@@ -194,13 +179,6 @@ export const studentJobs = {
       { icon: "🍽️", title: "Servir", text: "Service au comptoir, au rythme des Jeux" },
       { icon: "💳", title: "Encaisser", text: "Encaissement rapide des repas" },
       { icon: "🧼", title: "Garantir", text: "Propreté et protocoles HACCP" },
-    ],
-    gallery: [
-      photo("jo-champ-de-mars.jpg", "Le stade éphémère du Champ-de-Mars au pied de la tour Eiffel", "Champ-de-Mars"),
-      photo("jo-volontaires.jpg", "Des volontaires en tenue des Jeux sur le site de tir à l’arc", "Les volontaires"),
-      photo("jo-grand-palais.jpg", "Une épreuve de taekwondo sous la verrière du Grand Palais", "Grand Palais"),
-      photo("jo-anneaux-tour-eiffel.jpg", "Les anneaux olympiques suspendus à la tour Eiffel en 2024", "Les anneaux sur la tour Eiffel"),
-      photo("jo-vasque-jour.jpg", "La vasque olympique en journée dans le jardin des Tuileries", "Tuileries"),
     ],
   },
   coca: {
@@ -335,19 +313,11 @@ export const passions = {
       ],
     },
     text: "Je compose et produis mes propres sons sur FL Studio, en autodidacte : une mélodie, des batteries programmées pas à pas, des basses, puis le mixage.",
-    steps: ["Mélodie au piano roll", "Batterie au step sequencer", "808 et basses", "Mixage et export"],
-    // The step sequencer pattern: 1 = hit. Kick, snare, hi-hat, 808.
-    pattern: [
-      [1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
-      [1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1],
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-    ],
   },
   listening: {
     logo: "/media/passions/spotify-logo.png",
     icon: "/media/passions/spotify-icon.svg",
-    text: "J’écoute de tout, tout le temps, sur Spotify. Trois artistes reviennent sans cesse dans mes écoutes.",
+    text: "J’écoute de tout, tout le temps, sur Spotify. Mais trois artistes tournent en boucle plus que tous les autres : mon Big 3, ceux que je ne lâche jamais.",
   },
   // Each artist plays one song while their scene is on screen: the official 30-second preview
   // from Apple Music (iTunes Search API). To change a song, look it up on music.apple.com and
@@ -470,11 +440,18 @@ export const passions = {
 
 // Studies and stays abroad, placed on the atlas in chronological order; the data network links them in this order.
 export const studies = [
-  { code: "ARG", place: "Argenteuil", country: "France", school: "Lycée Julie Victoire Daubié", degree: "Baccalauréat général", years: "2019 — 2022", specialization: "Baccalauréat général", highlight: "", stack: [] as string[], coordinates: [2.2470, 48.9472] as [number, number], color: "#c7c3d7" },
+  { code: "PAR", place: "Paris", country: "France", school: "Lycée Julie Victoire Daubié", degree: "Baccalauréat général", years: "2019 — 2022", specialization: "Baccalauréat général", highlight: "", stack: [] as string[], coordinates: [2.3522, 48.8566] as [number, number], color: "#c7c3d7" },
   { code: "LYS", place: "Lyon", country: "France", school: "ESCENTECH", degree: "MBA Fullstack Development", years: "2022 — 2027", specialization: "Titre RNCP niveau 7 · Manager de projets informatiques", highlight: "École d’informatique avec immersion à l’étranger", stack: ["Full-stack", "Cloud", "Gestion de projet"], coordinates: [4.8357, 45.7640] as [number, number], color: "#a889c7" },
   { code: "DUB", place: "Dublin", country: "Irlande", school: "ESCENTECH · immersion", degree: "Immersion à l’étranger", years: "04/23 — 06/23", specialization: "Développement web front-end", highlight: "Site d’actualité UFC", stack: ["Front-end", "Site dynamique"], coordinates: [-6.2603, 53.3498] as [number, number], color: "#61bbb6" },
   { code: "BCN", place: "Barcelone", country: "Espagne", school: "ESCENTECH · immersion", degree: "Immersion à l’étranger", years: "09/23 — 11/23", specialization: "Développement full-stack e-commerce", highlight: "Boutique de maillots d’e-sport", stack: ["Full-stack", "E-commerce"], coordinates: [2.1734, 41.3851] as [number, number], color: "#d17b68" },
+  // TODO(Mathis): école, dates et contenu exacts de Montréal et Boston à compléter.
+  { code: "MTL", place: "Montréal", country: "Canada", school: "ESCENTECH · immersion", degree: "Immersion à l’étranger", years: "Dates à préciser", specialization: "Programme à préciser", highlight: "", stack: [] as string[], coordinates: [-73.5673, 45.5017] as [number, number], color: "#e0c36a" },
+  { code: "BOS", place: "Boston", country: "États-Unis", school: "ESCENTECH · immersion", degree: "Immersion à l’étranger", years: "Dates à préciser", specialization: "Programme à préciser", highlight: "", stack: [] as string[], coordinates: [-71.0589, 42.3601] as [number, number], color: "#6f9be8" },
 ];
+
+// The scroll tour of the atlas: an opening view, one hop per city, then the whole network.
+// Shared by TravelMap (what it draws) and motion.js (where the scroll rests), through data attributes.
+export const atlasTour = { intro: .1, outro: .9 };
 
 export const closing = {
   headline: ["Construisons", "la suite ensemble."],

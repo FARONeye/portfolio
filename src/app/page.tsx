@@ -1,49 +1,24 @@
 /* Native navigation gives the scroll narrative a fresh lifecycle on each page. */
 import Image from "next/image";
 import type { CSSProperties } from "react";
+import About from "./About";
+import Guide from "./Guide";
 import TravelMap from "./TravelMap";
 import Experiences from "./Experiences";
 import Jobs from "./Jobs";
 import Passions from "./Passions";
 import { projectCards } from "./projects";
-import { closing, profile } from "./content";
-
-const portrait = "/media/portraits/21C7AA17-2AB3-464F-9942-D4346396FAD9_1_102_o.jpeg";
-
-// The opening introduces Mathis like a terminal session: `whoami` prints his profile, the
-// card renders it, then the stack is checked before the parcours begins.
-const devSteps = ["Profil", "Compétences"];
-const devCaptions = [
-  "Bonjour, moi c’est Mathis.",
-  "Développeur full-stack, Node.js & Google Cloud.",
-  "Voici mon parcours.",
-];
-// Each code line is a list of [token class, text] pairs; the scroll types them one by one.
-const devCode: [string, string][][] = [
-  [["c", "$ whoami --format json"]],
-  [["", "{"]],
-  [["p", "  \"nom\""], ["", ": "], ["s", `"${profile.name}"`], ["", ","]],
-  [["p", "  \"rôle\""], ["", ": "], ["s", `"${profile.role}"`], ["", ","]],
-  [["p", "  \"basé à\""], ["", ": "], ["s", `"${profile.city}"`], ["", ","]],
-  [["p", "  \"poste\""], ["", ": "], ["s", `"${profile.company}"`], ["", ","]],
-  [["p", "  \"statut\""], ["", ": "], ["s", `"${profile.status}"`]],
-  [["", "}"]],
-];
-const devTerminal: [string, string, string][] = [
-  ["$", "mathis --stack", ""],
-  ...profile.stack.map(({ area, tools }): [string, string, string] => ["›", area, `✓ ${tools}`]),
-  ["●", "En poste", profile.company],
-];
+import { atlasTour, closing, studies } from "./content";
 
 // One rail names every chapter of the page, so the scroll reads as a single story.
 const chapters = [
-  { id: "presentation", label: "Qui je suis" },
-  { id: "experiences", label: "Expériences pro" },
-  { id: "jobs", label: "Jobs étudiants" },
-  { id: "passions", label: "Passions" },
-  { id: "projets", label: "Projets" },
-  { id: "atlas", label: "Études" },
-  { id: "suite", label: "Mot de fin" },
+  { id: "presentation", label: "Qui je suis", teaser: "" },
+  { id: "experiences", label: "Expériences pro", teaser: "Air Liquide · Trady" },
+  { id: "jobs", label: "Jobs étudiants", teaser: "JO Paris 2024, Coca-Cola, EWC…" },
+  { id: "passions", label: "Passions", teaser: "Mes sons, mon Big 3, le sport" },
+  { id: "projets", label: "Projets", teaser: "Du code au concret" },
+  { id: "atlas", label: "Études", teaser: "Mon parcours d’études" },
+  { id: "suite", label: "Mot de fin", teaser: "Me contacter" },
 ];
 // A contribution graph for the closing scene; the level pattern is fixed so server and client agree.
 const commitColumns = 40;
@@ -65,125 +40,9 @@ export default function Home() {
         ))}
       </nav>
       <a className="skip-link" href="#presentation">Aller au contenu</a>
+      <Guide />
 
-      <section id="presentation" className="intro-journey" data-intro-journey aria-labelledby="hero-title">
-        <div className="intro-sticky">
-          <header className="site-header" aria-label="Navigation principale">
-            <a className="wordmark" href="#accueil" aria-label="Mathis Truong, accueil">
-              <span className="wordmark-symbol">M<span className="wordmark-dot">.</span>T</span>
-              <span className="wordmark-name">Mathis<br />Truong</span>
-            </a>
-            <span className="header-edition">Full stack & Cloud&nbsp; / &nbsp;2026</span>
-            <nav className="header-nav" aria-label="Sections du site">
-              <a href="#experiences">Expériences pro</a>
-              <a href="#projets">Projets</a>
-              <a href="#atlas">Études</a>
-              <a className="nav-external" href="https://github.com/FARONeye" target="_blank" rel="noopener noreferrer">
-                GitHub <span aria-hidden="true">↗</span>
-              </a>
-            </nav>
-          </header>
-
-          <div className="hero">
-            <div className="hero-copy">
-              <div className="hero-intro-line">
-                <span className="eyebrow"><span className="eyebrow-mark" /> Développeur full stack & cloud</span>
-                <span className="section-index">01 / 07</span>
-              </div>
-              <h1 id="hero-title" className="hero-title">
-                <span className="hero-title-line">Mathis</span>
-                <span className="hero-title-line second-line">Truong<span className="title-period">.</span></span>
-              </h1>
-              <div className="hero-bottom">
-                <p className="hero-description">
-                  Développeur full-stack chez {profile.company}.<br />
-                  Je conçois des applications internes sécurisées, du front-end jusqu’au déploiement sur Google Cloud.
-                </p>
-                <a className="round-link" href="#experiences" aria-label="Découvrir mon parcours de développeur">
-                  <span aria-hidden="true">↘</span>
-                </a>
-              </div>
-            </div>
-
-            <figure className="hero-portrait">
-              <Image
-                src={portrait}
-                alt="Portrait en noir et blanc de Mathis Truong"
-                fill
-                priority
-                sizes="(max-width: 760px) 100vw, 100vw"
-                className="portrait-image"
-              />
-              <figcaption className="portrait-caption">
-                <span>Portrait / 001</span><span>Mathis Truong</span>
-              </figcaption>
-              <span className="portrait-scan" aria-hidden="true" />
-            </figure>
-            <div className="hero-kinetic" aria-hidden="true">
-              <span>Full stack</span><span>Web créatif</span><span>Cloud</span>
-            </div>
-            <div className="hero-side-note" aria-hidden="true">Conception · Développement · Cloud</div>
-            <a className="scroll-invitation" href="#experiences">Défiler pour découvrir <span aria-hidden="true">↓</span></a>
-          </div>
-
-          <div className="dev-stage" aria-hidden="true">
-            <ol className="dev-steps">
-              {devSteps.map((step, index) => (
-                <li key={step} data-dev-step={index}><span>0{index + 1}</span>{step}</li>
-              ))}
-            </ol>
-            <div className="dev-captions">
-              {devCaptions.map((caption) => <p key={caption}>{caption}</p>)}
-            </div>
-
-            <div className="dev-window dev-editor">
-              <div className="dev-window-bar"><i /><i /><i /><span>terminal — whoami</span></div>
-              <pre className="dev-code">
-                {devCode.map((line, index) => (
-                  <code key={index} data-dev-line={index}>
-                    <span className="dev-gutter">{index + 1}</span>
-                    <span className="dev-line">{line.map(([kind, text], token) => <span className={kind && `tok-${kind}`} key={token}>{text}</span>)}</span>
-                  </code>
-                ))}
-              </pre>
-            </div>
-
-            <div className="dev-window dev-preview">
-              <div className="dev-window-bar"><i /><i /><i /><span>profil.tsx</span></div>
-              <div className="dev-ui dev-profile">
-                <div className="dev-profile-head" data-dev-build={0}>
-                  <span className="dev-profile-avatar"><Image src={portrait} alt="" fill sizes="80px" /></span>
-                  <div><strong>{profile.name}</strong><small>{profile.role}</small></div>
-                </div>
-                <div className="dev-profile-tags" data-dev-build={1}><span>◎ {profile.city}</span>{profile.tags.map((tag) => <span key={tag}>{tag}</span>)}</div>
-                <div className="dev-profile-stats" data-dev-build={2}>
-                  {profile.stats.map((stat) => <span key={stat.label}><b>{stat.value}</b>{stat.label}</span>)}
-                </div>
-                <div className="dev-ui-status" data-dev-build={3}><span>● {profile.status}</span></div>
-              </div>
-            </div>
-
-            <div className="dev-window dev-terminal">
-              <div className="dev-window-bar"><i /><i /><i /><span>terminal</span></div>
-              <div className="dev-terminal-lines">
-                {devTerminal.map(([prompt, command, result], index) => (
-                  <p key={command} data-dev-term={index}><b>{prompt}</b><span>{command}</span><i>{result}</i></p>
-                ))}
-              </div>
-            </div>
-
-          </div>
-          <div className="intro-meter" aria-hidden="true">
-            <span className="intro-meter-label">Pipeline</span>
-            <i><b /></i>
-            <span className="intro-meter-count">00</span>
-          </div>
-        </div>
-      </section>
-
-
-
-
+      <About chapters={chapters.slice(1)} />
 
       <Experiences />
       <Jobs />
@@ -269,12 +128,12 @@ export default function Home() {
       </section>
 
       <section id="atlas" className="story travel-map-section" aria-labelledby="studies-title">
-        <div className="story-journey" data-story-journey>
+        <div className="story-journey" data-story-journey data-atlas-stops={studies.length} data-atlas-intro={atlasTour.intro} data-atlas-outro={atlasTour.outro} style={{ "--atlas-stops": studies.length } as CSSProperties}>
           <div className="story-sticky" data-active-chapter="0">
             <TravelMap />
             <div className="studies-heading">
               <span className="eyebrow">06 / Études</span>
-              <h2 id="studies-title">Quatre villes,<br /><em>un même fil.</em></h2>
+              <h2 id="studies-title">Six villes,<br /><em>un même fil.</em></h2>
             </div>
           </div>
         </div>

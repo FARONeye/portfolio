@@ -9,7 +9,7 @@ import { sideJobs, studentJobs, type JobPhoto } from "./content";
 const v = (vars: Record<string, string | number>) => vars as CSSProperties;
 const { sodexo, coca, fuze, ewc, ricard, loreal, terrain } = studentJobs;
 
-const weights = { intro: 1, sodexo: 1.3, service: 1.3, games: 1.2, coca: 1.2, fuze: 1.1, ewc: 1.2, ricard: 1.1, loreal: 1.1, terrain: 1.3 };
+const weights = { intro: 1, sodexo: 1.3, service: 1.3, coca: 1.2, fuze: 1.1, ewc: 1.2, ricard: 1.1, loreal: 1.1, terrain: 1.3 };
 const units = Object.values(weights).reduce((sum, weight) => sum + weight, 0);
 
 // The logo wall of the opening: every world the chapter visits.
@@ -93,7 +93,7 @@ export default function Jobs() {
 
         {/* 01 — the headline job: Sodexo at the Paris 2024 Olympic Games. */}
         <article className="xp-scene jb-s-sodexo xp-t-band" data-xp-scene data-weight={weights.sodexo} data-label="Sodexo · Jeux Olympiques 2024">
-          <span className="jb-flash jb-flash-duo" aria-hidden="true" style={v({ "--brand": "#ffffff" })}>
+          <span className="jb-flash jb-flash-duo" aria-hidden="true" style={v({ "--brand": "#dfe3ec" })}>
             <Image src={sodexo.logo} alt="" width={240} height={80} unoptimized /><i>×</i><Image src={sodexo.olympicLogo} alt="" width={342} height={158} unoptimized />
           </span>
           <Frame item={sodexo.cover} className="jb-cover-photo" sizes="100vw" />
@@ -128,19 +128,7 @@ export default function Jobs() {
           </div>
         </article>
 
-        {/* 03 — the summer of the Games, as a photo mosaic that assembles. */}
-        <article className="xp-scene jb-s-games xp-t-iris" data-xp-scene data-weight={weights.games} data-label="Sodexo · L’été des Jeux">
-          <div className="jb-games-title">
-            <span className="xp-kicker">Paris 2024</span>
-            <h3>L’été où Paris <em>a accueilli le monde.</em></h3>
-          </div>
-          <div className="jb-mosaic">
-            {sodexo.gallery.map((item, k) => <Frame key={item.src} item={item} className="jb-mosaic-photo" sizes="(max-width: 760px) 50vw, 30vw" k={k} />)}
-          </div>
-          <Credits photos={sodexo.gallery} />
-        </article>
-
-        {/* 04 — Coca-Cola red: a concert, cans and fizz. */}
+        {/* 03 — Coca-Cola red: a concert, cans and fizz. */}
         <article className="xp-scene jb-s-coca xp-t-diag" data-xp-scene data-weight={weights.coca} data-label="Coca-Cola · Concert de Céline Dion">
           <Flash color="#f40009" logo={coca.logo} invert />
           <svg className="jb-ribbon" viewBox="0 0 1000 400" preserveAspectRatio="none" aria-hidden="true"><path d="M-20 360 C 220 300, 380 420, 600 340 S 880 250, 1020 290" pathLength={100} /></svg>
@@ -158,7 +146,7 @@ export default function Jobs() {
           <Credits photos={coca.photos} />
         </article>
 
-        {/* 05 — Fuze Tea: a light, fruity world at the mall, with leaves drifting down. */}
+        {/* 04 — Fuze Tea: a light, fruity world at the mall, with leaves drifting down. */}
         <article className="xp-scene jb-s-fuze xp-t-side" data-xp-scene data-weight={weights.fuze} data-label="Fuze Tea · Westfield La Défense">
           <Flash color="#00a651" logo={fuze.logo} invert />
           <div className="jb-leaves" aria-hidden="true">{Array.from({ length: 12 }, (_, k) => <i key={k} style={v({ "--k": k, "--x": (k * 37) % 100, "--r": (k * 53) % 360 })} />)}</div>
@@ -175,7 +163,7 @@ export default function Jobs() {
           <Credits photos={fuze.photos} />
         </article>
 
-        {/* 06 — Esports World Cup: black, glitchy, a stage being set. */}
+        {/* 05 — Esports World Cup: black, glitchy, a stage being set. */}
         <article className="xp-scene jb-s-ewc xp-t-band" data-xp-scene data-weight={weights.ewc} data-label="Esports World Cup 2026 · Scènes">
           <Flash color="#000000" logo={ewc.logo} invert />
           <div className="xp-copy">
@@ -191,7 +179,7 @@ export default function Jobs() {
           <Credits photos={ewc.photos} />
         </article>
 
-        {/* 07 — Ricard: sun, yellow and blue. */}
+        {/* 06 — Ricard: sun, yellow and blue. */}
         <article className="xp-scene jb-s-ricard xp-t-iris" data-xp-scene data-weight={weights.ricard} data-label="Ricard · Cérémonie entre entreprises">
           <Flash color="#ffd100" text="RICARD" />
           <span className="jb-sun" aria-hidden="true" />
@@ -208,7 +196,7 @@ export default function Jobs() {
           <Credits photos={ricard.photos} />
         </article>
 
-        {/* 08 — L'Oréal: black and white luxury, a gold line drawn around the headquarters. */}
+        {/* 07 — L'Oréal: black and white luxury, a gold line drawn around the headquarters. */}
         <article className="xp-scene jb-s-loreal xp-t-side" data-xp-scene data-weight={weights.loreal} data-label="L’Oréal · Siège">
           <Flash color="#000000" logo={loreal.logo} />
           <div className="xp-copy">
@@ -224,7 +212,7 @@ export default function Jobs() {
           <Credits photos={loreal.photos} />
         </article>
 
-        {/* 09 — markets, oysters, B2B and an association, pinned on kraft paper with the receipt. */}
+        {/* 08 — markets, oysters, B2B and an association, pinned on kraft paper with the receipt. */}
         <article className="xp-scene jb-s-terrain xp-t-diag" data-xp-scene data-weight={weights.terrain} data-label="Terrain · Vente & restauration">
           <div className="xp-copy">
             <span className="xp-kicker">Marché · écaillage · B2B · association</span>
